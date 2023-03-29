@@ -10,15 +10,8 @@
 
 MODE: null
 
-PROJECT_NAME: TITO API
+PROJECT_NAME: TITO API WRAPPER
 
-# Logging
-# if LOG.PATH is null => a local relative path will be created in the project, suitable for DEV
-# LOG.DIR can be a full path or a directory or just a route
-# LOG.NAME is the log file name
-# LOG.DIR: log -> relative path: {project root dir}/log/{LOG.NAME},
-#          D:\Data\App\log -> D:\Data\App\log\{LOG.NAME}
-# directories will be created on startup
 LOG:
   DIR: ../log/app
   NAME: TITO_API.log
@@ -33,3 +26,9 @@ APP:
 
 account_slug: pysv
 event_slug: pyconde-pydata-berlin-2023
+
+
+exclude_ticket_patterns:
+- childcare
+- luggage
+- social
