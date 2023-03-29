@@ -9,6 +9,7 @@ dependencies:
   - requests
   - pip=22
   - omegaconf
+  - structlog
   # TESTING
   - pytest=7
   - pip:

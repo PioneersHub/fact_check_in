@@ -14,6 +14,10 @@ if not CONFIG.APP.get("HOST"):
 datadir = Path(__file__).parents[1] / "_data"
 datadir.mkdir(exist_ok=True)
 
+static = Path(__file__).parent.parent / "static"
+static.mkdir(exist_ok=True)
+
+
 CONFIG["datadir"] = datadir
 
 account_slug = CONFIG["account_slug"]
