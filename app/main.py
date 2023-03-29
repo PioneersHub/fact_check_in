@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import CONFIG
 from app.middleware import middleware
+from app.routers import routers
 
 app = FastAPI(title=CONFIG.PROJECT_NAME, middleware=middleware)
 
