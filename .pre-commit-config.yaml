@@ -1,0 +1,30 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# Hooks
+#   Please note the hooks below are intended to be installed as a pre-push hook, e.g. specifying the --hook-type option:
+#     pre-commit install --hook-type pre-push
+# Hooks can and should be customized for personal and project specific settings.
+# Checkin to the repository should be aligned with the other service maintainers.
+default_language_version:
+  python: python3.11
+
+default_stages: [push]
+
+repos:
+# Use local hooks to tools installed via the environment-dev.yml.
+# This should allow to use the installed tool without pre-commit, e.g. integrated in the IDE or manually.
+- repo: local
+  hooks:
+    # black picks up the custom line length from pyproject.toml
+    - id: black
+      name: Black formatter
+      entry: /opt/homebrew/bin/black
+      language: system
+      types: [python]
+
+    - id: flake8
+      name: flake8 linter
+      entry: /opt/homebrew/bin/flake8
+      language: system
+      types: [python]
