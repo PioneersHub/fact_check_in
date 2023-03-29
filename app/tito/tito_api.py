@@ -1,6 +1,8 @@
 import json
 
 import requests
+from fastapi.encoders import jsonable_encoder
+from starlette.responses import JSONResponse
 
 from app.config import account_slug, event_slug, TOKEN, CONFIG
 
@@ -46,6 +48,11 @@ def get_all_tickets(from_cache=False):
         print("getting page:", payload["page"])
         url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/tickets"
         res = requests.get(url, headers=headers, params=payload)
+        if res.status_code != 200:
+            return JSONResponse(
+                status_code=res.status_code,
+                content=jsonable_encoder({res.status_code: res.json()}),
+            )
         resj = res.json()
         _all.extend(resj["tickets"])
         payload["page"] = resj["meta"]["next_page"]
