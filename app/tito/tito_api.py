@@ -34,7 +34,7 @@ def get_all_orders(from_cache=False):
     return _all
 
 
-def get_all_tickets(from_cache=False):
+async def get_all_tickets(from_cache=False):
     """ """
     _file = CONFIG.datadir / "tickets.json"
     if from_cache and _file.exists():
@@ -56,13 +56,13 @@ def get_all_tickets(from_cache=False):
         resj = res.json()
         _all.extend(resj["tickets"])
         payload["page"] = resj["meta"]["next_page"]
-    json.dump(_all, _file.open("w"))
+    json.dump(_all, _file.open("w"), indent=4)
     return _all
 
 
-def get_all_ticket_offers():
+async def get_all_ticket_offers():
     """
-    At tito: releases
+    At tito: releases, get all ticket types offered for sale
     """
     _file = CONFIG.datadir / "ticket_offers.json"
     _all = []
@@ -72,6 +72,11 @@ def get_all_ticket_offers():
         print("getting page:", payload["page"])
         url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/releases"
         res = requests.get(url, headers=headers, params=payload)
+        if res.status_code != 200:
+            return JSONResponse(
+                status_code=res.status_code,
+                content=jsonable_encoder({res.status_code: res.json()}),
+            )
         resj = res.json()
         _all.extend(resj["releases"])
         payload["page"] = resj["meta"]["next_page"]
@@ -89,4 +94,5 @@ def get_ticket_offer(ticket_offer_slug):
 
 
 if __name__ == "__main__":
-    get_all_tickets()
+    pass
+    # await get_all_tickets()
