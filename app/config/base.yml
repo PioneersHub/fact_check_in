@@ -1,0 +1,35 @@
+########################################################################################
+########################################################################################
+# This is the BASIC configuration, it's always loaded.
+# To change the configuration depending on the environment, any params there will
+# overwrite settings below.
+# Omegaconf replaces all references to e.g. ${default.HOST} with one line/update for
+# all nodes using the reference once loaded `default.HOST = "cool.com"`.
+########################################################################################
+########################################################################################
+
+MODE: null
+
+PROJECT_NAME: TITO API
+
+# Logging
+# if LOG.PATH is null => a local relative path will be created in the project, suitable for DEV
+# LOG.DIR can be a full path or a directory or just a route
+# LOG.NAME is the log file name
+# LOG.DIR: log -> relative path: {project root dir}/log/{LOG.NAME},
+#          D:\Data\App\log -> D:\Data\App\log\{LOG.NAME}
+# directories will be created on startup
+LOG:
+  DIR: ../log/app
+  NAME: TITO_API.log
+  TO_FILE: false
+  TO_SCREEN: false
+
+# application settings
+APP:
+  PORT: 8090
+  HOST: null
+
+
+account_slug: pysv
+event_slug: pyconde-pydata-berlin-2023

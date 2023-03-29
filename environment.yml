@@ -1,0 +1,15 @@
+name: tito_api_wrapper
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - fastapi=0.92
+  - uvicorn
+  - requests
+  - pip=22
+  - omegaconf
+  # TESTING
+  - pytest=7
+  - pip:
+       - starlette_context
