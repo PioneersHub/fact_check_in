@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import CONFIG
 from app.middleware import middleware
 from app.routers import routers
+from app.routers.tickets import refresh_all
 
 app = FastAPI(title=CONFIG.PROJECT_NAME, middleware=middleware)
 
@@ -36,6 +37,11 @@ async def healthcheck():
     """
     content = {"alive": True}
     return content
+
+
+@app.on_event("startup")              #new
+async def app_startup():
+    await refresh_all()
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
