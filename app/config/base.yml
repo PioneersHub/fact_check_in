@@ -27,8 +27,8 @@ LOG:
 
 # application settings
 APP:
-  PORT: 8090
-  HOST: null
+  PORT: 9090
+  HOST: "127.0.0.1"
 
 
 account_slug: pysv
