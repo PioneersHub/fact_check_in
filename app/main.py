@@ -39,7 +39,7 @@ async def healthcheck():
     return content
 
 
-@app.on_event("startup")              #new
+@app.on_event("startup")  # new
 async def app_startup():
     await refresh_all()
 
