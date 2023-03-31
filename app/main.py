@@ -30,6 +30,7 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
     )
 
 
+@app.get("/")
 @app.get("/healthcheck/alive")
 async def healthcheck():
     """
