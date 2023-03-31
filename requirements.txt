@@ -5,3 +5,4 @@ omegaconf
 structlog
 unidecode
 starlette_context
+boto3
