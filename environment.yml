@@ -11,6 +11,7 @@ dependencies:
   - omegaconf
   - structlog
   - unidecode
+  - boto3
   # TESTING
   - pytest=7
   - pip:
