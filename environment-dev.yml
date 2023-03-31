@@ -10,6 +10,7 @@ dependencies:
   - pip=22
   - omegaconf
   - structlog
+  - boto3
   # TESTING
   - pytest=7
   # sphinx: doc generation
