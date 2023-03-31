@@ -24,6 +24,7 @@ account_slug = CONFIG["account_slug"]
 event_slug = CONFIG["event_slug"]
 
 token_path = project_root / "_private/TOKEN.txt"
+token_path.parent.mkdir(exist_ok=True, parents=True)
 if not token_path.exists():
     token_path.open("w").write("PUT-YOUR-TITO-TOKEN-HERE")
 TOKEN = token_path.open().read()
