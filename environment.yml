@@ -10,6 +10,7 @@ dependencies:
   - pip=22
   - omegaconf
   - structlog
+  - unidecode
   # TESTING
   - pytest=7
   - pip:

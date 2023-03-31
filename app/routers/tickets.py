@@ -1,8 +1,11 @@
 import json
+import re
+from difflib import SequenceMatcher
 
 from fastapi import APIRouter, Response
 from pydantic import BaseModel, Field
 from starlette import status
+from unidecode import unidecode
 
 from app.config import CONFIG
 from app.tito.tito_api import get_all_tickets, get_all_ticket_offers
@@ -15,12 +18,12 @@ all_releases = {}
 
 class Attendee(BaseModel):
     ticket_id: str = Field(..., example="XRTP-3", description="Tito ticket ID is a four char alphanumeric -  integer.")
-    last_name: str = Field(..., example="Smith", description="Person last name.")
+    name: str = Field(..., example="Sam Smith", description="Person full name as used for registration.")
 
 
 class IsAnAttendee(Attendee):
     is_attendee: bool = Field(
-        ..., example=False, description="Returns if the combination od ticket ID and last name is valid."
+        ..., example=False, description="Returns if the combination od ticket ID and name is valid."
     )
     hint: str = Field(
         "",
@@ -30,7 +33,7 @@ class IsAnAttendee(Attendee):
 
 
 def exclude_this_ticket_type(ticket_name: str):
-    """ Filter by ticket name substrings """
+    """Filter by ticket name substrings"""
     for pattern in CONFIG.exclude_ticket_patterns:
         if pattern.lower() in ticket_name.lower():
             return True
@@ -39,6 +42,12 @@ def exclude_this_ticket_type(ticket_name: str):
 def valid_ticket_types(data):
     """List of qualified ticket types (releases)"""
     return [x for x in data if not exclude_this_ticket_type(x["title"])]
+
+
+def normalization(txt):
+    """Remove all diacritic marks, normalize everything to asci, and make all upper case"""
+    txt = re.sub(r"\s{2,}", " ", txt).strip()
+    return unidecode(txt).upper()
 
 
 @router.get("/refresh_all/")
@@ -65,7 +74,7 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
     """
     Validate an attendee by:
       - ticket id
-      - last name
+      - name
     """
     res = attendee.dict()
     try:
@@ -86,10 +95,19 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
         res["hint"] = f"invalid ticket type: {ticket['release_title']}"
         return res
 
-    if ticket["last_name"].strip().upper() == attendee.last_name.strip().upper():
+    if ticket["name"].strip().upper() == attendee.name.strip().upper():
         res["is_attendee"] = True
-        return res
-
-    # TODO:
-    #  add some fuzzy logic esp. handling non ascii chars, double spaces etc
-    return attendee
+    else:
+        ratio = SequenceMatcher(
+            None, normalization(ticket["name"]), normalization(attendee.name)
+        ).ratio()
+        if ratio > 0.95:
+            res["is_attendee"] = True
+            res["hint"] = ""
+        elif ratio > 0.8:
+            res["is_attendee"] = False
+            res["hint"] = f"Supplied name {attendee.name} is close but not close enough."
+        else:
+            res["is_attendee"] = False
+            res["hint"] = f"Incorrect name specified"
+    return res
