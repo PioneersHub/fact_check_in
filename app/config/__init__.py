@@ -1,3 +1,5 @@
+import boto3
+from botocore.exceptions import ClientError
 import socket
 from pathlib import Path
 
@@ -50,7 +52,6 @@ else:
     # AWS
     TOKEN = get_secret()
 
-import boto3
-from botocore.exceptions import ClientError
+
 
 __all__ = ["CONFIG", "TOKEN", "event_slug", "account_slug"]
