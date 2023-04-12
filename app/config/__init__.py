@@ -50,8 +50,9 @@ if token_path.exists():
     TOKEN = token_path.open().read()
 else:
     # AWS
-    TOKEN = get_secret()
-
-
+    try:
+        TOKEN = get_secret()
+    except Exception as e:
+        TOKEN = event_slug = CONFIG["api_key"]
 
 __all__ = ["CONFIG", "TOKEN", "event_slug", "account_slug"]
