@@ -40,9 +40,9 @@ async def healthcheck():
     return content
 
 
-@app.on_event("startup")  # new
-async def app_startup():
-    await refresh_all()
+# @app.on_event("startup")  # new
+# async def app_startup():
+#     await refresh_all()
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
