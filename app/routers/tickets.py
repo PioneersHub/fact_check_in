@@ -57,8 +57,10 @@ async def refresh_all():
     """
     global all_sales
     global all_releases
-    all_sales = {x["reference"].upper(): x for x in await get_all_tickets(from_cache=False)}
-    all_releases = {x["title"].upper(): x for x in await get_all_ticket_offers()}
+    res = await get_all_tickets(from_cache=False)
+    all_sales = {x["reference"].upper(): x for x in  res}
+    res = await get_all_ticket_offers()
+    all_releases = {x["title"].upper(): x for x in res}
     return {"message": "The ticket cache was refreshed successfully."}
 
 
