@@ -52,6 +52,3 @@ def setup(app):
     return
 
 
-if __name__ == "__main__":
-    import os
-    uvicorn.run(app, host="0.0.0.0", port=CONFIG["PORT"])
