@@ -45,14 +45,6 @@ def get_secret():
 
 
 token_path = project_root / "_private/TOKEN.txt"
-token_path.parent.mkdir(exist_ok=True, parents=True)
-if token_path.exists():
-    TOKEN = token_path.open().read()
-else:
-    # AWS
-    try:
-        TOKEN = get_secret()
-    except Exception as e:
-        TOKEN = event_slug = CONFIG["api_key"]
+TOKEN = token_path.open().read()
 
 __all__ = ["CONFIG", "TOKEN", "event_slug", "account_slug"]
