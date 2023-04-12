@@ -1,5 +1,6 @@
 import json
 
+import httpx
 import requests
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
@@ -26,7 +27,7 @@ def get_all_orders(from_cache=False):
     while payload["page"]:
         print("getting page:", payload["page"])
         url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/registrations"
-        res = requests.get(url, headers=headers, params=payload)
+        res = httpx.get(url, headers=headers, params=payload)
         resj = res.json()
         _all.extend(resj["registrations"])
         payload["page"] = resj["meta"]["next_page"]
@@ -47,7 +48,7 @@ async def get_all_tickets(from_cache=False):
     while payload["page"]:
         print("getting page:", payload["page"])
         url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/tickets"
-        res = requests.get(url, headers=headers, params=payload)
+        res = httpx.get(url, headers=headers, params=payload)
         if res.status_code != 200:
             return JSONResponse(
                 status_code=res.status_code,
@@ -71,7 +72,7 @@ async def get_all_ticket_offers():
     while payload["page"]:
         print("getting page:", payload["page"])
         url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/releases"
-        res = requests.get(url, headers=headers, params=payload)
+        res = httpx.get(url, headers=headers, params=payload)
         if res.status_code != 200:
             return JSONResponse(
                 status_code=res.status_code,
@@ -88,7 +89,7 @@ def get_ticket_offer(ticket_offer_slug):
     # at tito: releases
     _file = CONFIG.datadir / f"ticket_offer_{ticket_offer_slug}.json"
     url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/releases/{ticket_offer_slug}"
-    res = requests.get(url, headers=headers)
+    res = httpx.get(url, headers=headers)
     resj = res.json()
     json.dump(resj["release"], _file.open("w"), indent=4)
 
