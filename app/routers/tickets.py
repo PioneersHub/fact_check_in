@@ -51,15 +51,15 @@ def normalization(txt):
 
 
 @router.get("/refresh_all/")
-async def refresh_all():
+def refresh_all():
     """
     Service method to force a reload of all ticket data from the ticketing system
     """
     global all_sales
     global all_releases
-    res = await get_all_tickets(from_cache=False)
+    res = get_all_tickets(from_cache=False)
     all_sales = {x["reference"].upper(): x for x in  res}
-    res = await get_all_ticket_offers()
+    res = get_all_ticket_offers()
     all_releases = {x["title"].upper(): x for x in res}
     return {"message": "The ticket cache was refreshed successfully."}
 

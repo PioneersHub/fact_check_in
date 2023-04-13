@@ -34,7 +34,7 @@ def get_all_orders(from_cache=False):
     return _all
 
 
-async def get_all_tickets(from_cache=False):
+def get_all_tickets(from_cache=False):
     """ """
     _file = CONFIG.datadir / "tickets.json"
     if from_cache and _file.exists():
@@ -63,7 +63,7 @@ async def get_all_tickets(from_cache=False):
     return _all
 
 
-async def get_all_ticket_offers():
+def get_all_ticket_offers():
     """
     At tito: releases, get all ticket types offered for sale
     """
