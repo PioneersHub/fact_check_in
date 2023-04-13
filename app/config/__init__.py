@@ -44,7 +44,8 @@ def get_secret():
     return secret
 
 
-token_path = project_root / "_private/TOKEN.txt"
-TOKEN = token_path.open().read().strip()
+TOKEN = CONFIG.api_token
+# token_path = project_root / "_private/TOKEN.txt"
+# TOKEN = token_path.open().read().strip()
 
 __all__ = ["CONFIG", "TOKEN", "event_slug", "account_slug"]

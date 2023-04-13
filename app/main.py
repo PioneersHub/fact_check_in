@@ -45,10 +45,5 @@ async def healthcheck():
 #     await refresh_all()
 
 
-# noinspection PyUnusedLocal,PyShadowingNames
-def setup(app):
-    # do not remove, required for sphinx to generate OpenAPI docs
-    # https://stackoverflow.com/questions/18356226/how-to-use-python-functions-in-conf-py-file-in-sphinx
-    return
-
-
+if __name__ == "__main__":
+    uvicorn.run(app, host=CONFIG.APP.HOST, port=CONFIG.APP.PORT)

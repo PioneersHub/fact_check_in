@@ -21,11 +21,12 @@ LOG:
 # application settings
 APP:
   PORT: 8080
-  HOST: "127.0.0.1"
+  HOST: "0.0.0.0"
 
 
 account_slug: pysv
 event_slug: pyconde-pydata-berlin-2023
+api_token: secret_live_MUT13z-sjCsnBBX1pz_N
 
 
 exclude_ticket_patterns:

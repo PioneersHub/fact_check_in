@@ -82,14 +82,10 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
     try:
         ticket = all_sales[attendee.ticket_id]
     except KeyError:
-        await refresh_all()
-        try:
-            ticket = all_sales[attendee.ticket_id]
-        except KeyError:
-            response.status_code = status.HTTP_404_NOT_FOUND
-            res["is_attendee"] = False
-            res["hint"] = "invalid ticket id"
-            return res
+        response.status_code = status.HTTP_404_NOT_FOUND
+        res["is_attendee"] = False
+        res["hint"] = "invalid ticket id"
+        return res
 
     if exclude_this_ticket_type(ticket["release_title"]):
         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
