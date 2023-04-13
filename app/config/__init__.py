@@ -1,5 +1,4 @@
-import boto3
-from botocore.exceptions import ClientError
+import os
 import socket
 from pathlib import Path
 
@@ -23,28 +22,11 @@ CONFIG["datadir"] = datadir
 account_slug = CONFIG["account_slug"]
 event_slug = CONFIG["event_slug"]
 
+TOKEN = os.getenv('TITO_TOKEN')
+if not TOKEN:
+    print("no token from ENV")
 
-def get_secret():
-    secret_name = "tito/api_ah"
-    region_name = "eu-central-1"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=region_name)
-
-    try:
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-    except ClientError as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
-
-    # Decrypts secret using the associated KMS key.
-    secret = get_secret_value_response["SecretString"]
-    return secret
-
-
-TOKEN = CONFIG.api_token
+    TOKEN = CONFIG.api_token
 # token_path = project_root / "_private/TOKEN.txt"
 # TOKEN = token_path.open().read().strip()
 
