@@ -3,7 +3,7 @@ import re
 from difflib import SequenceMatcher
 
 from fastapi import APIRouter, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from starlette import status
 from unidecode import unidecode
 
@@ -19,6 +19,20 @@ all_releases = {}
 class Attendee(BaseModel):
     ticket_id: str = Field(..., example="XRTP-3", description="Tito ticket ID is a four char alphanumeric -  integer.")
     name: str = Field(..., example="Sam Smith", description="Person full name as used for registration.")
+
+    @validator('ticket_id')
+    def valid_ticket_id(cls, v):
+        try:
+            return v.upper()
+        except Exception as e:
+            return v
+
+    @validator('name')
+    def valid_name(cls, v):
+        try:
+            return v.upper()
+        except Exception as e:
+            return v
 
 
 class IsAnAttendee(Attendee):
@@ -45,7 +59,7 @@ def valid_ticket_types(data):
 
 
 def normalization(txt):
-    """Remove all diacritic marks, normalize everything to asci, and make all upper case"""
+    """Remove all diacritic marks, normalize everything to ascii, and make all upper case"""
     txt = re.sub(r"\s{2,}", " ", txt).strip()
     return unidecode(txt).upper()
 
@@ -58,7 +72,7 @@ def refresh_all():
     global all_sales
     global all_releases
     res = get_all_tickets(from_cache=False)
-    all_sales = {x["reference"].upper(): x for x in  res}
+    all_sales = {x["reference"].upper(): x for x in res}
     res = get_all_ticket_offers()
     all_releases = {x["title"].upper(): x for x in res}
     return {"message": "The ticket cache was refreshed successfully."}
@@ -80,8 +94,10 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
     """
     res = attendee.dict()
     try:
-        ticket = all_sales[attendee.ticket_id]
+        ticket = all_sales[attendee.ticket_id.upper()]
     except KeyError:
+        print(f"ticket not found: {attendee.ticket_id}")
+        print(f"attendees loaded: {len(all_sales)}")
         response.status_code = status.HTTP_404_NOT_FOUND
         res["is_attendee"] = False
         res["hint"] = "invalid ticket id"
