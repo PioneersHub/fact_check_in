@@ -20,15 +20,23 @@ LOG:
 
 # application settings
 APP:
-  PORT: 8080
+  PORT: 9898
   HOST: "0.0.0.0"
 
 
 account_slug: pysv
-event_slug: pyconde-pydata-berlin-2023
+event_slug: pyconde-pydata-berlin-2024
 
 
 exclude_ticket_patterns:
 - childcare
 - luggage
 - social
+
+organizer_speakers:
+- "NGFT-1"  # Kristian Rother
+- "359S-1"  # Theodore Meynard
+- "DESG-1"  # Florian Wilhelm
+- "49MV-1"  # Valentina Scipione
+- "DXFB-1"  # Lisa A Chalaguine
+- "XPLR-1"  # Alexander Hendorf

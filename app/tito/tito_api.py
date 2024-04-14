@@ -84,7 +84,7 @@ def get_all_ticket_offers():
                     content=jsonable_encoder({res.status_code: res.json()}),
                 )
             except Exception as e:
-                 print("error", e)
+                print("error", e)
         resj = res.json()
         _all.extend(resj["releases"])
         payload["page"] = resj["meta"]["next_page"]
@@ -100,6 +100,22 @@ def get_ticket_offer(ticket_offer_slug):
     res = requests.get(url, headers=headers)
     resj = res.json()
     json.dump(resj["release"], _file.open("w"), indent=4)
+
+
+def search_reference(reference):
+    url = f"https://api.tito.io/v3/{account_slug}/{event_slug}/tickets?search%5Bq%5D={reference}"
+    res = requests.get(url, headers=headers)
+    if res.status_code != 200:
+        try:
+            return JSONResponse(
+                status_code=res.status_code,
+                content=jsonable_encoder({res.status_code: res.json()}),
+            )
+        except Exception as e:
+            print("error", e)
+            return
+    resj = res.json()
+    return resj["tickets"]
 
 
 if __name__ == "__main__":
