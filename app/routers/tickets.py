@@ -24,16 +24,26 @@ class Attendee(BaseModel):
     @validator("ticket_id")
     def valid_ticket_id(cls, v):
         try:
-            return v.upper()
-        except Exception as e:
+            v = v.strip().upper()
+            if not 6 <= len(v) <= 7:
+                raise ValueError("Invalid ticket ID, must be: ^[A-Z]{4}-\\d+$ e. g. DROP-3.")
             return v
+        except ValueError:
+            raise
+        except Exception:
+            raise
 
     @validator("name")
     def valid_name(cls, v):
         try:
-            return v.upper()
-        except Exception as e:
+            v = v.strip().upper()
+            if not v:
+                raise ValueError("Empty name, use full name e. g. Sam Smith.")
             return v
+        except ValueError:
+            raise
+        except Exception:
+            raise
 
 
 class IsAnAttendee(Attendee):
@@ -93,7 +103,23 @@ def refresh_all():
 async def get_ticket_types():
     _file = CONFIG.datadir / "ticket_offers.json"
     data = json.load(_file.open())
-    return data
+    cleaned_data = []
+    for record in data:
+        for key in [
+            "quantity",
+            "tickets_count",
+            "full_price_tickets_count",
+            "free_tickets_count",
+            "discounted_tickets_count",
+            "voided_tickets_count",
+            "pending_waiting_list",
+        ]:
+            try:
+                del record[key]
+            except KeyError:
+                pass
+        cleaned_data.append(record)
+    return cleaned_data
 
 
 @router.post("/search_ticket/", response_model=IsAnAttendee)
