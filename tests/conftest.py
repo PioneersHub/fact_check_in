@@ -6,7 +6,7 @@ import requests
 from fastapi.testclient import TestClient
 
 from app import main
-from app.config import CONFIG, log
+from app.config import CONFIG
 
 
 class LiveServerSession(requests.Session):
@@ -36,7 +36,7 @@ def app_client():
         host = os.environ.get("Server_App", CONFIG.APP.HOST)
         url_base = f"http://{host}:{port}"
 
-        log.info(f"Testing against service at {url_base}")
+        print(f"Testing against service at {url_base}")
         tc = LiveServerSession(url_base)
     else:
         tc = TestClient(main.app, raise_server_exceptions=True)
