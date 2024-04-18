@@ -171,7 +171,7 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
 
     if exclude_this_ticket_type(ticket["release_title"]):
         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
-        res["is_attendee"] = True
+        res["is_attendee"] = False
         res["hint"] = f"invalid ticket type: {ticket['release_title']}"
         return res
 
