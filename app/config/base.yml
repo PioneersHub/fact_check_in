@@ -10,11 +10,11 @@
 
 MODE: null
 
-PROJECT_NAME: TITO API WRAPPER
+PROJECT_NAME: Fact Check-In
 
 LOG:
   DIR: ../log/app
-  NAME: TITO_API.log
+  NAME: fact-check-in.log
   TO_FILE: false
   TO_SCREEN: false
 
@@ -23,20 +23,11 @@ APP:
   PORT: 9898
   HOST: "127.0.0.1"
 
-
-account_slug: pysv
-event_slug: pyconde-pydata-berlin-2024
-
-
-exclude_ticket_patterns:
-- childcare
-- luggage
-- social
+include_activities:
+  # activities that are relevant for this service
+  - on_site
+  - online_access
 
 organizer_speakers:
-- "NGFT-1"  # Kristian Rother
-- "359S-1"  # Theodore Meynard
-- "DESG-1"  # Florian Wilhelm
-- "49MV-1"  # Valentina Scipione
-- "DXFB-1"  # Lisa A Chalaguine
-- "XPLR-1"  # Alexander Hendorf
+  - "XYZA-1"  # J Doe
+

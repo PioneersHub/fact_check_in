@@ -1,0 +1,192 @@
+{
+  "BUSINESS (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "sale_on_site",
+      "online_access"
+    ],
+    "id": 1478120,
+    "title": "Business (In-Person)"
+  },
+  "BUSINESS (ONLINE)": {
+    "activities": [
+      "remote_sale",
+      "online_access"
+    ],
+    "id": 1478123,
+    "title": "Business (Online)"
+  },
+  "DAY PASS MONDAY (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "online_access"
+    ],
+    "id": 1482880,
+    "title": "Day Pass Monday (In-Person)"
+  },
+  "DAY PASS TUESDAY (IN-PERSON)": {
+    "activities": [
+      "seat-person-tuesday",
+      "online_access"
+    ],
+    "id": 1482881,
+    "title": "Day Pass Tuesday (In-Person)"
+  },
+  "DAY PASS WEDNESDAY (IN-PERSON)": {
+    "activities": [
+      "seat-person-wednesday",
+      "online_access"
+    ],
+    "id": 1482882,
+    "title": "Day Pass Wednesday (In-Person)"
+  },
+  "GRANT TICKET (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "free_on_site",
+      "online_access"
+    ],
+    "id": 1484848,
+    "title": "Grant Ticket (In-Person)"
+  },
+  "GRANT TICKET (ONLINE)": {
+    "activities": [
+      "remote_sale",
+      "online_access"
+    ],
+    "id": 1484849,
+    "title": "Grant Ticket (Online)"
+  },
+  "INDIVIDUAL (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "sale_on_site",
+      "online_access"
+    ],
+    "id": 1478121,
+    "title": "Individual (In-Person)"
+  },
+  "INDIVIDUAL (ONLINE)": {
+    "activities": [
+      "remote_sale",
+      "online_access"
+    ],
+    "id": 1478124,
+    "title": "Individual (Online)"
+  },
+  "KEYNOTE": {
+    "activities": [
+      "social_event",
+      "online_access"
+    ],
+    "id": 1495000,
+    "title": "Keynote"
+  },
+  "ORGANISER TICKET (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "free_on_site",
+      "social_event",
+      "online_access"
+    ],
+    "id": 1484846,
+    "title": "Organiser Ticket (In-Person)"
+  },
+  "PYLADIES TICKET (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "free_on_site",
+      "online_access"
+    ],
+    "id": 1484850,
+    "title": "Pyladies Ticket (In-Person)"
+  },
+  "PYLADIES TICKET (ONLINE)": {
+    "activities": [
+      "remote_sale",
+      "online_access"
+    ],
+    "id": 1484851,
+    "title": "Pyladies Ticket (Online)"
+  },
+  "SPEAKER TICKET (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "free_on_site",
+      "online_access"
+    ],
+    "id": 1484845,
+    "title": "Speaker Ticket (In-Person)"
+  },
+  "SPONSOR (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "sponsors_on_site",
+      "online_access"
+    ],
+    "id": 1478315,
+    "title": "Sponsor (In-Person)"
+  },
+  "SPONSOR (ONLINE)": {
+    "activities": [
+      "remote_sale",
+      "online_access"
+    ],
+    "id": 1478316,
+    "title": "Sponsor (Online)"
+  },
+  "STUDENT (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "sale_on_site",
+      "online_access"
+    ],
+    "id": 1478122,
+    "title": "Student (In-Person)"
+  },
+  "STUDENT (ONLINE)": {
+    "activities": [
+      "remote_sale",
+      "online_access"
+    ],
+    "id": 1478125,
+    "title": "Student (Online)"
+  },
+  "VOLUNTEER TICKET (IN-PERSON)": {
+    "activities": [
+      "on_site",
+      "seat-person-monday",
+      "seat-person-tuesday",
+      "seat-person-wednesday",
+      "free_on_site",
+      "online_access"
+    ],
+    "id": 1484847,
+    "title": "Volunteer Ticket (In-Person)"
+  }
+}

@@ -15,5 +15,10 @@ none
 
 > This is the changelog for the template repository!
 
+## 0.5.0 - 2025-02-22
+Cleanup of redundant code and documentation
+Switch to uv, removed conda, requirements
+Switch to mkdoc, removed sphinx
+
 ## 0.1.0 - 2023-03-29
 Initial Setup
