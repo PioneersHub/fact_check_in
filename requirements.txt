@@ -1,8 +1,0 @@
-fastapi==0.92
-uvicorn
-requests
-omegaconf
-structlog
-unidecode
-starlette_context
-boto3

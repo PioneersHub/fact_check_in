@@ -1,84 +1,14 @@
-import json
-import re
 from difflib import SequenceMatcher
 
 from fastapi import APIRouter, Response
-from pydantic import BaseModel, Field, validator
 from starlette import status
-from unidecode import unidecode
 
+from app import in_dummy_mode, interface, log, reset_interface
 from app.config import CONFIG
-from app.tito.tito_api import get_all_tickets, get_all_ticket_offers, search_reference
+from app.models.models import Attendee, Email, IsAnAttendee, TicketTypes, Truthy
+from app.tito.tito_api import get_all_ticket_offers, get_all_tickets, search, search_reference
 
 router = APIRouter(prefix="/tickets", tags=["Attendees"])
-
-all_sales = {}
-all_releases = {}
-release_id_map = {}
-
-
-class Attendee(BaseModel):
-    ticket_id: str = Field(..., example="XRTP-3", description="Tito ticket ID is a four char alphanumeric -  integer.")
-    name: str = Field(..., example="Sam Smith", description="Person full name as used for registration.")
-
-    @validator("ticket_id")
-    def valid_ticket_id(cls, v):
-        try:
-            v = v.strip().upper()
-            if not 6 <= len(v) <= 7:
-                raise ValueError("Invalid ticket ID, must be: ^[A-Z]{4}-\\d+$ e. g. DROP-3.")
-            return v
-        except ValueError:
-            raise
-        except Exception:
-            raise
-
-    @validator("name")
-    def valid_name(cls, v):
-        try:
-            v = v.strip().upper()
-            if not v:
-                raise ValueError("Empty name, use full name e. g. Sam Smith.")
-            return v
-        except ValueError:
-            raise
-        except Exception:
-            raise
-
-
-class IsAnAttendee(Attendee):
-    is_attendee: bool = Field(
-        ..., example=False, description="Returns if the combination od ticket ID and name is valid."
-    )
-    hint: str = Field(
-        "",
-        example="Looks like a typo",
-        description="Hint why validation failed, eg. if the name is close but not close enough.",
-    )
-    is_speaker: bool = Field(False, example=False, description="Person has a speaker ticket.")
-    is_sponsor: bool = Field(False, example=False, description="Person has a sponsor ticket.")
-    is_organizer: bool = Field(False, example=False, description="Person is an organizer.")
-    is_volunteer: bool = Field(False, example=False, description="Person is a volunteer.")
-    is_remote: bool = Field(False, example=False, description="Person is a remote attendee.")
-    is_onsite: bool = Field(False, example=False, description="Person is a in-person attendee.")
-
-
-def exclude_this_ticket_type(ticket_name: str):
-    """Filter by ticket name substrings"""
-    for pattern in CONFIG.exclude_ticket_patterns:
-        if pattern.lower() in ticket_name.lower():
-            return True
-
-
-def valid_ticket_types(data):
-    """List of qualified ticket types (releases)"""
-    return [x for x in data if not exclude_this_ticket_type(x["title"])]
-
-
-def normalization(txt):
-    """Remove all diacritic marks, normalize everything to ascii, and make all upper case"""
-    txt = re.sub(r"\s{2,}", " ", txt).strip()
-    return unidecode(txt).upper()
 
 
 @router.get("/refresh_all/")
@@ -86,48 +16,25 @@ def refresh_all():
     """
     Service method to force a reload of all ticket data from the ticketing system
     """
-    global all_sales
-    global all_releases
-    global release_id_map
-
-    res = get_all_tickets(from_cache=False)
-
-    all_sales = {x["reference"].upper(): x for x in res}
-    res = get_all_ticket_offers()
-    all_releases = {x["title"].upper(): x for x in res}
-    release_id_map = {v["id"]: v for v in all_releases.values()}
+    if in_dummy_mode:
+        reset_interface(in_dummy_mode)
+        return
+    get_all_ticket_offers()
+    get_all_tickets()
     return {"message": "The ticket cache was refreshed successfully."}
 
 
-@router.get("/ticket_types/")
+@router.get("/ticket_types/", response_model=TicketTypes)
 async def get_ticket_types():
-    _file = CONFIG.datadir / "ticket_offers.json"
-    data = json.load(_file.open())
-    cleaned_data = []
-    for record in data:
-        for key in [
-            "quantity",
-            "tickets_count",
-            "full_price_tickets_count",
-            "free_tickets_count",
-            "discounted_tickets_count",
-            "voided_tickets_count",
-            "pending_waiting_list",
-        ]:
-            try:
-                del record[key]
-            except KeyError:
-                pass
-        cleaned_data.append(record)
-    return cleaned_data
+    return {"ticket_types": list(interface.all_releases.values())}
 
 
-@router.post("/search_ticket/", response_model=IsAnAttendee)
 async def search_ticket(attendee: Attendee, response: Response):
     """
-    Search for a ticket by ticket ID
+    Live-search for a ticket by ticket ID.
+    Do not expose it as an endpoint.
     """
-    res = attendee.dict()
+    res = attendee.model_dump()
     found = search_reference(attendee.ticket_id)
     if not found:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -139,16 +46,32 @@ async def search_ticket(attendee: Attendee, response: Response):
     return res
 
 
+@router.post("/validate_email/", response_model=Truthy)
+async def search_email(email: Email, response: Response):
+    """
+    Live-search for a participant by email.
+    """
+    req = email.model_dump()
+    log.debug(email)
+    log.debug(f"searching for email: {req['email']}")
+    found = search(req["email"])
+    found = [x for x in found if x.get("release_id") in interface.valid_ticket_ids]
+    log.debug(f"found: {len(found)}")
+    if not found:
+        log.info(f"email not found: {req['email']}")
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"valid": False}
+    return {"valid": True}
+
+
 @router.post("/validate_name/", response_model=IsAnAttendee)
 async def get_ticket_by_id(attendee: Attendee, response: Response):
     """
-    Validate an attendee by:
-      - ticket id
-      - name
+    Validate an attendee by ticket id and name with some fuzzy matching
     """
-    res = attendee.dict()
+    res = attendee.model_dump()
     try:
-        ticket = all_sales[attendee.ticket_id.upper()]
+        ticket = interface.all_sales[attendee.ticket_id.upper()]
         print(f"ticket found: {attendee.ticket_id}")
     except KeyError:
         print(f"ticket not found in cache: {attendee.ticket_id}")
@@ -156,20 +79,20 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
         try:
             ticket = search_reference(attendee.ticket_id)[0]
             print(f"ticket found: {attendee.ticket_id}")
-        except IndexError:
-            print(f"attendees loaded: {len(all_sales)}")
+        except (IndexError, TypeError):
+            print(f"attendees loaded: {len(interface.all_sales)}")
             response.status_code = status.HTTP_404_NOT_FOUND
             res["is_attendee"] = False
             res["hint"] = "invalid ticket id"
             return res
     try:
-        ticket["release_title"] = release_id_map[ticket["release_id"]]["title"]
+        ticket["release_title"] = interface.release_id_map[ticket["release_id"]]["title"]
     except KeyError:
         print(f"release not found: {ticket['release_id']}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return res
 
-    if exclude_this_ticket_type(ticket["release_title"]):
+    if ticket["release_id"] not in interface.valid_ticket_ids:
         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
         res["is_attendee"] = False
         res["hint"] = f"invalid ticket type: {ticket['release_title']}"
@@ -178,7 +101,7 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
     if ticket["name"].strip().upper() == attendee.name.strip().upper():
         res["is_attendee"] = True
     else:
-        ratio = SequenceMatcher(None, normalization(ticket["name"]), normalization(attendee.name)).ratio()
+        ratio = SequenceMatcher(None, interface.normalization(ticket["name"]), interface.normalization(attendee.name)).ratio()
         if ratio > 0.95:
             res["is_attendee"] = True
             res["hint"] = ""
@@ -199,8 +122,10 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
         res["is_sponsor"] = True
     if "volunteer" in ticket.get("release_title", "").lower():
         res["is_volunteer"] = True
-    if "online" in ticket.get("release_title", "").lower():
+    if ticket["release_id"] in interface.activity_release_id_map["remote_sale"]:
         res["is_remote"] = True
-    if "in-person" in ticket.get("release_title", "").lower():
+    if ticket["release_id"] in interface.activity_release_id_map["on_site"]:
         res["is_onsite"] = True
+    if ticket["release_id"] in interface.activity_release_id_map["online_access"]:
+        res["online_access"] = True
     return res

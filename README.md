@@ -1,4 +1,20 @@
-# Tito Ticketing API wrapper
+# Fact Check-in
+
+> Validate if the attendee is registered for the conference by ticket code, name and email
+
+## Features
+
+1. Validate if the attendee is registered for the conference by ticket code and name
+2. Validate if the attendee is registered by email
+3. Provide information about the registration type (attendee, speaker, sponsor, organizer, etc.)
+
+## Use Cases
+
+1. Automatically add the attendee to the conference Discord assigning roles based on the registration type
+2. Allow access to a video-streaming platform for conference talks
+
+
+The REST-API returns the following information:
 
 Important: run with ONE worker only!
 ```
@@ -7,23 +23,12 @@ uvicorn main:app --port 8080 --host "0.0.0.0"
 
 It takes about 30 sec to launch, data is loaded and process from Tito
 
-```
-export IMAGE_NAME=pyconde_tito_2547
-AWS_REGION=eu-central-1
-export IMAGE_REPO=718419346402.dkr.ecr.eu-central-1.amazonaws.com
-export IMAGE_URL=$IMAGE_REPO/pyconde_tito_2547
+## Set-Up
 
-```
+Add a `.env` file with the following content:
 
-
-```
-export VERSION=v5
-
-docker buildx build --platform linux/amd64 -t pyconde_tito .
-docker tag $IMAGE_NAME $IMAGE_URL:$VERSION
-
-
-```
-conda activate tito_api_wrapper_dev
-aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $IMAGE_URL:latest
+```text
+TITO_TOKEN="your_secret_token"
+ACCOUNT_SLUG="account_slug_from_tito"
+EVENT_SLUG="event_slug_from_tito"
 ```

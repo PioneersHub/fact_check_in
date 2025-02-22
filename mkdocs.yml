@@ -1,0 +1,107 @@
+---
+site_name: Fact Check-In
+site_url: https://pioneershub.github.io/fact-check-in/
+site_author: Alexander Hendorf
+site_description: >-
+  Validate if the attendee is registered for the conference by ticket code, name and email.
+# Repository
+repo_name: PioneersHub/fact-check-in
+repo_url: https://github.com/PioneersHub/fact-check-in
+
+#
+nav:
+  - About: index.md
+
+theme:
+  name: material
+  icon:
+    logo: fontawesome/solid/users-rays
+    annotation: material/arrow-right-circle
+    admonition:
+      tip: fontawesome/solid/hand-point-up
+  language: en
+  palette:
+    primary: custom
+  features:
+    - content.tooltips
+    - content.tabs.link
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.tabs
+    - navigation.path
+markdown_extensions:
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - md_in_html
+  - admonition
+  - footnotes
+  - pymdownx.magiclink
+  - pymdownx.betterem
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: "¤"
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - social:
+      cards_layout_options:
+        background_color: "#ffffff"
+        color: "#000000"
+  - search
+  - tags
+  - macros
+
+extra:
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    actions:
+      - accept
+      - manage
+  version:
+    provider: mike
+    default: stable
+  # custom config for social cards customisation
+  social_cards:
+    dirs:
+      # relative paths from the repository root
+      cache_dir: "./.cache/plugin/social"
+      site_dir: "./site/assets/images/social"
+      # convention, rename your logo accordingly
+    logo_path: "./docs/assets/images/social_card_logo.png"
+
+hooks:
+  - scripts/hook_copyright_year.py
+  - scripts/hook_add_logo_to_social_cards.py
+
+# Copyright
+copyright: >
+  Copyright &copy; 2024 Pioneers Hub gGmbH / Python Softwareverband e.V. –
+  <a href="#__consent">Change cookie settings</a>
