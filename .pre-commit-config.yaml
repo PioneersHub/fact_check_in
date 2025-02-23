@@ -27,9 +27,11 @@ repos:
       entry: uv pip check
       language: system
       types: [python]
+      pass_filenames: false
 
     - id: uv-requirements-sync
       name: UV Sync Dependencies
       entry: uv pip compile pyproject.toml -o requirements.txt
       language: system
       types: [python]
+      pass_filenames: false
