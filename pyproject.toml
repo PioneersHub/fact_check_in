@@ -1,6 +1,6 @@
 [project]
 name = "fact-check-in"
-version = "0.6.1"
+version = "0.6.2"
 description = "Validate if the attendee is registered for the conference by ticket code, name and email."
 readme = "README.md"
 requires-python = ">=3.12"
