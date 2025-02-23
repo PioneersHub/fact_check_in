@@ -50,6 +50,27 @@ wheels = [
 ]
 
 [[package]]
+name = "bump2version"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/29/2a/688aca6eeebfe8941235be53f4da780c6edee05dbbea5d7abaa3aab6fad2/bump2version-1.0.1.tar.gz", hash = "sha256:762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6", size = 36236 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/e3/fa60c47d7c344533142eb3af0b73234ef8ea3fb2da742ab976b947e717df/bump2version-1.0.1-py2.py3-none-any.whl", hash = "sha256:37f927ea17cde7ae2d7baf832f8e80ce3777624554a653006c9144f8017fe410", size = 22030 },
+]
+
+[[package]]
+name = "bumpversion"
+version = "0.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "bump2version" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/f5/e95fcd8de146884cf5ecf30f227e13c3615584ccef8c8cca18140a27b664/bumpversion-0.6.0.tar.gz", hash = "sha256:4ba55e4080d373f80177b4dabef146c07ce73c7d1377aabf9d3c3ae1f94584a6", size = 11897 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/ff/93f0db7b3ca337e9f2a289980083e858775dfb3672b38052c6911b36ea66/bumpversion-0.6.0-py2.py3-none-any.whl", hash = "sha256:4eb3267a38194d09f048a2179980bb4803701969bff2c85fa8f6d1ce050be15e", size = 8449 },
+]
+
+[[package]]
 name = "cairocffi"
 version = "1.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -221,7 +242,7 @@ wheels = [
 
 [[package]]
 name = "fact-check-in"
-version = "0.7.0"
+version = "0.5.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
@@ -241,6 +262,8 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "bump2version" },
+    { name = "bumpversion" },
     { name = "faker" },
     { name = "httpx" },
     { name = "hypothesis" },
@@ -267,6 +290,8 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "bump2version", specifier = ">=1.0.1" },
+    { name = "bumpversion", specifier = ">=0.6.0" },
     { name = "faker", specifier = ">=36.1.1" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "hypothesis", specifier = ">=6.126.0" },
