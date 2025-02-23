@@ -1,6 +1,6 @@
 [project]
 name = "fact-check-in"
-version = "0.7.0"
+version = "0.5.0"
 description = "Validate if the attendee is registered for the conference by ticket code, name and email."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -26,6 +26,8 @@ target-version = ['py312']
 
 [dependency-groups]
 dev = [
+    "bump2version>=1.0.1",
+    "bumpversion>=0.6.0",
     "faker>=36.1.1",
     "httpx>=0.28.1",
     "hypothesis>=6.126.0",
