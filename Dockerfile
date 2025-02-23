@@ -20,5 +20,8 @@ RUN /usr/local/bin/uv venv && \
 # Copy the application code
 COPY ./app /code/app
 
+# Set a default value for FAKE_CHECK_IN_TEST_MODE (optional)
+ENV FAKE_CHECK_IN_TEST_MODE=1
+
 # Run FastAPI with Uvicorn using UV
 CMD ["/code/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9898"]
