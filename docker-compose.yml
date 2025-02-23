@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  fact_check_in:
+    build: .
+    ports:
+      - "9898:9898"
+    environment:
+      - FAKE_CHECK_IN_TEST_MODE=1
