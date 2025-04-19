@@ -5,7 +5,7 @@ from starlette import status
 
 from app import in_dummy_mode, interface, log, reset_interface
 from app.config import CONFIG
-from app.models.models import Attendee, Email, IsAnAttendee, TicketTypes, Truthy
+from app.models.models import Attendee, Email, IsAnAttendee, TicketCount, TicketTypes, Truthy
 from app.tito.tito_api import get_all_ticket_offers, get_all_tickets, search, search_reference
 
 router = APIRouter(prefix="/tickets", tags=["Attendees"])
@@ -27,6 +27,11 @@ def refresh_all():
 @router.get("/ticket_types/", response_model=TicketTypes)
 async def get_ticket_types():
     return {"ticket_types": list(interface.all_releases.values())}
+
+
+@router.get("/ticket_count/", response_model=TicketCount)
+async def get_ticket_count():
+    return {"ticket_count": len(interface.all_sales)}
 
 
 async def search_ticket(attendee: Attendee, response: Response):
