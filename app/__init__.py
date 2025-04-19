@@ -39,11 +39,12 @@ log.info("Logging configured")
 
 # if the API token is not set, we are in fake mode by default
 in_dummy_mode = False
+
 if not TOKEN:
     log.info("Activated dummy mode, no Token set")
     in_dummy_mode = True
-elif os.environ.get("FAKE_CHECK_IN_TEST_MODE"):
-    log.info("Activated dummy mode as requested via environment")
+elif os.environ.get("FAKE_CHECK_IN_TEST_MODE", "False").lower() in ("true", "1"):
+    log.info(f"Activated dummy mode as requested via environment FAKE_CHECK_IN_TEST_MODE={os.environ.get('FAKE_CHECK_IN_TEST_MODE')}")
     in_dummy_mode = True
 else:
     log.info("Using real API token")
