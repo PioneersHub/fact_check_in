@@ -70,5 +70,9 @@ class TicketTypes(BaseModel):
     ticket_types: list[TicketType] = Field(json_schema_extra={"description": "List of ticket types."})
 
 
+class TicketCount(BaseModel):
+    ticket_count: int = Field(json_schema_extra={"count": "Number of tickets in cache."})
+
+
 class Truthy(BaseModel):
     valid: bool = Field(False, json_schema_extra={"description": "Simple true / false response"})
