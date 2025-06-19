@@ -115,12 +115,47 @@ def get_all_order_positions():
     interface.all_sales = {x["reference"]: x for x in collect}
 
 
+def get_all_categories():
+    """Get all categories from Pretix."""
+    if in_dummy_mode:
+        return {}
+
+    categories = {}
+    url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/categories/"
+    params = {"page": 1}
+
+    while True:
+        log.info(f"getting categories page:{params['page']}")
+        res = requests.get(url, headers=headers, params=params)
+        if res.status_code != HTTPStatus.OK:
+            response_is_not_ok(res)
+
+        res_j = res.json()
+        for cat in res_j["results"]:
+            categories[cat["id"]] = {
+                "id": cat["id"],
+                "name": cat["name"].get("en", cat["name"]) if isinstance(cat["name"], dict) else cat["name"],
+                "internal_name": cat.get("internal_name", ""),
+            }
+
+        if res_j["next"]:
+            params["page"] += 1
+        else:
+            break
+
+    return categories
+
+
 def get_all_items():
     """Get all items/products (equivalent to releases/ticket types in Tito)."""
     if in_dummy_mode:
         return
-    collect = []
 
+    # First fetch categories
+    categories = get_all_categories()
+    interface.categories = categories  # Store for validation
+
+    collect = []
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/items/"
     params = {"page": 1}
 
@@ -133,12 +168,18 @@ def get_all_items():
         res_j = res.json()
 
         for item in res_j["results"]:
+            # Determine activities first (which also sets _attributes)
+            activities = determine_activities_from_item(item, categories)
+
             # Transform Pretix items to match Tito releases structure
             transformed = {
                 "id": item["id"],
                 "title": item["name"].get("en", item["name"]),  # Handle multi-language
-                # Pretix doesn't have activities, so we determine type from name/category
-                "activities": determine_activities_from_item(item),
+                "category_id": item.get("category"),
+                "category": categories.get(item.get("category"), {}) if item.get("category") else None,
+                "activities": activities,
+                # Copy the attributes that were set during activity determination
+                "_attributes": item.get("_attributes", {}),
             }
             collect.append(transformed)
 
@@ -150,34 +191,41 @@ def get_all_items():
     interface.all_releases = {x["title"].upper(): x for x in collect}
 
 
-def determine_activities_from_item(item: dict) -> list[str]:
+def determine_activities_from_item(item: dict, categories: dict = None) -> list[str]:
     """Determine pseudo-activities based on item name and category.
 
     This maps Pretix items to the activity-based system used by Tito.
     """
-    activities = []
+    from app.pretix.mapping import PretixAttributeMapper
+
+    # Get the mapper
+    mapper = PretixAttributeMapper()
+
+    # Get category info if available
+    category = None
+    if categories and item.get("category"):
+        category = categories.get(item["category"])
+
+    # Get attributes using the mapping engine
+    attributes = mapper.get_attributes_from_item(item, category)
+
+    # Store attributes in the item for later use (e.g., in validation endpoint)
+    item["_attributes"] = attributes
+
+    # Convert to legacy activities format
+    activities = mapper.get_activities_from_attributes(attributes)
+
+    # Add day-specific activities if it's a day pass
     name = item.get("name", {}).get("en", "").lower()
-
-    # Check for online/remote indicators
-    if any(keyword in name for keyword in ["online", "remote", "virtual", "streaming"]):
-        activities.extend(["remote_sale", "online_access"])
-
-    # Check for in-person indicators
-    if any(keyword in name for keyword in ["in-person", "on-site", "physical", "venue"]):
-        activities.extend(["on_site", "online_access"])  # Most include online access too
-
-    # Check for day passes
     if "day pass" in name:
-        activities.append("on_site")
         if "monday" in name:
             activities.append("seat-person-monday")
         if "tuesday" in name:
             activities.append("seat-person-tuesday")
         if "wednesday" in name:
             activities.append("seat-person-wednesday")
-        activities.append("online_access")
 
-    # Default: if no specific indicators, assume it's an on-site ticket with online access
+    # Ensure we have at least some activities
     if not activities:
         activities = ["on_site", "online_access"]
 

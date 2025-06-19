@@ -73,9 +73,47 @@ Here are recommended product names that will work perfectly with the system:
 
 ## Pretix Configuration
 
+### Using Categories (Recommended)
+
+1. **Create Categories** in Pretix for each attendee type:
+   - "Speaker" → Maps to `is_speaker`
+   - "Sponsor" → Maps to `is_sponsor`
+   - "Volunteer" → Maps to `is_volunteer`
+   - "Organizer" → Maps to `is_organizer`
+   - "VIP" → Maps to `is_guest`
+
+2. **Configure Category Mapping** in `app/config/base.yml`:
+   ```yaml
+   pretix_mapping:
+     categories:
+       by_id:
+         123456:  # Your Speaker category ID
+           is_speaker: true
+         123457:  # Your Sponsor category ID
+           is_sponsor: true
+   ```
+
+3. **Product Names** still determine access type (remote/onsite)
+
+### Alternative: Name-Based Detection
+
 1. **Create Products** with naming conventions above
 2. **Collect Attendee Info**: Name and Email (required)
 3. **Order States**: Only "Paid" orders are valid
+
+### Validation on Startup
+
+The system now validates attribute mappings on startup and shows:
+- Which attributes have no tickets mapped
+- Coverage percentage for each attribute
+- Suggestions for improvement
+
+Example output:
+```
+⚠️  The following attributes have NO tickets mapped to them:
+  ❌ is_speaker
+     → Suggestion: Create a 'Speaker' category in Pretix
+```
 
 ## API Setup
 

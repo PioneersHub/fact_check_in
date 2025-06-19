@@ -113,6 +113,7 @@ The project uses comprehensive testing with:
 3. **Attendee Categorization**: Logic in `app/routers/tickets.py` determines attendee types
 4. **Environment-based Configuration**: Different behavior for test vs production modes
 5. **Docker Deployment**: Containerized deployment with uv package manager
+6. **Pretix Category Mapping**: Flexible attribute mapping system for Pretix tickets via categories or product names
 
 ## Common Development Tasks
 
@@ -127,3 +128,36 @@ When debugging:
 - The application logs extensively with structlog
 - Test mode can be enabled with `FAKE_CHECK_IN_TEST_MODE=1`
 - Individual tests can be run with pytest for faster iteration
+
+## Pretix Integration
+
+The application supports Pretix as an alternative to Tito. Key features:
+
+### Category-Based Attribute Mapping
+Configure in `app/config/base.yml`:
+```yaml
+pretix_mapping:
+  categories:
+    by_id:
+      123456:  # Pretix category ID
+        is_speaker: true
+    by_name:
+      "speaker":  # Match category names
+        is_speaker: true
+```
+
+### Startup Validation
+- Automatically validates attribute coverage on startup
+- Shows unmapped attributes with suggestions
+- Helps identify configuration issues early
+
+### Mapping Priority
+1. Category ID mapping (highest priority)
+2. Category name mapping
+3. Product name patterns (fallback)
+4. Default attributes
+
+When working with Pretix:
+- Check validation output on startup for coverage gaps
+- Use categories for explicit attribute control
+- Product names still determine access type (remote/onsite)

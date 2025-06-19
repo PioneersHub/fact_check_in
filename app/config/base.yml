@@ -44,3 +44,67 @@ name_matching:
   # Names matching above this threshold are considered close matches
   close_match_threshold: 0.8
 
+# Pretix category and item mapping configuration
+pretix_mapping:
+  # Category-based attribute mappings
+  categories:
+    # Map by category ID (most reliable)
+    by_id:
+      # Example mappings - add your category IDs here
+      # 999001: 
+      #   is_speaker: true
+      # 999002:
+      #   is_sponsor: true
+    
+    # Map by category name (case-insensitive fallback)
+    by_name:
+      "speaker":
+        is_speaker: true
+      "sponsor":
+        is_sponsor: true
+      "volunteer":
+        is_volunteer: true
+      "organizer":
+        is_organizer: true
+      "vip":
+        is_guest: true
+  
+  # Product name patterns for access types
+  access_patterns:
+    remote:
+      keywords: ["remote", "online", "virtual", "streaming"]
+      attributes:
+        is_remote: true
+        is_onsite: false
+        online_access: true
+    onsite:
+      keywords: ["in-person", "on-site", "physical", "venue", "conference pass"]
+      attributes:
+        is_remote: false
+        is_onsite: true
+        online_access: true
+    day_pass:
+      keywords: ["day pass"]
+      attributes:
+        is_onsite: true
+        online_access: true
+  
+  # Product name patterns for attendee types (when not using categories)
+  attendee_patterns:
+    speaker:
+      keywords: ["speaker"]
+      attributes:
+        is_speaker: true
+    sponsor:
+      keywords: ["sponsor"]
+      attributes:
+        is_sponsor: true
+    volunteer:
+      keywords: ["volunteer"]
+      attributes:
+        is_volunteer: true
+    organizer:
+      keywords: ["organiser", "organizer"]
+      attributes:
+        is_organizer: true
+
