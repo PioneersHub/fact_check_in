@@ -161,3 +161,37 @@ When working with Pretix:
 - Check validation output on startup for coverage gaps
 - Use categories for explicit attribute control
 - Product names still determine access type (remote/onsite)
+
+## Versioning
+
+This project uses semantic versioning (SemVer) with bumpversion for automatic version management.
+
+### Version Format
+`MAJOR.MINOR.PATCH` (e.g., 0.7.0)
+
+### When to Bump Versions
+- **MAJOR**: Breaking API changes, major refactoring
+- **MINOR**: New features, significant enhancements (like Pretix integration)
+- **PATCH**: Bug fixes, minor improvements
+
+### Creating a New Version
+```bash
+# For bug fixes
+bumpversion patch
+
+# For new features
+bumpversion minor
+
+# For breaking changes
+bumpversion major
+```
+
+This automatically:
+- Updates version in pyproject.toml, app/__init__.py, and .bumpversion.cfg
+- Creates a commit with message "Bump version: X.Y.Z → X.Y.Z"
+- Creates a git tag (vX.Y.Z)
+
+### Push Tags
+```bash
+git push origin --tags
+```
