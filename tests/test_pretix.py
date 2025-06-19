@@ -90,21 +90,33 @@ class TestPretixIntegration:
 
     def test_backend_selection(self):
         """Test that the correct backend is selected based on config."""
-        from app.config import CONFIG
-        from app.ticketing.backend import get_backend
+        import os
 
-        # Test Tito backend (default)
+        from app.config import CONFIG
+        from app.ticketing import backend as backend_module
+
+        # Clear the cached backend
+        backend_module._backend = None
+
+        # Test Tito backend
+        os.environ["TICKETING_BACKEND"] = "tito"
         CONFIG.TICKETING_BACKEND = "tito"
-        backend = get_backend()
+        backend = backend_module.get_backend()
         assert backend.__class__.__name__ == "TitoBackend"
 
+        # Clear cache again
+        backend_module._backend = None
+
         # Test Pretix backend
+        os.environ["TICKETING_BACKEND"] = "pretix"
         CONFIG.TICKETING_BACKEND = "pretix"
-        backend = get_backend()
+        backend = backend_module.get_backend()
         assert backend.__class__.__name__ == "PretixBackend"
 
-        # Reset to default
-        CONFIG.TICKETING_BACKEND = "tito"
+        # Reset to original
+        backend_module._backend = None
+        if "TICKETING_BACKEND" in os.environ:
+            del os.environ["TICKETING_BACKEND"]
 
     def test_pretix_fake_data_structure(self):
         """Test that Pretix fake data has the correct structure."""
