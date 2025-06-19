@@ -39,12 +39,11 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     if os.environ.get("PORT"):
         port = os.environ.get("PORT")
 
-    logger.info("=" * 60)
+    logger.info("\n" + "=" * 60)
     logger.info(f"🚀 {CONFIG.PROJECT_NAME} Ready!")
     logger.info("=" * 60)
-    logger.info(f"📚 Interactive API docs: http://localhost:{port}/docs")
-    logger.info(f"📄 Alternative docs: http://localhost:{port}/redoc")
-    logger.info(f"📊 OpenAPI schema: http://localhost:{port}/openapi.json")
+    logger.info("📚 API Documentation (Swagger UI):")
+    logger.info(f"   http://localhost:{port}/docs")
     logger.info("=" * 60)
 
     yield
