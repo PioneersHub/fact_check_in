@@ -73,7 +73,7 @@ async def search_email(email: Email, response: Response):
 
 
 @router.post("/validate_name/", response_model=IsAnAttendee)
-async def get_ticket_by_id(attendee: Attendee, response: Response):
+async def get_ticket_by_id(attendee: Attendee, response: Response):  # noqa: PLR0912, PLR0915
     """
     Validate an attendee by ticket id and name with some fuzzy matching
     """
@@ -111,10 +111,10 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
         res["is_attendee"] = True
     else:
         ratio = SequenceMatcher(None, interface.normalization(ticket["name"]), interface.normalization(attendee.name)).ratio()
-        if ratio > 0.95:
+        if ratio > CONFIG.name_matching.exact_match_threshold:
             res["is_attendee"] = True
             res["hint"] = ""
-        elif ratio > 0.8:
+        elif ratio > CONFIG.name_matching.close_match_threshold:
             res["is_attendee"] = False
             res["hint"] = f"Supplied name {attendee.name} is close but not close enough."
         else:

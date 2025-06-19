@@ -90,7 +90,7 @@ _backend = None
 
 def get_ticketing_backend() -> TicketingBackend:
     """Get or create the global ticketing backend instance."""
-    global _backend
+    global _backend  # noqa: PLW0603
     if _backend is None:
         _backend = get_backend()
     return _backend
