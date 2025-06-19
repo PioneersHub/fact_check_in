@@ -2,6 +2,18 @@
 
 This document compares how Tito and Pretix handle ticketing features in the context of the Fact Check-in system.
 
+## Architectural Differences
+
+### Backend Implementation
+- **Tito**: Direct activity-based model with native support for multi-activity tickets
+- **Pretix**: Category and product-based model requiring attribute mapping
+- **API Design**: Tito uses simple JSON; Pretix uses paginated REST with rich metadata
+
+### Data Loading
+- **Tito**: Single API call loads all tickets
+- **Pretix**: Paginated requests, may require multiple calls for large events
+- **Performance**: Both cache data on startup (~30 seconds)
+
 ## Core Concept Differences
 
 ### Activities (Tito) vs Product Names (Pretix)
@@ -157,12 +169,48 @@ Establish clear patterns:
 - Changing access requires renaming products
 - Must follow naming conventions strictly
 
+## Category Mapping (Pretix Advanced Feature)
+
+### Overview
+Pretix categories provide a more robust way to map attendee attributes without relying on product names.
+
+### Configuration Example
+```yaml
+pretix_mapping:
+  categories:
+    by_id:
+      999001:  # Speaker category ID
+        is_speaker: true
+      999002:  # Sponsor category ID  
+        is_sponsor: true
+    by_name:  # Fallback if IDs change
+      "speaker":
+        is_speaker: true
+      "sponsor":
+        is_sponsor: true
+```
+
+### Benefits
+- Cleaner product names (no need for role keywords)
+- Easier to manage multiple attributes
+- More maintainable than name-based detection
+
+## Performance Comparison
+
+| Metric | Tito | Pretix |
+|--------|------|--------|
+| Initial Load Time | ~20-30s | ~20-40s (depends on pagination) |
+| API Calls on Startup | 2 (tickets + releases) | 3+ (items + categories + positions) |
+| Memory Usage | Lower | Higher (rich metadata) |
+| Validation Speed | Same | Same (cached) |
+
 ## Recommendations
 
 1. **For Simple Events**: Pretix's name-based system is sufficient
-2. **For Complex Access Control**: Tito's activities provide more flexibility
-3. **For Migration**: Start with clear product naming in Pretix that mirrors your Tito activities
-4. **For Dual Support**: Run both systems with `TICKETING_BACKEND` configuration
+2. **For Complex Access Control**: Tito's activities provide more flexibility  
+3. **For Large Events**: Consider Pretix's category system over name-based
+4. **For Migration**: Start with clear product naming in Pretix that mirrors your Tito activities
+5. **For Dual Support**: Run both systems with `TICKETING_BACKEND` configuration
 
 ## Quick Reference: Setting Up Equivalent Tickets
 

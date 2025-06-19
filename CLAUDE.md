@@ -1,10 +1,10 @@
-# CLAUDE.md
+# Development Guidelines
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidelines for AI assistants and developers working with this codebase.
 
 ## Project Overview
 
-Fact Check-in is a FastAPI-based REST API service that validates conference attendees by verifying their registration against the Tito ticketing platform. The service performs ticket validation using ticket codes and fuzzy name matching, and categorizes attendees by type (speaker, sponsor, organizer, volunteer, etc.).
+Fact Check-in is a FastAPI-based REST API service that validates conference attendees using multiple ticketing systems (Tito, Pretix) through a modular backend architecture. The service performs ticket validation using ticket codes and fuzzy name matching, and categorizes attendees by type (speaker, sponsor, organizer, volunteer, etc.).
 
 ## Development Commands
 
@@ -14,9 +14,18 @@ Fact Check-in is a FastAPI-based REST API service that validates conference atte
 uv pip install -e .
 
 # Create .env file with required credentials:
+
+# For Tito (default):
 # TITO_TOKEN="your_secret_token"
 # ACCOUNT_SLUG="account_slug_from_tito"
 # EVENT_SLUG="event_slug_from_tito"
+
+# For Pretix:
+# TICKETING_BACKEND=pretix
+# PRETIX_TOKEN="your_api_token"
+# PRETIX_BASE_URL="https://pretix.eu/api/v1"
+# PRETIX_ORGANIZER_SLUG="your_organizer"
+# PRETIX_EVENT_SLUG="your_event"
 ```
 
 ### Running the Application

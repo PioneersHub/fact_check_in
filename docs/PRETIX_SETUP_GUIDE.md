@@ -146,10 +146,33 @@ curl -X POST http://localhost:8080/tickets/validate_name/ \
 
 ## Troubleshooting
 
-- **Wrong access type?** Check product name includes keywords (online/in-person)
-- **Day pass not working?** Include both "day pass" and day name
-- **Type not detected?** Add role keyword to product name
-- **No tickets loading?** Verify API token and permissions
+### Common Issues
+
+1. **Wrong access type detected**
+   - Check product name includes keywords (online/in-person/remote/venue)
+   - Verify keywords are spelled correctly
+   - Check `app/config/base.yml` for access pattern configuration
+
+2. **Day pass not recognized**
+   - Must include both "day pass" AND day name in product title
+   - Day names are case-insensitive
+   - Supported days: Monday through Sunday
+
+3. **Attendee type not detected**
+   - For best results, use categories instead of product names
+   - If using names, ensure keywords (speaker/sponsor/volunteer) are included
+   - Check startup logs for unmapped attributes
+
+4. **No tickets loading**
+   - Verify API token has correct permissions
+   - Check PRETIX_BASE_URL format (should end with /api/v1)
+   - Ensure event and organizer slugs are correct
+   - Check logs for API errors
+
+5. **Validation always fails**
+   - Ensure order status is "paid" (not pending/canceled)
+   - Verify ticket reference format: ORDER-POSITION (e.g., ABC123-1)
+   - Check name matching thresholds in configuration
 
 ## Example Product Structure
 
