@@ -1,6 +1,11 @@
 # Fact Check-in
 
-REST API to validate conference attendees using Tito or Pretix ticketing systems.
+REST API to validate conference attendees using multiple ticketing systems through a modular backend architecture.
+
+## Supported Ticketing Systems
+
+- **Tito** - Default backend with native activity support
+- **Pretix** - Full integration with category-based attribute mapping
 
 ## Quick Start
 
@@ -46,10 +51,27 @@ uvicorn app.main:app --port 8080 --host "0.0.0.0"
 
 ## Features
 
-- Validate attendees by ticket code + name (with fuzzy matching)
-- Validate attendees by email
-- Identify attendee types (speaker, sponsor, organizer, volunteer)
-- Distinguish access levels (on-site, remote, online)
+- **Modular Backend Architecture**: Easily switch between ticketing systems or add new ones
+- **Dynamic Configuration**: Backend selection via environment variables or config files
+- **Smart Validation**: 
+  - Validate attendees by ticket code + name (with fuzzy matching)
+  - Validate attendees by email
+  - Configurable name matching thresholds
+- **Flexible Attribute Mapping**: 
+  - Tito: Native activity support
+  - Pretix: Category and product name-based mapping
+- **Special Attendee Types**: Automatic detection of speakers, sponsors, volunteers, organizers
+- **Access Level Detection**: Distinguish between on-site, remote, and online attendees
+- **Day Pass Support**: Handle day-specific access (Monday, Tuesday, etc.)
+
+## Backend Architecture
+
+The application uses a modular backend system that allows seamless switching between different ticketing platforms:
+
+- **Abstract Interface**: `TicketingBackend` base class defines the contract
+- **Dynamic Loading**: Backends are loaded at runtime based on configuration
+- **Consistent API**: Same REST endpoints work with any backend
+- **Easy Extension**: Add new backends by implementing the interface
 
 ## API Endpoints
 
@@ -77,6 +99,7 @@ ruff format .
 
 ## Documentation
 
-- [CLAUDE.md](CLAUDE.md) - Development guide for Claude Code
+- [Developer Guide](DEVELOPER.md) - Development setup and guidelines
 - [Pretix Setup Guide](docs/PRETIX_SETUP_GUIDE.md) - Configure Pretix products
 - [Tito vs Pretix Comparison](docs/TITO_PRETIX_COMPARISON.md) - Feature comparison
+- [API Documentation](http://localhost:8080/docs) - Interactive API docs (when running)

@@ -259,3 +259,6 @@ logs/
 *.log
 
 tests/integration/*.json
+
+__*
+backup_before_filter/
