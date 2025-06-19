@@ -27,65 +27,38 @@ class TicketingBackend:
         """Search for tickets by email or name."""
         raise NotImplementedError
 
-
-class TitoBackend(TicketingBackend):
-    """Tito ticketing system backend."""
-
-    def __init__(self):
-        from app.tito import tito_api
-
-        self.api = tito_api
-
-    def get_all_tickets(self):
-        return self.api.get_all_tickets()
-
-    def get_all_ticket_offers(self):
-        return self.api.get_all_ticket_offers()
-
-    def search_reference(self, reference: str):
-        return self.api.search_reference(reference)
-
-    def search(self, search_for: str):
-        return self.api.search(search_for)
+    def get_router(self):
+        """Return the backend-specific router."""
+        raise NotImplementedError
 
 
-class PretixBackend(TicketingBackend):
-    """Pretix ticketing system backend."""
+def get_backend_name() -> str:
+    """Get the configured backend name."""
+    import os
 
-    def __init__(self):
-        from app.pretix import pretix_api
-
-        self.api = pretix_api
-
-    def get_all_tickets(self):
-        return self.api.get_all_tickets()
-
-    def get_all_ticket_offers(self):
-        return self.api.get_all_ticket_offers()
-
-    def search_reference(self, reference: str):
-        return self.api.search_reference(reference)
-
-    def search(self, search_for: str):
-        return self.api.search(search_for)
+    backend_name = os.environ.get("TICKETING_BACKEND") or CONFIG.get("TICKETING_BACKEND", "tito")
+    return backend_name.lower()
 
 
 def get_backend() -> TicketingBackend:
-    """Get the configured ticketing backend."""
-    import os
+    """Dynamically load the configured ticketing backend."""
+    backend_name = get_backend_name()
 
-    # Check environment variable first, then fall back to config
-    backend_name = os.environ.get("TICKETING_BACKEND") or CONFIG.get("TICKETING_BACKEND", "tito")
-    backend_name = backend_name.lower()
+    try:
+        if backend_name == "tito":
+            log.info("Using Tito ticketing backend")
+            from app.tito.backend import TitoBackend
 
-    if backend_name == "tito":
-        log.info("Using Tito ticketing backend")
-        return TitoBackend()
-    elif backend_name == "pretix":
-        log.info("Using Pretix ticketing backend")
-        return PretixBackend()
-    else:
-        raise ValueError(f"Unknown ticketing backend: {backend_name}")
+            return TitoBackend()
+        elif backend_name == "pretix":
+            log.info("Using Pretix ticketing backend")
+            from app.pretix.backend import PretixBackend
+
+            return PretixBackend()
+        else:
+            raise ValueError(f"Unknown ticketing backend: {backend_name}")
+    except ImportError as e:
+        raise ImportError(f"Backend '{backend_name}' not found. Module may have been removed.") from e
 
 
 # Global backend instance
