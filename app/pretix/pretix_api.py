@@ -28,18 +28,15 @@ def minimize_data(data: list[dict]) -> list[dict]:
     For Pretix, we keep order position data that maps to ticket data in Tito.
     """
     opt_in_attributes = {
-        "id",
-        "order",  # Order code (like ABCD1)
-        "positionid",  # Position within order
-        "item",  # Product ID
-        "variation",  # Product variation ID
-        "attendee_name",
-        "attendee_email",
-        "secret",  # Ticket secret/barcode
-        "pseudonymization_id",  # Unique attendee ID
-        "state",  # Order state
-        "created",
-        "modified",
+        "reference",  # Our constructed reference (ORDER-POSITION)
+        "email",  # Mapped from attendee_email
+        "name",  # Mapped from attendee_name
+        "release_id",  # Mapped from item
+        "state",  # Mapped from order status
+        "created_at",  # Mapped from created
+        "updated_at",  # Mapped from modified
+        "assigned",  # Based on attendee_email presence
+        "_pretix_data",  # Original Pretix data
     }
     log.debug("minimizing data footprint")
     filtered = [{k: v for k, v in x.items() if k in opt_in_attributes} for x in data]
