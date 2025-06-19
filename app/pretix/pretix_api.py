@@ -303,16 +303,18 @@ def search(search_for: str):
 
     # Transform results
     for pos in res_j["results"]:
-        reference = f"{pos['order']}-{pos['positionid']}"
-        results.append(
-            {
-                "reference": reference.upper(),
-                "email": pos.get("attendee_email", ""),
-                "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
-                "release_id": pos["item"],
-                "state": "complete" if pos.get("order__status") == "p" else "pending",
-            }
-        )
+        # Only include if email actually matches
+        if pos.get("attendee_email") and search_for.lower() in pos.get("attendee_email", "").lower():
+            reference = f"{pos['order']}-{pos['positionid']}"
+            results.append(
+                {
+                    "reference": reference.upper(),
+                    "email": pos.get("attendee_email", ""),
+                    "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+                    "release_id": pos["item"],
+                    "state": "complete" if pos.get("order__status") == "p" else "pending",
+                }
+            )
 
     # If no results, try name search
     if not results:
@@ -322,18 +324,113 @@ def search(search_for: str):
         if res.status_code == HTTPStatus.OK:
             res_j = res.json()
             for pos in res_j["results"]:
-                reference = f"{pos['order']}-{pos['positionid']}"
-                results.append(
-                    {
-                        "reference": reference.upper(),
-                        "email": pos.get("attendee_email", ""),
-                        "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
-                        "release_id": pos["item"],
-                        "state": "complete" if pos.get("order__status") == "p" else "pending",
-                    }
-                )
+                # Only include if name actually matches
+                if pos.get("attendee_name") and search_for.lower() in pos.get("attendee_name", "").lower():
+                    reference = f"{pos['order']}-{pos['positionid']}"
+                    results.append(
+                        {
+                            "reference": reference.upper(),
+                            "email": pos.get("attendee_email", ""),
+                            "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+                            "release_id": pos["item"],
+                            "state": "complete" if pos.get("order__status") == "p" else "pending",
+                        }
+                    )
 
     log.debug(f"success: the request {search_for} returned {len(results)} tickets.")
+    return results
+
+
+def search_by_secret(secret: str):
+    """Search for order position by secret/ticket ID."""
+    log.debug(f"searching by secret: {secret}")
+    if in_dummy_mode:
+        # Find by secret in _pretix_data
+        for sale in interface.all_sales.values():
+            if sale.get("_pretix_data", {}).get("secret") == secret:
+                return sale
+        return None
+
+    url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
+    params = {"secret": secret}
+
+    res = requests.get(url, headers=headers, params=params)
+    if res.status_code != HTTPStatus.OK:
+        log.debug(f"search by secret returned status code: {res.status_code}")
+        return None
+
+    res_j = res.json()
+    results = res_j.get("results", [])
+
+    if results:
+        # Transform and return first match
+        pos = results[0]
+        reference = f"{pos['order']}-{pos['positionid']}"
+        return {
+            "reference": reference.upper(),
+            "email": pos.get("attendee_email", ""),
+            "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+            "release_id": pos["item"],
+            "state": "complete" if pos.get("order__status") == "p" else "pending",
+            "created_at": pos.get("created"),
+            "updated_at": pos.get("modified"),
+            "assigned": bool(pos.get("attendee_email")),
+            "_pretix_data": {
+                "order": pos["order"],
+                "positionid": pos["positionid"],
+                "secret": pos.get("secret"),
+                "item": pos["item"],
+                "variation": pos.get("variation"),
+            },
+        }
+    return None
+
+
+def search_by_order(order_code: str):
+    """Search for all order positions by order code."""
+    log.debug(f"searching by order: {order_code}")
+    if in_dummy_mode:
+        # Find all positions for this order
+        results = []
+        for sale in interface.all_sales.values():
+            if sale.get("_pretix_data", {}).get("order") == order_code.upper():
+                results.append(sale)
+        return results
+
+    url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
+    params = {"order": order_code}
+
+    res = requests.get(url, headers=headers, params=params)
+    if res.status_code != HTTPStatus.OK:
+        log.debug(f"search by order returned status code: {res.status_code}")
+        return []
+
+    res_j = res.json()
+    results = []
+
+    # Transform all positions
+    for pos in res_j.get("results", []):
+        reference = f"{pos['order']}-{pos['positionid']}"
+        results.append(
+            {
+                "reference": reference.upper(),
+                "email": pos.get("attendee_email", ""),
+                "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+                "release_id": pos["item"],
+                "state": "complete" if pos.get("order__status") == "p" else "pending",
+                "created_at": pos.get("created"),
+                "updated_at": pos.get("modified"),
+                "assigned": bool(pos.get("attendee_email")),
+                "_pretix_data": {
+                    "order": pos["order"],
+                    "positionid": pos["positionid"],
+                    "secret": pos.get("secret"),
+                    "item": pos["item"],
+                    "variation": pos.get("variation"),
+                },
+            }
+        )
+
     return results
 
 

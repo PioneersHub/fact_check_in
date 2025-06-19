@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from app.config import CONFIG
 from app.middleware import middleware
 from app.routers import routers
-from app.routers.tickets import refresh_all
+from app.routers.common import refresh_all
 
 
 @asynccontextmanager
