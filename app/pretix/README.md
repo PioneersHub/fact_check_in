@@ -18,6 +18,18 @@ To use Pretix instead of Tito, you need to:
    PRETIX_EVENT_SLUG="your_event_slug"
    ```
 
+3. Configure attribute mappings in `app/config/base.yml`:
+   ```yaml
+   pretix_mapping:
+     categories:
+       by_id:
+         123456:  # Your Speaker category ID
+           is_speaker: true
+       by_name:
+         "speaker":
+           is_speaker: true
+   ```
+
 ## How It Works
 
 The Pretix adapter maps Pretix concepts to the existing Tito-based system:
@@ -29,25 +41,39 @@ The Pretix adapter maps Pretix concepts to the existing Tito-based system:
 | Ticket | Order Position | Each attendee in an order |
 | Reference (ABCD-1) | Order-Position (ORDER123-1) | Constructed from order code + position |
 | Release | Item/Product | Ticket types |
-| Activities | (Simulated from item names) | Pretix doesn't have activities |
+| Activities | (Simulated from attributes) | Pretix doesn't have activities |
 
-### Activity Simulation
+### Attribute Mapping System
 
-Since Pretix doesn't have an "activities" concept like Tito, the adapter determines activities based on item names:
+The new mapping system provides flexible ways to assign attendee attributes:
 
-- Items with "online", "remote", "virtual", "streaming" → `remote_sale`, `online_access`
-- Items with "in-person", "on-site", "physical", "venue" → `on_site`, `online_access`
-- Items with "day pass" → `on_site` + day-specific activities
-- Default → `on_site`, `online_access`
+1. **Category-Based Mapping** (Recommended):
+   - Map by Category ID (highest priority)
+   - Map by Category Name
+   - Configure in `app/config/base.yml`
 
-### Attendee Type Detection
+2. **Product Name Detection** (Fallback):
+   - Detects keywords in product names
+   - Automatic for common patterns
 
-Attendee types are still determined by ticket/item names (same as Tito):
-- "speaker" in name → `is_speaker`
-- "organiser" in name → `is_organizer`
-- "sponsor" in name → `is_sponsor`
-- "day pass" in name → `is_sponsor` (special handling)
-- "volunteer" in name → `is_volunteer`
+3. **Access Type Detection**:
+   - "online", "remote", "virtual" → Remote access
+   - "in-person", "on-site", "venue" → On-site access
+   - Default: On-site with online access
+
+### Startup Validation
+
+The system validates attribute mappings on startup:
+- Shows which attributes have no tickets mapped
+- Provides coverage statistics
+- Suggests improvements
+
+Example output:
+```
+⚠️  The following attributes have NO tickets mapped to them:
+  ❌ is_speaker
+     → Suggestion: Create a 'Speaker' category in Pretix
+```
 
 ## API Endpoints Used
 
