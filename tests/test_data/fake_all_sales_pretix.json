@@ -1,0 +1,172 @@
+{
+  "ORDER123-1": {
+    "reference": "ORDER123-1",
+    "email": "angel.hill@example.net",
+    "name": "Angel Hill",
+    "release_id": 101,
+    "state": "complete",
+    "created_at": "2025-02-03T20:54:50.205574+02:00",
+    "updated_at": "2025-02-03T21:31:50.205574+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDER123",
+      "positionid": 1,
+      "secret": "kzjf832jf",
+      "item": 101,
+      "variation": null
+    }
+  },
+  "ORDER456-1": {
+    "reference": "ORDER456-1",
+    "email": "robert.johnson@example.net",
+    "name": "Robert Johnson",
+    "release_id": 102,
+    "state": "complete",
+    "created_at": "2025-01-05T14:31:36.432848+02:00",
+    "updated_at": "2025-01-05T14:41:36.432848+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDER456",
+      "positionid": 1,
+      "secret": "mxn9283nd",
+      "item": 102,
+      "variation": null
+    }
+  },
+  "ORDER789-1": {
+    "reference": "ORDER789-1",
+    "email": "jacqueline.barnes@example.org",
+    "name": "Jacqueline Barnes",
+    "release_id": 103,
+    "state": "complete",
+    "created_at": "2025-02-07T22:17:15.603246+02:00",
+    "updated_at": "2025-02-07T22:55:15.603246+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDER789",
+      "positionid": 1,
+      "secret": "qwer1234",
+      "item": 103,
+      "variation": null
+    }
+  },
+  "ORDERABC-1": {
+    "reference": "ORDERABC-1",
+    "email": "matthew.moore@example.com",
+    "name": "Matthew Moore",
+    "release_id": 104,
+    "state": "complete",
+    "created_at": "2025-02-06T23:33:22.494618+02:00",
+    "updated_at": "2025-02-07T00:10:22.494618+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDERABC",
+      "positionid": 1,
+      "secret": "asdf5678",
+      "item": 104,
+      "variation": null
+    }
+  },
+  "ORDERDEF-1": {
+    "reference": "ORDERDEF-1",
+    "email": "sarah.smith@example.net",
+    "name": "Sarah Smith",
+    "release_id": 105,
+    "state": "complete",
+    "created_at": "2025-02-08T10:15:30.123456+02:00",
+    "updated_at": "2025-02-08T10:45:30.123456+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDERDEF",
+      "positionid": 1,
+      "secret": "zxcv9012",
+      "item": 105,
+      "variation": null
+    }
+  },
+  "ORDERGHI-1": {
+    "reference": "ORDERGHI-1",
+    "email": "speaker.jones@example.org",
+    "name": "Speaker Jones",
+    "release_id": 106,
+    "state": "complete",
+    "created_at": "2025-02-09T14:20:45.789012+02:00",
+    "updated_at": "2025-02-09T14:50:45.789012+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDERGHI",
+      "positionid": 1,
+      "secret": "poiu3456",
+      "item": 106,
+      "variation": null
+    }
+  },
+  "ORDERJKL-1": {
+    "reference": "ORDERJKL-1",
+    "email": "volunteer.wilson@example.com",
+    "name": "Volunteer Wilson",
+    "release_id": 107,
+    "state": "complete",
+    "created_at": "2025-02-10T09:30:20.456789+02:00",
+    "updated_at": "2025-02-10T10:00:20.456789+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDERJKL",
+      "positionid": 1,
+      "secret": "lkjh7890",
+      "item": 107,
+      "variation": null
+    }
+  },
+  "ORDERMNO-1": {
+    "reference": "ORDERMNO-1",
+    "email": "sponsor.garcia@example.net",
+    "name": "Sponsor Garcia",
+    "release_id": 108,
+    "state": "complete",
+    "created_at": "2025-02-11T11:45:55.234567+02:00",
+    "updated_at": "2025-02-11T12:15:55.234567+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDERMNO",
+      "positionid": 1,
+      "secret": "mnbv2345",
+      "item": 108,
+      "variation": null
+    }
+  },
+  "ORDERPQR-1": {
+    "reference": "ORDERPQR-1",
+    "email": "",
+    "name": "",
+    "release_id": 101,
+    "state": "pending",
+    "created_at": "2025-02-12T13:00:00.000000+02:00",
+    "updated_at": "2025-02-12T13:00:00.000000+02:00",
+    "assigned": false,
+    "_pretix_data": {
+      "order": "ORDERPQR",
+      "positionid": 1,
+      "secret": "tyui6789",
+      "item": 101,
+      "variation": null
+    }
+  },
+  "ORDERSTU-1": {
+    "reference": "ORDERSTU-1",
+    "email": "day.pass@example.org",
+    "name": "Day Pass Attendee",
+    "release_id": 109,
+    "state": "complete",
+    "created_at": "2025-02-13T08:30:00.000000+02:00",
+    "updated_at": "2025-02-13T09:00:00.000000+02:00",
+    "assigned": true,
+    "_pretix_data": {
+      "order": "ORDERSTU",
+      "positionid": 1,
+      "secret": "ghjk3456",
+      "item": 109,
+      "variation": null
+    }
+  }
+}

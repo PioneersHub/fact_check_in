@@ -1,0 +1,212 @@
+{
+  "CONFERENCE PASS": {
+    "id": 101,
+    "title": "Conference Pass",
+    "category_id": 1001,
+    "category": {
+      "id": 1001,
+      "name": "Regular Tickets",
+      "internal_name": "regular"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "REMOTE CONFERENCE PASS": {
+    "id": 102,
+    "title": "Remote Conference Pass",
+    "category_id": 1001,
+    "category": {
+      "id": 1001,
+      "name": "Regular Tickets",
+      "internal_name": "regular"
+    },
+    "activities": ["remote_sale", "online_access"],
+    "_attributes": {
+      "is_remote": true,
+      "is_onsite": false,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "LATE BIRD CONFERENCE PASS": {
+    "id": 103,
+    "title": "Late Bird Conference Pass",
+    "category_id": 1002,
+    "category": {
+      "id": 1002,
+      "name": "Late Bird",
+      "internal_name": "late_bird"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "REMOTE LATE BIRD CONFERENCE PASS": {
+    "id": 104,
+    "title": "Remote Late Bird Conference Pass",
+    "category_id": 1002,
+    "category": {
+      "id": 1002,
+      "name": "Late Bird",
+      "internal_name": "late_bird"
+    },
+    "activities": ["remote_sale", "online_access"],
+    "_attributes": {
+      "is_remote": true,
+      "is_onsite": false,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "BUSINESS TICKET": {
+    "id": 105,
+    "title": "Business Ticket",
+    "category_id": 1003,
+    "category": {
+      "id": 1003,
+      "name": "Business",
+      "internal_name": "business"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "SPEAKER PASS": {
+    "id": 106,
+    "title": "Speaker Pass",
+    "category_id": 1004,
+    "category": {
+      "id": 1004,
+      "name": "Speaker",
+      "internal_name": "speaker"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": true,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "VOLUNTEER PASS": {
+    "id": 107,
+    "title": "Volunteer Pass",
+    "category_id": 1005,
+    "category": {
+      "id": 1005,
+      "name": "Volunteer",
+      "internal_name": "volunteer"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": true,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "SPONSOR PASS": {
+    "id": 108,
+    "title": "Sponsor Pass",
+    "category_id": 1006,
+    "category": {
+      "id": 1006,
+      "name": "Sponsor",
+      "internal_name": "sponsor"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": true,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "MONDAY DAY PASS": {
+    "id": 109,
+    "title": "Monday Day Pass",
+    "category_id": 1007,
+    "category": {
+      "id": 1007,
+      "name": "Day Passes",
+      "internal_name": "day_passes"
+    },
+    "activities": ["on_site", "seat-person-monday", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": true,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": false
+    }
+  },
+  "VIP GUEST PASS": {
+    "id": 110,
+    "title": "VIP Guest Pass",
+    "category_id": 1008,
+    "category": {
+      "id": 1008,
+      "name": "VIP",
+      "internal_name": "vip"
+    },
+    "activities": ["on_site", "online_access"],
+    "_attributes": {
+      "is_remote": false,
+      "is_onsite": true,
+      "online_access": true,
+      "is_speaker": false,
+      "is_sponsor": false,
+      "is_volunteer": false,
+      "is_organizer": false,
+      "is_guest": true
+    }
+  }
+}

@@ -1,8 +1,29 @@
-"""Tests for Pretix integration."""
+"""Tests for Pretix integration.
+
+This test module validates the Pretix integration based on the official Pretix API documentation.
+
+Reference URLs for Pretix API documentation:
+- Order Positions: https://docs.pretix.eu/en/latest/api/resources/orders.html
+  - Contains order position structure with fields like positionid, item, attendee_name, etc.
+  - Order status values: 'n' (pending), 'p' (paid), 'e' (expired), 'c' (canceled)
+
+- Items (Products): https://docs.pretix.eu/en/latest/api/resources/items.html
+  - Item structure with id, name (multi-lingual), category, default_price, etc.
+
+- Categories: https://docs.pretix.eu/en/latest/api/resources/categories.html
+  - Category structure with id, name (multi-lingual), internal_name, position, etc.
+
+- Order Format: https://docs.pretix.eu/en/latest/api/resources/orders.html
+  - Order codes consist of A-Z and 0-9 (excluding O and 1)
+  - Format example: "ORDER123" with position ID creates reference "ORDER123-1"
+"""
 
 from unittest.mock import MagicMock, patch
 
 from app.pretix import pretix_api
+
+# Constants
+PRETIX_REFERENCE_PARTS = 2  # ORDER-POSITION format
 
 
 class TestPretixIntegration:
@@ -84,3 +105,85 @@ class TestPretixIntegration:
 
         # Reset to default
         CONFIG.TICKETING_BACKEND = "tito"
+
+    def test_pretix_fake_data_structure(self):
+        """Test that Pretix fake data has the correct structure."""
+        import json
+        from pathlib import Path
+
+        # Load Pretix fake data files
+        project_root = Path(__file__).parent.parent
+        with open(project_root / "tests/test_data/fake_all_sales_pretix.json") as f:
+            sales = json.load(f)
+        with open(project_root / "tests/test_data/fake_all_releases_pretix.json") as f:
+            releases = json.load(f)
+
+        # Test sales structure
+        for ref, sale in sales.items():
+            # Check reference format
+            assert "-" in ref
+            parts = ref.split("-")
+            assert len(parts) == PRETIX_REFERENCE_PARTS
+            assert parts[0].startswith("ORDER")
+            assert parts[1].isdigit()
+
+            # Check required fields
+            assert "reference" in sale
+            assert "email" in sale
+            assert "name" in sale
+            assert "release_id" in sale
+            assert "state" in sale
+            assert "_pretix_data" in sale
+
+            # Check Pretix-specific data
+            pretix_data = sale["_pretix_data"]
+            assert "order" in pretix_data
+            assert "positionid" in pretix_data
+            assert "secret" in pretix_data
+            assert "item" in pretix_data
+
+        # Test releases structure
+        for _title, release in releases.items():
+            # Check required fields
+            assert "id" in release
+            assert "title" in release
+            assert "activities" in release
+            assert "_attributes" in release
+
+            # Check category structure
+            if "category" in release:
+                cat = release["category"]
+                assert "id" in cat
+                assert "name" in cat
+                assert "internal_name" in cat
+
+            # Check attributes structure
+            attrs = release["_attributes"]
+            assert "is_speaker" in attrs
+            assert "is_sponsor" in attrs
+            assert "is_onsite" in attrs
+            assert "is_remote" in attrs
+
+    @patch.dict("os.environ", {"TICKETING_BACKEND": "pretix"})
+    def test_interface_loads_pretix_fake_data(self):
+        """Test that Interface loads Pretix-specific fake data when backend is Pretix."""
+        from app import interface, reset_interface
+
+        # Reset interface with dummy mode
+        reset_interface(dummy_mode=True)
+
+        # Check that Pretix data was loaded
+        # Pretix references have ORDER format
+        assert any(ref.startswith("ORDER") for ref in interface.all_sales)
+
+        # Check that categories were loaded
+        assert len(interface.categories) > 0
+
+        # Check specific Pretix features
+        for sale in interface.all_sales.values():
+            assert "_pretix_data" in sale
+
+        # Check that releases have categories
+        for release in interface.all_releases.values():
+            if release.get("category_id"):
+                assert "category" in release
