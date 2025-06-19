@@ -1,20 +1,80 @@
-# DEVELOPER
+# Developer Guide
 
-## Use `uv`
-Clone the repository and `cd` into it.
-To install a local conda environment for the project:
+## Setup
 
-```shell
-uv init
+### 1. Prerequisites
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) package manager
+
+### 2. Install Development Environment
+```bash
+# Clone and enter repository
+git clone <repo-url>
+cd fact_check_in
+
+# Install dependencies
+uv pip install -e .
+
+# Set up pre-commit hooks
+pre-commit install --hook-type pre-commit --hook-type pre-push
 ```
 
+### 3. Configure Environment
+```bash
+# Copy example env file
+cp .env.example .env  # or .env.pretix.example for Pretix
 
-# Deployment
-The deployment procedure of a new release consists of the following steps
-- Consolidate the repository (i.e. clean repo, everything committed, unit tests pass)
-- Bump version identifier to release
-- Bump version identifier to development state on the main (optional, recommended)
-- Build documentation (optional)
+# Edit .env with your credentials
+```
+
+## Running Locally
+
+```bash
+# Start server (MUST use single worker!)
+uvicorn app.main:app --reload --port 8080
+
+# Or using Python module
+python -m app.main
+```
+
+## Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run specific test file
+pytest tests/test_name_tickets.py
+
+# Run smoke tests only
+pytest -m smoke_test
+
+# Run with coverage
+pytest --cov=app
+```
+
+## Code Quality
+
+Pre-commit hooks automatically run on every commit. To run manually:
+
+```bash
+# Run all checks
+pre-commit run --all-files
+
+# Run linting with fixes
+ruff check . --fix
+
+# Run formatter
+ruff format .
+```
+
+## Deployment
+
+### Release Process
+1. Ensure clean repository (all changes committed, tests pass)
+2. Bump version to release
+3. Deploy
+4. Bump version to development state
 
 ## Versioning Schema
 The versioning schema is `{major}.{minor}.{patch}[{release}{build}]` where the

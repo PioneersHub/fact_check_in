@@ -1,59 +1,78 @@
 # Fact Check-in
 
-> Validate if the attendee is registered for the conference by ticket code, name and email
+REST API to validate conference attendees using Tito or Pretix ticketing systems.
 
-## Features
+## Quick Start
 
-1. Validate if the attendee is registered for the conference by ticket code and name
-2. Validate if the attendee is registered by email
-3. Provide information about the registration type (attendee, speaker, sponsor, organizer, etc.)
-
-## Use Cases
-
-1. Automatically add the attendee to the conference Discord assigning roles based on the registration type
-2. Allow access to a video-streaming platform for conference talks
-
-
-The REST-API returns the following information:
-
-Important: run with ONE worker only!
-```
-uvicorn main:app --port 8080 --host "0.0.0.0" 
+### 1. Install Dependencies
+```bash
+# Requires Python 3.12+
+uv pip install -e .
 ```
 
-It takes about 30 sec to launch, data is loaded and processed from the ticketing system (Tito or Pretix).
+### 2. Configure Ticketing System
 
-## Set-Up
-
-### Using Tito (Default)
-
-Add a `.env` file with the following content:
-
-```text
+**Option A: Tito (Default)**
+```bash
+# Create .env file
 TITO_TOKEN="your_secret_token"
 ACCOUNT_SLUG="account_slug_from_tito"
 EVENT_SLUG="event_slug_from_tito"
 ```
 
-### Using Pretix
+**Option B: Pretix**
+```bash
+# Create .env file
+PRETIX_TOKEN="your_pretix_api_token"
+PRETIX_BASE_URL="https://pretix.eu/api/v1"
+PRETIX_ORGANIZER_SLUG="your_organizer_slug"
+PRETIX_EVENT_SLUG="your_event_slug"
 
-To use Pretix instead of Tito:
+# Set in app/config/base.yml
+TICKETING_BACKEND: pretix
+```
 
-1. Set the ticketing backend in `app/config/base.yml`:
-   ```yaml
-   TICKETING_BACKEND: pretix
-   ```
+### 3. Run the Application
+```bash
+# IMPORTANT: Use single worker only!
+uvicorn app.main:app --port 8080 --host "0.0.0.0"
+```
 
-2. Add Pretix credentials to your `.env` file:
-   ```text
-   PRETIX_TOKEN="your_pretix_api_token"
-   PRETIX_BASE_URL="https://pretix.eu/api/v1"  # or your self-hosted instance
-   PRETIX_ORGANIZER_SLUG="your_organizer_slug"
-   PRETIX_EVENT_SLUG="your_event_slug"
-   ```
+**Note**: Startup takes ~30 seconds while loading ticket data.
 
-See [app/pretix/README.md](app/pretix/README.md) for technical details on the Pretix integration.
+## Features
 
-For setting up your Pretix event to work with this system, see:
-- [Pretix Setup Guide](docs/PRETIX_SETUP_GUIDE.md) - How to configure products in Pretix
-- [Tito vs Pretix Comparison](docs/TITO_PRETIX_COMPARISON.md) - Detailed feature comparison
+- Validate attendees by ticket code + name (with fuzzy matching)
+- Validate attendees by email
+- Identify attendee types (speaker, sponsor, organizer, volunteer)
+- Distinguish access levels (on-site, remote, online)
+
+## API Endpoints
+
+- `POST /tickets/validate_name/` - Validate by ticket ID and name
+- `POST /tickets/validate_email/` - Validate by email
+- `GET /tickets/refresh_all/` - Force reload ticket data
+- `GET /healthcheck/alive` - Health check
+
+## Development
+
+```bash
+# Install with dev dependencies
+uv pip install -e .
+
+# Set up pre-commit hooks
+pre-commit install --hook-type pre-commit --hook-type pre-push
+
+# Run tests
+pytest
+
+# Run linting/formatting
+ruff check . --fix
+ruff format .
+```
+
+## Documentation
+
+- [CLAUDE.md](CLAUDE.md) - Development guide for Claude Code
+- [Pretix Setup Guide](docs/PRETIX_SETUP_GUIDE.md) - Configure Pretix products
+- [Tito vs Pretix Comparison](docs/TITO_PRETIX_COMPARISON.md) - Feature comparison
