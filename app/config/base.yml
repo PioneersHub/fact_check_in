@@ -23,6 +23,9 @@ APP:
   PORT: 9898
   HOST: "127.0.0.1"
 
+# Ticketing backend: "tito" or "pretix"
+TICKETING_BACKEND: tito
+
 include_activities:
   # activities that are relevant for this service
   - on_site
@@ -30,4 +33,7 @@ include_activities:
 
 organizer_speakers:
   - "XYZA-1"  # J Doe
+
+# Optional: patterns to exclude certain ticket types
+exclude_ticket_patterns: []
 
