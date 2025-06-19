@@ -124,7 +124,9 @@ class TestPretixIntegration:
             assert "-" in ref
             parts = ref.split("-")
             assert len(parts) == PRETIX_REFERENCE_PARTS
-            assert parts[0].startswith("ORDER")
+            # Check valid Pretix order code (no O or 1)
+            assert "O" not in parts[0]
+            assert "1" not in parts[0]
             assert parts[1].isdigit()
 
             # Check required fields
@@ -173,8 +175,11 @@ class TestPretixIntegration:
         reset_interface(dummy_mode=True)
 
         # Check that Pretix data was loaded
-        # Pretix references have ORDER format
-        assert any(ref.startswith("ORDER") for ref in interface.all_sales)
+        # Pretix references should not contain O or 1
+        for ref in interface.all_sales:
+            parts = ref.split("-")
+            assert "O" not in parts[0]
+            assert "1" not in parts[0]
 
         # Check that categories were loaded
         assert len(interface.categories) > 0
