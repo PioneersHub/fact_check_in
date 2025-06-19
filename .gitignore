@@ -251,3 +251,9 @@ cython_debug/
 
 .ruffcache/
 *cache/
+
+CLAUDE.local.md
+
+# Logs
+logs/
+*.log
