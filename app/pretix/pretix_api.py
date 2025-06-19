@@ -1,15 +1,12 @@
+# Pretix API configuration
+import os
 from http import HTTPStatus
-from urllib.parse import urlencode
 
 import requests
 from fastapi.encoders import jsonable_encoder
 
 from app import in_dummy_mode, interface, log
-from app.config import CONFIG
 from app.errors import NotOk
-
-# Pretix API configuration
-import os
 
 PRETIX_TOKEN = os.getenv("PRETIX_TOKEN")
 PRETIX_BASE_URL = os.getenv("PRETIX_BASE_URL", "https://pretix.eu/api/v1")
@@ -25,11 +22,9 @@ headers_post = dict(headers.items())
 headers_post["Content-Type"] = "application/json"
 
 
-
-
 def minimize_data(data: list[dict]) -> list[dict]:
     """Remove all data that is not relevant to run the application.
-    
+
     For Pretix, we keep order position data that maps to ticket data in Tito.
     """
     opt_in_attributes = {
@@ -75,23 +70,23 @@ def get_all_order_positions():
         return
     log.info("Loading all order positions from Pretix API")
     collect = []
-    
+
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
     params = {"page": 1}
-    
+
     while True:
         log.info(f"getting page:{params['page']}")
         res = requests.get(url, headers=headers, params=params)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
-        
+
         res_j = res.json()
         # Transform Pretix data to match Tito structure
         positions = []
         for pos in res_j["results"]:
             # Create a reference like Tito's "ABCD-1" from order + position
             reference = f"{pos['order']}-{pos['positionid']}"
-            
+
             transformed = {
                 "reference": reference.upper(),
                 "email": pos.get("attendee_email", ""),
@@ -108,18 +103,18 @@ def get_all_order_positions():
                     "secret": pos.get("secret"),
                     "item": pos["item"],
                     "variation": pos.get("variation"),
-                }
+                },
             }
             positions.append(transformed)
-        
+
         data = minimize_data(positions)
         collect.extend(data)
-        
+
         if res_j["next"]:
             params["page"] += 1
         else:
             break
-    
+
     interface.all_sales = {x["reference"]: x for x in collect}
 
 
@@ -128,18 +123,18 @@ def get_all_items():
     if in_dummy_mode:
         return
     collect = []
-    
+
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/items/"
     params = {"page": 1}
-    
+
     while True:
         log.info(f"getting page:{params['page']}")
         res = requests.get(url, headers=headers, params=params)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
-        
+
         res_j = res.json()
-        
+
         for item in res_j["results"]:
             # Transform Pretix items to match Tito releases structure
             transformed = {
@@ -149,31 +144,31 @@ def get_all_items():
                 "activities": determine_activities_from_item(item),
             }
             collect.append(transformed)
-        
+
         if res_j["next"]:
             params["page"] += 1
         else:
             break
-    
+
     interface.all_releases = {x["title"].upper(): x for x in collect}
 
 
 def determine_activities_from_item(item: dict) -> list[str]:
     """Determine pseudo-activities based on item name and category.
-    
+
     This maps Pretix items to the activity-based system used by Tito.
     """
     activities = []
     name = item.get("name", {}).get("en", "").lower()
-    
+
     # Check for online/remote indicators
     if any(keyword in name for keyword in ["online", "remote", "virtual", "streaming"]):
         activities.extend(["remote_sale", "online_access"])
-    
+
     # Check for in-person indicators
     if any(keyword in name for keyword in ["in-person", "on-site", "physical", "venue"]):
         activities.extend(["on_site", "online_access"])  # Most include online access too
-    
+
     # Check for day passes
     if "day pass" in name:
         activities.append("on_site")
@@ -184,11 +179,11 @@ def determine_activities_from_item(item: dict) -> list[str]:
         if "wednesday" in name:
             activities.append("seat-person-wednesday")
         activities.append("online_access")
-    
+
     # Default: if no specific indicators, assume it's an on-site ticket with online access
     if not activities:
         activities = ["on_site", "online_access"]
-    
+
     return activities
 
 
@@ -198,7 +193,7 @@ def search_reference(reference):
     if in_dummy_mode:
         res = interface.all_sales.get(reference)
         return res
-    
+
     # Split reference back into order and position
     try:
         order_code, position_id = reference.upper().split("-")
@@ -206,32 +201,34 @@ def search_reference(reference):
     except ValueError:
         log.debug(f"Invalid reference format: {reference}")
         return None
-    
+
     # Search for the specific order position
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
     params = {
         "order__code": order_code,
     }
-    
+
     res = requests.get(url, headers=headers, params=params)
     if res.status_code != HTTPStatus.OK:
         log.debug(f"the request reference: {reference} returned status code: {res.status_code}")
         response_is_not_ok(res)
-    
+
     res_j = res.json()
-    
+
     # Find the specific position
     for pos in res_j["results"]:
         if pos["positionid"] == position_id:
             # Transform to match Tito structure
-            return [{
-                "reference": reference,
-                "email": pos.get("attendee_email", ""),
-                "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
-                "release_id": pos["item"],
-                "state": "complete" if pos.get("order__status") == "p" else "pending",
-            }]
-    
+            return [
+                {
+                    "reference": reference,
+                    "email": pos.get("attendee_email", ""),
+                    "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+                    "release_id": pos["item"],
+                    "state": "complete" if pos.get("order__status") == "p" else "pending",
+                }
+            ]
+
     log.debug(f"Position {position_id} not found in order {order_code}")
     return []
 
@@ -244,49 +241,53 @@ def search(search_for: str):
         if res:
             return res
         return [{"email": search_for}]
-    
+
     # Pretix allows searching by attendee email or name
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
-    
+
     # Try email search first
     params = {"attendee_email__icontains": search_for}
     res = requests.get(url, headers=headers, params=params)
-    
+
     if res.status_code != HTTPStatus.OK:
         log.debug(f"the request {search_for} returned status code: {res.status_code}")
         response_is_not_ok(res)
-    
+
     res_j = res.json()
     results = []
-    
+
     # Transform results
     for pos in res_j["results"]:
         reference = f"{pos['order']}-{pos['positionid']}"
-        results.append({
-            "reference": reference.upper(),
-            "email": pos.get("attendee_email", ""),
-            "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
-            "release_id": pos["item"],
-            "state": "complete" if pos.get("order__status") == "p" else "pending",
-        })
-    
+        results.append(
+            {
+                "reference": reference.upper(),
+                "email": pos.get("attendee_email", ""),
+                "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+                "release_id": pos["item"],
+                "state": "complete" if pos.get("order__status") == "p" else "pending",
+            }
+        )
+
     # If no results, try name search
     if not results:
         params = {"attendee_name__icontains": search_for}
         res = requests.get(url, headers=headers, params=params)
-        
+
         if res.status_code == HTTPStatus.OK:
             res_j = res.json()
             for pos in res_j["results"]:
                 reference = f"{pos['order']}-{pos['positionid']}"
-                results.append({
-                    "reference": reference.upper(),
-                    "email": pos.get("attendee_email", ""),
-                    "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
-                    "release_id": pos["item"],
-                    "state": "complete" if pos.get("order__status") == "p" else "pending",
-                })
-    
+                results.append(
+                    {
+                        "reference": reference.upper(),
+                        "email": pos.get("attendee_email", ""),
+                        "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
+                        "release_id": pos["item"],
+                        "state": "complete" if pos.get("order__status") == "p" else "pending",
+                    }
+                )
+
     log.debug(f"success: the request {search_for} returned {len(results)} tickets.")
     return results
 
