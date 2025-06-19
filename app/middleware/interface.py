@@ -12,7 +12,7 @@ class Interface:
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
-            cls._instance = super(Interface, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.__init__(*args, **kwargs)
         return cls._instance
 
@@ -26,6 +26,7 @@ class Interface:
         self._activity_release_id_map: dict = {}
         self._valid_ticket_ids: dict = {}
         self.initial_data_loaded: bool = False
+        self.categories: dict = {}  # For Pretix categories
         if self.in_dummy_mode:
             self.set_dummy_data()
 
@@ -84,8 +85,33 @@ class Interface:
         return unidecode(txt).upper()
 
     def set_dummy_data(self):
-        with (project_root / "tests/test_data/fake_all_releases.json").open() as f:
+        # Check which backend is being used
+        import os
+
+        from app.config import CONFIG
+
+        backend_name = os.environ.get("TICKETING_BACKEND") or CONFIG.get("TICKETING_BACKEND", "tito")
+
+        if backend_name.lower() == "pretix":
+            # Load Pretix-specific fake data
+            releases_file = "fake_all_releases_pretix.json"
+            sales_file = "fake_all_sales_pretix.json"
+        else:
+            # Load Tito fake data (default)
+            releases_file = "fake_all_releases.json"
+            sales_file = "fake_all_sales.json"
+
+        with (project_root / f"tests/test_data/{releases_file}").open() as f:
             self.all_releases = json.load(f)
-        with (project_root / "tests/test_data/fake_all_sales.json").open() as f:
+        with (project_root / f"tests/test_data/{sales_file}").open() as f:
             self.all_sales = json.load(f)
+
+        # For Pretix, extract categories from releases
+        if backend_name.lower() == "pretix":
+            self.categories = {}
+            for release in self.all_releases.values():
+                if release.get("category"):
+                    cat = release["category"]
+                    self.categories[cat["id"]] = cat
+
         self.initial_data_loaded = True
