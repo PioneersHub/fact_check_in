@@ -66,6 +66,9 @@ indent-style = "space"
 docstring-code-format = true
 
 [tool.pytest.ini_options]
+markers = [
+    "smoke_test: marks tests as smoke tests",
+]
 filterwarnings = [
     "error",
     "ignore:UserWarning",

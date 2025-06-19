@@ -6,7 +6,7 @@ from starlette import status
 from app import in_dummy_mode, interface, log, reset_interface
 from app.config import CONFIG
 from app.models.models import Attendee, Email, IsAnAttendee, TicketCount, TicketTypes, Truthy
-from app.tito.tito_api import get_all_ticket_offers, get_all_tickets, search, search_reference
+from app.ticketing.backend import get_ticketing_backend
 
 router = APIRouter(prefix="/tickets", tags=["Attendees"])
 
@@ -19,8 +19,9 @@ def refresh_all():
     if in_dummy_mode:
         reset_interface(in_dummy_mode)
         return
-    get_all_ticket_offers()
-    get_all_tickets()
+    backend = get_ticketing_backend()
+    backend.get_all_ticket_offers()
+    backend.get_all_tickets()
     return {"message": "The ticket cache was refreshed successfully."}
 
 
@@ -40,7 +41,8 @@ async def search_ticket(attendee: Attendee, response: Response):
     Do not expose it as an endpoint.
     """
     res = attendee.model_dump()
-    found = search_reference(attendee.ticket_id)
+    backend = get_ticketing_backend()
+    found = backend.search_reference(attendee.ticket_id)
     if not found:
         response.status_code = status.HTTP_404_NOT_FOUND
         res["is_attendee"] = False
@@ -59,7 +61,8 @@ async def search_email(email: Email, response: Response):
     req = email.model_dump()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
-    found = search(req["email"])
+    backend = get_ticketing_backend()
+    found = backend.search(req["email"])
     found = [x for x in found if x.get("release_id") in interface.valid_ticket_ids]
     log.debug(f"found: {len(found)}")
     if not found:
@@ -82,7 +85,8 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
         print(f"ticket not found in cache: {attendee.ticket_id}")
         print(f"trying live search: {attendee.ticket_id}")
         try:
-            ticket = search_reference(attendee.ticket_id)[0]
+            backend = get_ticketing_backend()
+            ticket = backend.search_reference(attendee.ticket_id)[0]
             print(f"ticket found: {attendee.ticket_id}")
         except (IndexError, TypeError):
             print(f"attendees loaded: {len(interface.all_sales)}")
