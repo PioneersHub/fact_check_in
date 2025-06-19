@@ -122,22 +122,41 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):  # noqa: PLR
             res["is_attendee"] = False
             res["hint"] = f"We couldn't find {attendee.name}, check spelling."
 
-    if "speaker" in ticket.get("release_title", "").lower():
-        res["is_speaker"] = True
-    if "organiser" in ticket.get("release_title", "").lower():
-        res["is_organizer"] = True
-        if attendee.ticket_id.upper() in CONFIG.organizer_speakers:
+    # Try to get attributes from Pretix mapping first
+    release_info = interface.release_id_map.get(ticket["release_id"], {})
+    if hasattr(release_info, "_attributes") or "_attributes" in release_info:
+        # Use mapped attributes from Pretix
+        attributes = release_info.get("_attributes", {})
+        res["is_speaker"] = attributes.get("is_speaker", False)
+        res["is_organizer"] = attributes.get("is_organizer", False)
+        res["is_sponsor"] = attributes.get("is_sponsor", False)
+        res["is_volunteer"] = attributes.get("is_volunteer", False)
+        res["is_guest"] = attributes.get("is_guest", False)
+        res["is_remote"] = attributes.get("is_remote", False)
+        res["is_onsite"] = attributes.get("is_onsite", False)
+        res["online_access"] = attributes.get("online_access", False)
+
+        # Special case: check organizer speakers list
+        if res["is_organizer"] and attendee.ticket_id.upper() in CONFIG.organizer_speakers:
             res["is_speaker"] = True
-    if "sponsor" in ticket.get("release_title", "").lower():
-        res["is_sponsor"] = True
-    if "day pass" in ticket.get("release_title", "").lower():
-        res["is_sponsor"] = True
-    if "volunteer" in ticket.get("release_title", "").lower():
-        res["is_volunteer"] = True
-    if ticket["release_id"] in interface.activity_release_id_map["remote_sale"]:
-        res["is_remote"] = True
-    if ticket["release_id"] in interface.activity_release_id_map["on_site"]:
-        res["is_onsite"] = True
-    if ticket["release_id"] in interface.activity_release_id_map["online_access"]:
-        res["online_access"] = True
+    else:
+        # Fallback to legacy name-based detection for Tito
+        if "speaker" in ticket.get("release_title", "").lower():
+            res["is_speaker"] = True
+        if "organiser" in ticket.get("release_title", "").lower():
+            res["is_organizer"] = True
+            if attendee.ticket_id.upper() in CONFIG.organizer_speakers:
+                res["is_speaker"] = True
+        if "sponsor" in ticket.get("release_title", "").lower():
+            res["is_sponsor"] = True
+        if "day pass" in ticket.get("release_title", "").lower():
+            res["is_sponsor"] = True
+        if "volunteer" in ticket.get("release_title", "").lower():
+            res["is_volunteer"] = True
+        if ticket["release_id"] in interface.activity_release_id_map.get("remote_sale", []):
+            res["is_remote"] = True
+        if ticket["release_id"] in interface.activity_release_id_map.get("on_site", []):
+            res["is_onsite"] = True
+        if ticket["release_id"] in interface.activity_release_id_map.get("online_access", []):
+            res["online_access"] = True
     return res

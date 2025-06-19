@@ -17,6 +17,17 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     # Startup code
     refresh_all()
 
+    # Run Pretix validation if using Pretix backend
+    try:
+        from app.pretix.validation import validate_pretix_mappings
+
+        validate_pretix_mappings()
+    except Exception as e:
+        import logging
+
+        logger = logging.getLogger("uvicorn.error")
+        logger.error(f"Failed to validate Pretix mappings: {e}")
+
     # Print startup info
     import logging
 
