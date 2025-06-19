@@ -1,0 +1,14 @@
+{
+  "passed": 5,
+  "failed": 1,
+  "skipped": 0,
+  "errors": [
+    {
+      "test": "Email Validation",
+      "error": "Expected 404 for invalid email, got 200. Response: {\"valid\":true}",
+      "type": "assertion"
+    }
+  ],
+  "start_time": "2025-06-19T13:18:13.917871",
+  "end_time": "2025-06-19T13:18:21.487014"
+}
