@@ -16,8 +16,12 @@ repos:
   rev: "v0.9.7"  # Update to the latest Ruff version
   hooks:
     - id: ruff
-      name: Ruff Linter & Formatter
-      args: ["--fix"]
+      name: Ruff Linter
+      args: ["check", "--fix"]
+      stages: [pre-commit, pre-push]
+    - id: ruff-format
+      name: Ruff Formatter
+      stages: [pre-commit, pre-push]
 # Use local hooks to tools installed via the environment-dev.yml.
 # This should allow to ake the installed tool without pre-commit, e.g., integrated in the IDE or manually.
 - repo: local
