@@ -72,7 +72,11 @@ class PretixBackend(TicketingBackend):
 
 def get_backend() -> TicketingBackend:
     """Get the configured ticketing backend."""
-    backend_name = CONFIG.get("TICKETING_BACKEND", "tito").lower()
+    import os
+
+    # Check environment variable first, then fall back to config
+    backend_name = os.environ.get("TICKETING_BACKEND") or CONFIG.get("TICKETING_BACKEND", "tito")
+    backend_name = backend_name.lower()
 
     if backend_name == "tito":
         log.info("Using Tito ticketing backend")
