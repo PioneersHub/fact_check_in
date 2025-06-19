@@ -21,12 +21,30 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     import logging
 
     logger = logging.getLogger("uvicorn.error")
+    # Try to get the actual port from uvicorn server
+    import os
+    import sys
+
+    # Detect port from command line args or environment
+    port = "8000"  # Default uvicorn port
+    for i, arg in enumerate(sys.argv):
+        if arg == "--port" and i + 1 < len(sys.argv):
+            port = sys.argv[i + 1]
+            break
+        elif arg.startswith("--port="):
+            port = arg.split("=")[1]
+            break
+
+    # Could also be set via environment
+    if os.environ.get("PORT"):
+        port = os.environ.get("PORT")
+
     logger.info("=" * 60)
     logger.info(f"🚀 {CONFIG.PROJECT_NAME} Ready!")
     logger.info("=" * 60)
-    logger.info("📚 API Documentation: /docs")
-    logger.info("📊 OpenAPI Schema: /openapi.json")
-    logger.info("🔍 ReDoc: /redoc")
+    logger.info(f"📚 Interactive API docs: http://localhost:{port}/docs")
+    logger.info(f"📄 Alternative docs: http://localhost:{port}/redoc")
+    logger.info(f"📊 OpenAPI schema: http://localhost:{port}/openapi.json")
     logger.info("=" * 60)
 
     yield
@@ -74,12 +92,15 @@ if __name__ == "__main__":
             port = int(sys.argv[i + 1])
 
     # Custom startup message
+    # Convert 0.0.0.0 to localhost for display
+    display_host = "localhost" if host == "0.0.0.0" else host
     print(f"\n{'=' * 60}")
     print(f"Starting {CONFIG.PROJECT_NAME}")
     print(f"{'=' * 60}")
-    print(f"Server:     http://{host}:{port}")
-    print(f"API Docs:   http://{host}:{port}/docs")
-    print(f"OpenAPI:    http://{host}:{port}/openapi.json")
+    print(f"Server:     http://{display_host}:{port}")
+    print(f"API Docs:   http://{display_host}:{port}/docs")
+    print(f"ReDoc:      http://{display_host}:{port}/redoc")
+    print(f"OpenAPI:    http://{display_host}:{port}/openapi.json")
     print(f"{'=' * 60}\n")
 
     uvicorn.run(
