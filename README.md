@@ -40,6 +40,10 @@ uvicorn app.main:app --port 8080 --host "0.0.0.0"
 
 **Note**: Startup takes ~30 seconds while loading ticket data.
 
+**API Documentation**: Once running, visit:
+- Interactive API docs: http://localhost:8080/docs
+- ReDoc: http://localhost:8080/redoc
+
 ## Features
 
 - Validate attendees by ticket code + name (with fuzzy matching)

@@ -14,11 +14,24 @@ from app.routers.tickets import refresh_all
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa: ARG001
-    # Startup code (if any)
+    # Startup code
     refresh_all()
+
+    # Print startup info
+    import logging
+
+    logger = logging.getLogger("uvicorn.error")
+    logger.info("=" * 60)
+    logger.info(f"🚀 {CONFIG.PROJECT_NAME} Ready!")
+    logger.info("=" * 60)
+    logger.info("📚 API Documentation: /docs")
+    logger.info("📊 OpenAPI Schema: /openapi.json")
+    logger.info("🔍 ReDoc: /redoc")
+    logger.info("=" * 60)
+
     yield
+    # Shutdown code
     refresh_all()
-    # Shutdown code (if any)
 
 
 app = FastAPI(title=CONFIG.PROJECT_NAME, middleware=middleware, lifespan=lifespan)
@@ -48,8 +61,29 @@ async def healthcheck():
 
 
 if __name__ == "__main__":
+    import sys
+
+    # Parse command line arguments for host and port
+    host = CONFIG.APP.HOST
+    port = CONFIG.APP.PORT
+
+    for i, arg in enumerate(sys.argv):
+        if arg == "--host" and i + 1 < len(sys.argv):
+            host = sys.argv[i + 1]
+        elif arg == "--port" and i + 1 < len(sys.argv):
+            port = int(sys.argv[i + 1])
+
+    # Custom startup message
+    print(f"\n{'=' * 60}")
+    print(f"Starting {CONFIG.PROJECT_NAME}")
+    print(f"{'=' * 60}")
+    print(f"Server:     http://{host}:{port}")
+    print(f"API Docs:   http://{host}:{port}/docs")
+    print(f"OpenAPI:    http://{host}:{port}/openapi.json")
+    print(f"{'=' * 60}\n")
+
     uvicorn.run(
         app,
-        host=CONFIG.APP.HOST,
-        port=CONFIG.APP.PORT,
+        host=host,
+        port=port,
     )
