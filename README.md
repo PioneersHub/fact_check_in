@@ -28,8 +28,8 @@ PRETIX_BASE_URL="https://pretix.eu/api/v1"
 PRETIX_ORGANIZER_SLUG="your_organizer_slug"
 PRETIX_EVENT_SLUG="your_event_slug"
 
-# Set in app/config/base.yml
-TICKETING_BACKEND: pretix
+# Set backend (environment variable takes precedence over config file)
+TICKETING_BACKEND=pretix
 ```
 
 ### 3. Run the Application

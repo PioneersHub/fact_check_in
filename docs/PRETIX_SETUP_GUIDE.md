@@ -84,7 +84,10 @@ Here are recommended product names that will work perfectly with the system:
 
 2. **Configure** `.env` file:
 ```bash
+# IMPORTANT: This must be set to use Pretix instead of Tito
 TICKETING_BACKEND=pretix
+
+# Pretix API credentials
 PRETIX_TOKEN="your_api_token"
 PRETIX_BASE_URL="https://pretix.eu/api/v1"
 PRETIX_ORGANIZER_SLUG="your_organizer"

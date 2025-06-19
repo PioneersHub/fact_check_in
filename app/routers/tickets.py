@@ -22,7 +22,8 @@ def refresh_all():
     backend = get_ticketing_backend()
     backend.get_all_ticket_offers()
     backend.get_all_tickets()
-    return {"message": "The ticket cache was refreshed successfully."}
+    backend_name = backend.__class__.__name__.replace("Backend", "")
+    return {"message": f"The ticket cache was refreshed successfully from {backend_name}."}
 
 
 @router.get("/ticket_types/", response_model=TicketTypes)
