@@ -37,3 +37,10 @@ organizer_speakers:
 # Optional: patterns to exclude certain ticket types
 exclude_ticket_patterns: []
 
+# Name validation thresholds
+name_matching:
+  # Names matching above this threshold are considered exact matches
+  exact_match_threshold: 0.95
+  # Names matching above this threshold are considered close matches
+  close_match_threshold: 0.8
+
