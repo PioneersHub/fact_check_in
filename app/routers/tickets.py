@@ -125,6 +125,8 @@ async def get_ticket_by_id(attendee: Attendee, response: Response):
             res["is_speaker"] = True
     if "sponsor" in ticket.get("release_title", "").lower():
         res["is_sponsor"] = True
+    if "day pass" in ticket.get("release_title", "").lower():
+        res["is_sponsor"] = True
     if "volunteer" in ticket.get("release_title", "").lower():
         res["is_volunteer"] = True
     if ticket["release_id"] in interface.activity_release_id_map["remote_sale"]:
