@@ -45,14 +45,20 @@ pytest -m smoke_test
 ### Code Quality
 ```bash
 # Ruff is configured for linting and formatting
-# Install pre-commit hooks (runs on pre-push)
-pre-commit install --hook-type pre-push
+# Pre-commit hooks are installed for both commit and push
+# They will automatically run ruff check and format
+
+# To install/update pre-commit hooks:
+pre-commit install --hook-type pre-commit --hook-type pre-push
 
 # Run linting manually
-ruff check .
+ruff check . --fix
 
-# Run formatting
+# Run formatting manually
 ruff format .
+
+# Run all pre-commit hooks manually
+pre-commit run --all-files
 ```
 
 ### Version Management
