@@ -1,3 +1,6 @@
+import logging
+import os
+import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -16,25 +19,18 @@ from app.routers.common import refresh_all
 async def lifespan(app: FastAPI):  # noqa: ARG001
     # Startup code
     refresh_all()
-
     # Run Pretix validation if using Pretix backend
     try:
-        from app.pretix.validation import validate_pretix_mappings
+        # make sure to use lazy import
+        from app.pretix.validation import validate_pretix_mappings  # noqa: PLC0415
 
         validate_pretix_mappings()
     except Exception as e:
-        import logging
-
         logger = logging.getLogger("uvicorn.error")
         logger.error(f"Failed to validate Pretix mappings: {e}")
 
-    # Print startup info
-    import logging
-
     logger = logging.getLogger("uvicorn.error")
     # Try to get the actual port from uvicorn server
-    import os
-    import sys
 
     # Detect port from command line args or environment
     port = "8000"  # Default uvicorn port
@@ -56,10 +52,9 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     logger.info("📚 API Documentation (Swagger UI):")
     logger.info(f"   http://localhost:{port}/docs")
     logger.info("=" * 60)
-
     yield
     # Shutdown code
-    refresh_all()
+    logger.info("shutting down")
 
 
 app = FastAPI(title=CONFIG.PROJECT_NAME, middleware=middleware, lifespan=lifespan)

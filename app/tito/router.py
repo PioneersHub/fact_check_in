@@ -5,12 +5,33 @@ from starlette import status
 
 from app import interface, log
 from app.config import CONFIG
+from app.models.base import Email, Truthy
+from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
 
 from .backend import TitoBackend
 from .models import TitoAttendee, TitoIsAnAttendee
 
 router = APIRouter(prefix="/tickets", tags=["Tito Validation"])
+
+
+@router.post("/validate_email/", response_model=Truthy)
+async def search_email(email: Email, response: Response):
+    """
+    Live-search for a participant by email.
+    """
+    req = email.model_dump()
+    log.debug(email)
+    log.debug(f"searching for email: {req['email']}")
+    backend = get_ticketing_backend()
+    found = backend.search(req["email"])
+    found = [x for x in found if x.get("release_id") in interface.valid_ticket_ids]
+    log.debug(f"found: {len(found)}")
+    if not found:
+        log.info(f"email not found: {req['email']}")
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"valid": False}
+    return {"valid": True}
 
 
 @router.post("/validate_name/", response_model=TitoIsAnAttendee)

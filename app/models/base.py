@@ -25,7 +25,8 @@ class BaseIsAnAttendee(BaseModel):
         },
     )
     is_speaker: bool = Field(False, json_schema_extra={"example": False, "description": "Person has a speaker ticket."})
-    is_sponsor: bool = Field(False, json_schema_extra={"example": False, "description": "Person has a sponsor ticket."})
+    is_keynote: bool = Field(False, json_schema_extra={"example": False, "description": "Person is Keynote speaker."})
+    is_sponsor: bool = Field(False, json_schema_extra={"example": False, "description": "Person is affiliated with a sponsor."})
     is_organizer: bool = Field(False, json_schema_extra={"example": False, "description": "Person is an organizer."})
     is_volunteer: bool = Field(False, json_schema_extra={"example": False, "description": "Person is a volunteer."})
     is_remote: bool = Field(False, json_schema_extra={"example": False, "description": "Person is a remote attendee."})

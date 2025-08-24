@@ -1,16 +1,20 @@
 """Common routes shared by all ticketing backends."""
 
-from fastapi import APIRouter, Response
-from starlette import status
+from cachetools import TTLCache, cached
+from fastapi import APIRouter
 
-from app import in_dummy_mode, interface, log, reset_interface
-from app.models.base import Email, TicketCount, TicketTypes, Truthy
+from app import in_dummy_mode, interface, reset_interface
+from app.models.base import TicketCount, TicketTypes
 from app.ticketing.backend import get_ticketing_backend
 
 router = APIRouter(prefix="/tickets", tags=["Common"])
 
+# Create a cache with maxsize=128 and ttl=300 seconds
+cache = TTLCache(maxsize=128, ttl=300)
+
 
 @router.get("/refresh_all/")
+@cached(cache=TTLCache(maxsize=1024, ttl=300))
 def refresh_all():
     """
     Service method to force a reload of all ticket data from the ticketing system
@@ -33,26 +37,3 @@ async def get_ticket_types():
 @router.get("/ticket_count/", response_model=TicketCount)
 async def get_ticket_count():
     return {"ticket_count": len(interface.all_sales)}
-
-
-@router.post("/validate_email/", response_model=Truthy)
-async def search_email(email: Email, response: Response):
-    """
-    Live-search for a participant by email.
-    """
-    req = email.model_dump()
-    log.debug(email)
-    log.debug(f"searching for email: {req['email']}")
-    backend = get_ticketing_backend()
-    if req["email"] in backend.api.interface.valid_emails:
-        return {"valid": True}
-
-    # TODO: search for email live if not loaded already
-    found = backend.search(req["email"])
-    found = [x for x in found if x.get("release_id") in interface.valid_ticket_ids]
-    log.debug(f"found: {len(found)}")
-    if not found:
-        log.info(f"email not found: {req['email']}")
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"valid": False}
-    return {"valid": True}
