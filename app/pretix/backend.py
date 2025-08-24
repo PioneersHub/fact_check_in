@@ -3,6 +3,7 @@
 from app.ticketing.backend import TicketingBackend
 
 from . import pretix_api
+from .router import router
 
 
 class PretixBackend(TicketingBackend):
@@ -25,6 +26,4 @@ class PretixBackend(TicketingBackend):
 
     def get_router(self):
         """Return the Pretix-specific router."""
-        from .router import router
-
         return router

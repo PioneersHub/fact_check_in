@@ -1,5 +1,6 @@
 # Pretix API configuration
 import os
+from collections import Counter
 from http import HTTPStatus
 
 import requests
@@ -7,6 +8,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app import in_dummy_mode, interface, log
 from app.errors import NotOk
+from app.pretix.mapping import PretixAttributeMapper
 
 PRETIX_TOKEN = os.getenv("PRETIX_TOKEN")
 PRETIX_BASE_URL = os.getenv("PRETIX_BASE_URL", "https://pretix.eu/api/v1")
@@ -28,14 +30,15 @@ def minimize_data(data: list[dict]) -> list[dict]:
     For Pretix, we keep order position data that maps to ticket data in Tito.
     """
     opt_in_attributes = {
-        "reference",  # Our constructed reference (ORDER-POSITION)
-        "email",  # Mapped from attendee_email
-        "name",  # Mapped from attendee_name
-        "release_id",  # Mapped from item
-        "state",  # Mapped from order status
-        "created_at",  # Mapped from created
-        "updated_at",  # Mapped from modified
-        "assigned",  # Based on attendee_email presence
+        "reference",  # constructed reference (ORDER-POSITION)
+        "email",
+        "name",
+        "release_id",
+        "item",
+        "order",
+        "category",
+        "state",
+        "assigned",
         "_pretix_data",  # Original Pretix data
     }
     log.debug("minimizing data footprint")
@@ -51,6 +54,7 @@ def filter_valid_items(data: list[dict], valid_item_ids: set) -> list[dict]:
 
 def response_is_not_ok(response):
     content = "response is not OK"
+    # noinspection PyUnreachableCode
     try:
         log.info("error", response.status_code)
         content = jsonable_encoder({response.status_code: response.json()})
@@ -62,13 +66,15 @@ def response_is_not_ok(response):
 
 
 def get_all_order_positions():
-    """Get all order positions (equivalent to tickets in Tito)."""
+    """Get all order positions (equivalent to tickets in Tito).
+    This gets all orders and iterates through the order positions
+    """
     if in_dummy_mode:
         return
     log.info("Loading all order positions from Pretix API")
     collect = []
 
-    url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
+    url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orders/"
     params = {"page": 1}
 
     while True:
@@ -80,29 +86,45 @@ def get_all_order_positions():
         res_j = res.json()
         # Transform Pretix data to match Tito structure
         positions = []
-        for pos in res_j["results"]:
-            # Create a reference like Tito's "ABCD-1" from order + position
-            reference = f"{pos['order']}-{pos['positionid']}"
-
-            transformed = {
-                "reference": reference.upper(),
-                "email": pos.get("attendee_email", ""),
-                "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
-                "release_id": pos["item"],  # Map item ID to release_id
-                "state": "complete" if pos.get("order__status") == "p" else "pending",
-                "created_at": pos.get("created"),
-                "updated_at": pos.get("modified"),
-                "assigned": bool(pos.get("attendee_email")),
-                # Store original Pretix data for reference
-                "_pretix_data": {
-                    "order": pos["order"],
-                    "positionid": pos["positionid"],
-                    "secret": pos.get("secret"),
-                    "item": pos["item"],
-                    "variation": pos.get("variation"),
-                },
-            }
-            positions.append(transformed)
+        for order in res_j["results"]:
+            # noinspection SpellCheckingInspection
+            # Simplified state, e: expired and n: pending are deemed valid for now.
+            state = {
+                "c": "canceled",
+            }.get(order["status"], "complete")
+            for pos in order["positions"]:
+                try:
+                    pos_state = "canceled" if pos["canceled"] else state
+                    # Add only valid orders to the API
+                    skip = pos_state == "canceled"
+                    if skip:
+                        continue
+                    email = pos.get("attendee_email").casefold().strip() if pos.get("attendee_email") else ""
+                    transformed = {
+                        # We MUST construct a tito-like reference with numbered suffix via
+                        # pos['order'] - pos['positionid'] for uniqueness BUT this information is not accessible to the users
+                        "reference": f"{pos['order']}-{pos['positionid']}".upper(),
+                        "order": pos["order"].upper(),
+                        "email": email,
+                        "name": pos.get("attendee_name") if pos.get("attendee_name") else "",
+                        "release_id": pos["variation"],  # variation of item ticket ID
+                        "item": pos["item"],  # 'main' ticket ID
+                        "state": pos_state,
+                        "assigned": bool(email),
+                        # Store original Pretix data for reference
+                        "_pretix_data": {
+                            "order": pos["order"],
+                            "positionid": pos["positionid"],
+                            "secret": pos.get("secret"),
+                            "item": pos["item"],
+                            "variation": pos.get("variation"),
+                            "canceled": pos.get("canceled"),
+                            "blocked": pos.get("blocked"),
+                        },
+                    }
+                    positions.append(transformed)
+                except AttributeError as e:
+                    print(f"error: {e}")
 
         data = minimize_data(positions)
         collect.extend(data)
@@ -116,7 +138,10 @@ def get_all_order_positions():
 
 
 def get_all_categories():
-    """Get all categories from Pretix."""
+    """Get all categories from Pretix.
+    Product Categories are used for grouping tickets in Pretix
+    Categories set the baseline for on-site and remote access
+    """
     if in_dummy_mode:
         return {}
 
@@ -153,6 +178,7 @@ def get_all_items():
 
     # First fetch categories
     categories = get_all_categories()
+    # TODO: check if categories are useful at all, risk: they might changes easily the UI
     interface.categories = categories  # Store for validation
 
     collect = []
@@ -169,7 +195,7 @@ def get_all_items():
 
         for item in res_j["results"]:
             # Determine activities first (which also sets _attributes)
-            activities = determine_activities_from_item(item, categories)
+            activities = determine_activities_from_item(item)
 
             # Transform Pretix items to match Tito releases structure
             transformed = {
@@ -188,47 +214,48 @@ def get_all_items():
         else:
             break
 
+    # Make sure ticket names are unique
+    duplicates = {item: cnt for item, cnt in Counter([x["title"].upper() for x in collect]).items() if cnt > 1}
+    if duplicates:
+        raise AssertionError(f"ticket names must be unique for mapping: {duplicates}")
+
     interface.all_releases = {x["title"].upper(): x for x in collect}
 
 
-def determine_activities_from_item(item: dict, categories: dict = None) -> list[str]:
+def determine_activities_from_item(item: dict) -> list[str]:
     """Determine pseudo-activities based on item name and category.
 
     This maps Pretix items to the activity-based system used by Tito.
     """
-    from app.pretix.mapping import PretixAttributeMapper
 
     # Get the mapper
     mapper = PretixAttributeMapper()
-
-    # Get category info if available
-    category = None
-    if categories and item.get("category"):
-        category = categories.get(item["category"])
-
     # Get attributes using the mapping engine
-    attributes = mapper.get_attributes_from_item(item, category)
+    attributes = mapper.get_attributes_from_item(item)
 
     # Store attributes in the item for later use (e.g., in validation endpoint)
     item["_attributes"] = attributes
 
-    # Convert to legacy activities format
-    activities = mapper.get_activities_from_attributes(attributes)
-
+    activities = ["on_site", "online_access"]
     # Add day-specific activities if it's a day pass
     name = item.get("name", {}).get("en", "").lower()
+    weekdays = {
+        "mon": "monday",
+        "tue": "tuesday",
+        "wed": "wednesday",
+        "thu": "thursday",
+        "fri": "friday",
+        "sat": "saturday",
+        "sun": "sunday",
+    }
     if "day pass" in name:
-        if "monday" in name:
-            activities.append("seat-person-monday")
-        if "tuesday" in name:
-            activities.append("seat-person-tuesday")
-        if "wednesday" in name:
-            activities.append("seat-person-wednesday")
-
-    # Ensure we have at least some activities
-    if not activities:
-        activities = ["on_site", "online_access"]
-
+        for short, long in weekdays.items():
+            if long in name.split(" "):
+                activities.append(f"seat-person-{long}")
+                break
+            if short in name.split(" "):
+                activities.append(f"seat-person-{long}")
+                break
     return activities
 
 

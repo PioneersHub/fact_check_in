@@ -1,5 +1,7 @@
 """Startup validation for Pretix attribute mappings."""
 
+import os
+
 from app import interface, log
 from app.pretix.mapping import PretixAttributeMapper
 
@@ -10,11 +12,7 @@ SMALL_ITEM_COUNT_THRESHOLD = 3  # Show details for up to this many items
 def validate_pretix_mappings():
     """Validate Pretix attribute mappings on startup and log warnings."""
     # Only run for Pretix backend
-    import os
-
-    from app.config import CONFIG
-
-    backend_name = os.environ.get("TICKETING_BACKEND") or CONFIG.get("TICKETING_BACKEND", "tito")
+    backend_name = os.environ.get("TICKETING_BACKEND")
     if backend_name.lower() != "pretix":
         return
 

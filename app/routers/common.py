@@ -44,6 +44,10 @@ async def search_email(email: Email, response: Response):
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
     backend = get_ticketing_backend()
+    if req["email"] in backend.api.interface.valid_emails:
+        return {"valid": True}
+
+    # TODO: search for email live if not loaded already
     found = backend.search(req["email"])
     found = [x for x in found if x.get("release_id") in interface.valid_ticket_ids]
     log.debug(f"found: {len(found)}")

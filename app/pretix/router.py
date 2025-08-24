@@ -8,7 +8,7 @@ from app.config import CONFIG
 from app.ticketing.utils import fuzzy_match_name
 
 from .models import PretixAttendee, PretixIsAnAttendee
-from .pretix_api import search_by_order, search_by_secret
+from .pretix_api import search_by_order
 
 router = APIRouter(prefix="/tickets", tags=["Pretix Validation"])
 
@@ -24,27 +24,25 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
     res = attendee.model_dump()
     position = None
 
-    # Priority: secret (most specific) -> order lookup
-    if attendee.ticket_id:
-        # Search by secret
-        position = search_by_secret(attendee.ticket_id)
-        if not position:
-            response.status_code = status.HTTP_404_NOT_FOUND
-            res["is_attendee"] = False
-            res["hint"] = "Invalid ticket ID"
+    # noinspection PyBroadException
+    try:
+        item = interface.valid_order_name_combo.get((attendee.order_id, attendee.name.strip().upper()))
+        if item:
+            # direct hit, can be processed directly
+            res = detailed_positive_result(item)
             return res
+        # valid_email = interface.valid_emails.get(attendee.email.strip().casefold())
+        # TODO: allocated ticket with fuzzy name match
 
-        # If order_id also provided, verify they match
-        if attendee.order_id:
-            # Extract order code from reference (e.g., "ABC23-1" -> "ABC23")
-            order_part = position["reference"].split("-")[0]
-            if order_part != attendee.order_id.upper():
-                response.status_code = status.HTTP_406_NOT_ACCEPTABLE
-                res["is_attendee"] = False
-                res["hint"] = "Order ID and Ticket ID do not match"
-                return res
+        valid_order = attendee.order_id.upper() in interface.valid_order_ids
+        valid_name = attendee.name.strip().upper() in interface.valid_names
+        _ = valid_order or valid_name
 
-    elif attendee.order_id:
+    except Exception as e:
+        print(e)
+        pass
+
+    if attendee.order_id:
         # Only order_id provided - search all positions for this order
         positions = search_by_order(attendee.order_id)
 
@@ -133,29 +131,41 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
         except KeyError:
             res["hint"] = "invalid ticket type"
         return res
+    return detailed_positive_result()
 
-    # Success - set response
+
+def base_result():
+    return dict.fromkeys(
+        {"is_attendee", "is_speaker", "is_organizer", "is_sponsor", "is_volunteer", "is_guest", "is_remote", "is_onsite", "online_access"},
+        False,
+    )
+
+
+def detailed_positive_result(item) -> dict[str, bool]:
+    """Set attributes via ticket and rules in CONFIG
+    For clarity: set attributes to True if matched, never to False"""
+    res = base_result()
+    res["name"] = item["name"]
+    res["order_id"] = item["order"]
     res["is_attendee"] = True
 
-    # Set attributes from release mapping
-    release_info = interface.release_id_map.get(position["release_id"], {})
-    if "_attributes" in release_info:
-        attributes = release_info["_attributes"]
-        res.update(
-            {
-                "is_speaker": attributes.get("is_speaker", False),
-                "is_organizer": attributes.get("is_organizer", False),
-                "is_sponsor": attributes.get("is_sponsor", False),
-                "is_volunteer": attributes.get("is_volunteer", False),
-                "is_guest": attributes.get("is_guest", False),
-                "is_remote": attributes.get("is_remote", False),
-                "is_onsite": attributes.get("is_onsite", False),
-                "online_access": attributes.get("online_access", False),
-            }
-        )
-
-        # Special case: check organizer speakers list
-        if res["is_organizer"] and position.get("reference", "").upper() in CONFIG.organizer_speakers:
-            res["is_speaker"] = True
-
+    # add ticket features via categories.by_id
+    _attributes = interface.release_id_map[item["item"]]["_attributes"]
+    res.update(_attributes)
+    # add ticket features categories.by_ticket_id
+    _attributes = CONFIG.pretix_mapping.categories.by_ticket_id.get(item["item"], {})
+    res.update(_attributes)
+    # add ticket ticker_id + pos:
+    #  - organizer_and_speaker
+    if item["reference"] in CONFIG.pretix_mapping.organizer_and_speaker:
+        res.update({"is_speaker": True, "is_organizer": True})
+    #  - organizer_and_sponsor
+    if item["reference"] in CONFIG.pretix_mapping.organizer_and_sponsor:
+        res.update({"is_sponsor": True, "is_organizer": True})
+    #  - speaker_and_sponsor
+    if item["reference"] in CONFIG.pretix_mapping.speaker_and_sponsor:
+        res.update({"is_speaker": True, "is_sponsor": True})
+    #  - speaker_add_keynote
+    if item["reference"] in CONFIG.pretix_mapping.speaker_add_keynote:
+        res.update({"is_speaker": True, "is_keynote": True})
     return res
