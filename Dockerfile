@@ -9,19 +9,18 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 # Verify UV installation
 RUN /usr/local/bin/uv --version
 
-# Copy project files
-COPY . /code
+# Copy only necessary files for installation
+COPY pyproject.toml /code/
+COPY README.md /code/
+COPY app /code/app
+COPY event_config.yml /code/event_config.yml
 
 # Use UV to install dependencies
 RUN /usr/local/bin/uv venv && \
-    /usr/local/bin/uv pip compile pyproject.toml -o requirements.txt && \
-    /usr/local/bin/uv pip install -r requirements.txt
-
-# Copy the application code
-COPY ./app /code/app
+    /usr/local/bin/uv pip install -e .
 
 # Set a default value for FAKE_CHECK_IN_TEST_MODE (optional)
 ENV FAKE_CHECK_IN_TEST_MODE=1
 
-# Run FastAPI with Uvicorn using UV
-CMD ["/code/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9898"]
+# Run FastAPI with Uvicorn using UV - check which path works
+CMD ["/usr/local/bin/uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9898"]

@@ -7,7 +7,10 @@ from omegaconf import OmegaConf
 
 project_root = Path(__file__).resolve().parents[2]
 
-CONFIG = OmegaConf.load(Path(__file__).parent.resolve() / "base.yml")
+BASE_CONFIG = OmegaConf.load(Path(__file__).parent.resolve() / "base.yml")
+LOCAL_CONFIG = OmegaConf.load(Path(__file__).parents[2].resolve() / "event_config.yml")
+
+CONFIG = OmegaConf.merge(BASE_CONFIG, LOCAL_CONFIG)
 
 if not CONFIG.APP.get("HOST"):
     CONFIG.APP.HOST = socket.gethostname()

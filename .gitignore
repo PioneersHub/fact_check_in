@@ -253,6 +253,7 @@ cython_debug/
 *cache/
 
 CLAUDE.local.md
+CLAUDE.md
 
 # Logs
 logs/
@@ -262,3 +263,5 @@ tests/integration/*.json
 
 __*
 backup_before_filter/
+
+event_config.yml

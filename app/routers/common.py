@@ -14,11 +14,7 @@ cache = TTLCache(maxsize=128, ttl=300)
 
 
 @router.get("/refresh_all/")
-@cached(cache=TTLCache(maxsize=1024, ttl=300))
-def refresh_all():
-    """
-    Service method to force a reload of all ticket data from the ticketing system
-    """
+def force_refresh_all():
     if in_dummy_mode:
         reset_interface(in_dummy_mode)
         return
@@ -27,6 +23,14 @@ def refresh_all():
     backend.get_all_tickets()
     backend_name = backend.__class__.__name__.replace("Backend", "")
     return {"message": f"The ticket cache was refreshed successfully from {backend_name}."}
+
+
+@cached(cache=TTLCache(maxsize=1024, ttl=300))
+def refresh_all():
+    """
+    Service method to force a reload of all ticket data from the ticketing system
+    """
+    return force_refresh_all()
 
 
 @router.get("/ticket_types/", response_model=TicketTypes)

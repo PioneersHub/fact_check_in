@@ -30,7 +30,7 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
     refresh_all()
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}
-    raise HTTPException(status_code=404, detail="Item not found")
+    raise HTTPException(status_code=404, detail="Email not found")
 
 
 @router.post("/validate_attendee/", response_model=PretixIsAnAttendee)
