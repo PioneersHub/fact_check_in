@@ -3,10 +3,20 @@ services:
     build: .
     ports:
       - "9898:9898"
+    env_file:
+      - .env
     environment:
-      - FAKE_CHECK_IN_TEST_MODE=1
+      # These will override values from .env file
+      # Shell environment variables take precedence over .env file
+      - TICKETING_BACKEND
+      - TITO_TOKEN
+      - ACCOUNT_SLUG
+      - EVENT_SLUG
+      - PRETIX_TOKEN
+      - PRETIX_BASE_URL
+      - PRETIX_ORGANIZER_SLUG
+      - PRETIX_EVENT_SLUG
+      - FAKE_CHECK_IN_TEST_MODE
     volumes:
       # Mount event_config.yml for live updates without rebuilding
       - ./event_config.yml:/code/event_config.yml:ro
-      # Mount .env file if needed for credentials
-      - ./.env:/code/.env:ro

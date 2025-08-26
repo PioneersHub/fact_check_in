@@ -14,7 +14,8 @@
       "secret": "z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
       "item": 101,
       "variation": null
-    }
+    },
+    "order": "ABC23"
   },
   "DEF456-1": {
     "reference": "DEF456-1",
@@ -31,7 +32,8 @@
       "secret": "a7b9c2d4e6f8g3h5j2k4m6n8p9q2r4s6",
       "item": 102,
       "variation": null
-    }
+    },
+    "order": "DEF456"
   },
   "GHJ789-1": {
     "reference": "GHJ789-1",
@@ -48,7 +50,8 @@
       "secret": "t5u7v9w2x4y6z8a3b5c7d9e2f4g6h8j3",
       "item": 103,
       "variation": null
-    }
+    },
+    "order": "GHJ789"
   },
   "KLMABC-1": {
     "reference": "KLMABC-1",
@@ -65,7 +68,8 @@
       "secret": "k5m7n9p2q4r6s8t3u5v7w9x2y4z6a8b3",
       "item": 104,
       "variation": null
-    }
+    },
+    "order": "KLMABC"
   },
   "NPQDEF-1": {
     "reference": "NPQDEF-1",
@@ -82,7 +86,8 @@
       "secret": "c5d7e9f2g4h6j8k3m5n7p9q2r4s6t8u3",
       "item": 105,
       "variation": null
-    }
+    },
+    "order": "NPQDEF"
   },
   "RSTGHI-1": {
     "reference": "RSTGHI-1",
@@ -99,7 +104,8 @@
       "secret": "v5w7x9y2z4a6b8c3d5e7f9g2h4j6k8m3",
       "item": 106,
       "variation": null
-    }
+    },
+    "order": "RSTGHI"
   },
   "UVWJKL-1": {
     "reference": "UVWJKL-1",
@@ -116,7 +122,8 @@
       "secret": "n5p7q9r2s4t6u8v3w5x7y9z2a4b6c8d3",
       "item": 107,
       "variation": null
-    }
+    },
+    "order": "UVWJKL"
   },
   "XYZABC-1": {
     "reference": "XYZABC-1",
@@ -133,7 +140,8 @@
       "secret": "e5f7g9h2j4k6m8n3p5q7r9s2t4u6v8w3",
       "item": 108,
       "variation": null
-    }
+    },
+    "order": "XYZABC"
   },
   "PQRSTU-1": {
     "reference": "PQRSTU-1",
@@ -150,7 +158,8 @@
       "secret": "x5y7z9a2b4c6d8e3f5g7h9j2k4m6n8p3",
       "item": 101,
       "variation": null
-    }
+    },
+    "order": "PQRSTU"
   },
   "VWXYZ2-1": {
     "reference": "VWXYZ2-1",
@@ -167,6 +176,7 @@
       "secret": "q5r7s9t2u4v6w8x3y5z7a9b2c4d6e8f3",
       "item": 109,
       "variation": null
-    }
+    },
+    "order": "VWXYZ2"
   }
 }

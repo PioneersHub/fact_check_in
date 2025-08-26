@@ -14,13 +14,12 @@ COPY pyproject.toml /code/
 COPY README.md /code/
 COPY app /code/app
 COPY event_config.yml /code/event_config.yml
+# Copy test data for FAKE_CHECK_IN_TEST_MODE
+COPY tests /code/tests
 
 # Use UV to install dependencies
 RUN /usr/local/bin/uv venv && \
     /usr/local/bin/uv pip install -e .
-
-# Set a default value for FAKE_CHECK_IN_TEST_MODE (optional)
-ENV FAKE_CHECK_IN_TEST_MODE=1
 
 # Run FastAPI with Uvicorn using UV - check which path works
 CMD ["/usr/local/bin/uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9898"]
