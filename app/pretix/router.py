@@ -122,4 +122,6 @@ def detailed_positive_result(item) -> dict[str, bool]:
     #  - speaker_add_keynote
     if item["reference"] in CONFIG.pretix_mapping.speaker_add_keynote:
         res.update({"is_speaker": True, "is_keynote": True})
+    if item["reference"] in CONFIG.pretix_mapping.add_speaker:
+        res.update({"is_speaker": True})
     return res

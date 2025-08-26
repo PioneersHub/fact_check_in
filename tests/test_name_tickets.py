@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from pathlib import Path
 
 os.environ["FAKE_CHECK_IN_TEST_MODE"] = "1"
 os.environ["TICKETING_BACKEND"] = "tito"  # These tests are for Tito backend
@@ -21,11 +22,12 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("faker").setLevel(logging.WARNING)
 
 
-# Load the fake data
-with open("tests/test_data/fake_all_sales.json") as f:
+# Load the fake data using absolute paths based on this file's location
+test_dir = Path(__file__).parent
+with open(test_dir / "test_data" / "fake_all_sales.json") as f:
     fake_data = json.load(f)
 
-with open("tests/test_data/fake_all_sales_fail.json") as f:
+with open(test_dir / "test_data" / "fake_all_sales_fail.json") as f:
     fake_data_fail = json.load(f)
 
 # Router is already included via main.py dynamic loading

@@ -21,10 +21,6 @@ dependencies = [
     "uvicorn>=0.34.0",
 ]
 
-line-length = 140
-indent-width = 4
-target-version = ['py312']
-
 [dependency-groups]
 dev = [
     "bump2version>=1.0.1",
