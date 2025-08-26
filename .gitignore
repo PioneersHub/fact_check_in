@@ -249,3 +249,19 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
+.ruffcache/
+*cache/
+
+CLAUDE.local.md
+CLAUDE.md
+
+# Logs
+logs/
+*.log
+
+tests/integration/*.json
+
+__*
+backup_before_filter/
+
+event_config.yml

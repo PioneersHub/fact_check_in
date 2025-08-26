@@ -1,0 +1,95 @@
+########################################################################################
+########################################################################################
+# This is the BASIC configuration, it's always loaded.
+# To change the configuration depending on the environment, any params there will
+# overwrite settings below.
+# Omegaconf replaces all references to e.g. ${default.HOST} with one line/update for
+# all nodes using the reference once loaded `default.HOST = "cool.com"`.
+########################################################################################
+########################################################################################
+
+MODE: null
+
+PROJECT_NAME: Fact Check-In
+
+LOG:
+  DIR: ../log/app
+  NAME: fact-check-in.log
+  TO_FILE: false
+  TO_SCREEN: false
+
+# application settings
+APP:
+  PORT: 9898
+  HOST: "127.0.0.1"
+
+# Ticketing backend: "tito" or "pretix"
+TICKETING_BACKEND: pretix
+
+include_activities:
+  # activities that are relevant for this service, tito only
+  - on_site
+  - online_access
+
+# Optional: patterns to exclude certain ticket types, tito only
+exclude_ticket_patterns: []
+
+# Name validation thresholds
+name_matching:
+  # Names matching above this threshold are considered exact matches
+  exact_match_threshold: 0.95
+  # Names matching above this threshold are considered close matches
+  close_match_threshold: 0.8
+
+# Pretix category and item mapping configuration
+pretix_mapping:
+  # Category-based attribute mappings
+  #  attributes: is_remote, is_onsite, online_access,
+  #  is_speaker, is_sponsor, is_volunteer, is_organizer
+
+  categories:
+    # Map by category ID (most reliable)
+    # Category defines on-site and remote access baseline
+    by_id:
+      # category IDs
+      # attributes:
+      0:  # dummy ID
+        is_remote: false
+        is_onsite: true
+        online_access: true
+
+    # Set additional attributes by ticket IDs
+    by_ticket_id:
+      0:  # dummy ID
+         is_speaker: true
+
+  # Special cases for multiple roles: organizer add speaker
+  # noinspection SpellCheckingInspection
+  organizer_and_speaker:
+    # set is_speaker: true
+    # set is_organizer: true
+    - "XYZAB-1"  # John Doe
+
+  # Special cases for multiple roles: organizer add sponsor
+  # noinspection SpellCheckingInspection
+  organizer_and_sponsor:
+    # set is_sponsor: true
+    # set is_organizer: true
+    - "XYZAB-1"  # John Doe
+
+  # Special cases for multiple roles: speaker and sponsor
+  # noinspection SpellCheckingInspection
+  speaker_and_sponsor:
+    # set is_sponsor: true
+    # set is_speaker: true
+    - "XYZDE-1"  # Jane Doe
+
+  # Special cases for multiple roles: speaker add keynote
+  # noinspection SpellCheckingInspection
+  speaker_add_keynote:
+    # set is_keynote: true
+    # set is_speaker: true
+    - "XYZDE-1"  # Jane Doe
+
+  add_speaker:  # add speaker role to any other ticket (e.g. day tickets)
+    - "XYZFG-1"  # Dean Doe

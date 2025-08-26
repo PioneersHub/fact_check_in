@@ -1,4 +1,4 @@
-__version__ = "0.6.2"
+__version__ = "2.0.0"
 
 import logging
 import os
@@ -53,7 +53,8 @@ interface = Interface(in_dummy_mode=in_dummy_mode)
 
 def reset_interface(dummy_mode=True):
     global interface  # noqa: PLW0603
-    interface = None
+    # Reset the singleton instance
+    Interface._instance = None
     interface = Interface(in_dummy_mode=dummy_mode)
 
 
