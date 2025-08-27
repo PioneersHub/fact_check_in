@@ -1,12 +1,12 @@
 ---
 site_name: Fact Check-In
-site_url: https://pioneershub.github.io/fact-check-in/
+site_url: https://pioneershub.github.io/fact_check_in/
 site_author: Alexander Hendorf
 site_description: >-
   Validate if the attendee is registered for the conference by ticket code, name and email.
 # Repository
-repo_name: PioneersHub/fact-check-in
-repo_url: https://github.com/PioneersHub/fact-check-in
+repo_name: PioneersHub/fact_check_in
+repo_url: https://github.com/PioneersHub/fact_check_in
 
 #
 nav:
