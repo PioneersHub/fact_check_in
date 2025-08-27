@@ -265,3 +265,4 @@ __*
 backup_before_filter/
 
 event_config.yml
+libcairo.2.dylib

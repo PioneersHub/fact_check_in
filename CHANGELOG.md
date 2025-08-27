@@ -11,6 +11,32 @@ none
 none
 ### Changes:
 none
+## [2.0.0] - 2025-08-27
+
+### Major Changes
+- **Docker Support**: Added full Docker containerization with docker-compose configuration
+- **Enhanced Configuration**: Introduced `event_config.yml` for event-specific ticket mapping
+- **Improved Pretix Integration**: Added ticket ID and order-based attribute mapping
+- **Better Documentation**: Added comprehensive setup instructions for both Tito and Pretix
+
+### Added
+- Docker support with environment variable configuration
+- `event_config.yml` for centralized event configuration
+- Support for multi-role assignments (speaker_and_sponsor, organizer_and_speaker, etc.)
+- Ticket ID-based attribute mapping for Pretix
+- Order ID-based special case handling
+- Comprehensive [README](README.md) with setup pitfalls and best practices
+- Built-in attributes documentation
+
+### Changed
+- Improved environment variable handling in Docker container
+- Enhanced Pretix category mapping with multiple configuration options
+- Better separation of application and event configuration
+- Updated documentation structure
+
+### Fixed
+- Docker environment variable loading issues
+- Pretix attribute mapping edge cases
 
 ## [1.0.0] - 2025-06-19
 
