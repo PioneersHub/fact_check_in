@@ -22,23 +22,29 @@ The following attributes are built-in and default toi `False`:
 - is_organizer
 - is_guest
 
-### 0. Ticketing System Setup: in Pretix
+### Prep: Setup Ticketing in Pretix
 
 It's important to follow a base structure when setting up the tickets in pretix already.
 
 Roles can bes assigned via:
 
-#### 1. Ticket categories  ("Product categories" in Pretix)
+#### 1. Ticket Categories  
+
+> "Product categories" in Pretix
 
 The category defines on-site and remote access baseline (e.g. attributes: is_remote, is_onsite, online_access)
 
-#### 2. Tickets including variations ("Products" in Pretix)
+#### 2. Tickets (incl. Variations)
+
+>"Products" in Pretix
 
 This will update the attributes set in 1.
 
 A usual use case is to add is_speaker for speaker tickets for example.
 
-#### 3. Order ID ('ABCDE-1') ("Orders" in Pretix, note one order can have multiple items 'ABCDE-1, 'ABCDE-2',…)
+#### 3. Order ID 
+
+> 'ABCDE-1', "Orders" in Pretix, note one order can have multiple items 'ABCDE-1, 'ABCDE-2',…
 
 This will update the attributes set in 1. and 2.
 
