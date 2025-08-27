@@ -45,4 +45,4 @@ jobs:
       - name: Build and deploy docs
         run: |
           source .venv/bin/activate
-          uv run mkdocs gh-deploy --force
+          uv run mkdocs gh-deploy --force --clean --verbose
