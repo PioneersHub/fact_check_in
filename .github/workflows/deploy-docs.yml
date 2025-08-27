@@ -42,6 +42,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev libpango1.0-dev
           
+      - name: Sync README to docs
+        run: |
+          source .venv/bin/activate
+          python scripts/sync_readme_to_docs.py
+          
       - name: Build and deploy docs
         run: |
           source .venv/bin/activate
