@@ -10,7 +10,17 @@ repo_url: https://github.com/PioneersHub/fact_check_in
 
 #
 nav:
-  - About: index.md
+  - Home: index.md
+  - Quick Start:
+    - Installation: index.md#install-dependencies
+    - Configuration: index.md#configure-ticketing-system
+    - Running: index.md#run-the-application
+  - Ticketing Systems:
+    - Overview: index.md#supported-ticketing-systems
+    - Pretix Setup: index.md#prep-setup-ticketing-in-pretix
+  - Features: index.md#features
+  - API: index.md#api-endpoints
+  - Development: index.md#development
 
 theme:
   name: material
