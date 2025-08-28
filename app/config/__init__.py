@@ -38,7 +38,12 @@ if os.environ.get("TICKETING_BACKEND"):
 account_slug = CONFIG["account_slug"]
 event_slug = CONFIG["event_slug"]
 
-TOKEN = os.getenv("TITO_TOKEN")
+TOKEN = None
+if CONFIG["TICKETING_BACKEND"] == "tito":
+    TOKEN = os.getenv("TITO_TOKEN")
+elif CONFIG["TICKETING_BACKEND"] == "pretix":
+    TOKEN = os.getenv("PRETIX_TOKEN")
+
 if not TOKEN:
     print("no token found in environment, trying config")
 
