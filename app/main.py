@@ -19,15 +19,22 @@ from app.routers.common import refresh_all
 async def lifespan(app: FastAPI):  # noqa: ARG001
     # Startup code
     refresh_all()
-    # Run Pretix validation if using Pretix backend
+    # Run Pretix validation and load add-on statistics if using Pretix backend
     try:
-        # make sure to use lazy import
         from app.pretix.validation import validate_pretix_mappings  # noqa: PLC0415
 
         validate_pretix_mappings()
     except Exception as e:
         logger = logging.getLogger("uvicorn.error")
         logger.error(f"Failed to validate Pretix mappings: {e}")
+
+    try:
+        from app.pretix.addon_stats import load_addon_statistics  # noqa: PLC0415
+
+        load_addon_statistics()
+    except Exception as e:
+        logger = logging.getLogger("uvicorn.error")
+        logger.error(f"Failed to load add-on statistics: {e}")
 
     logger = logging.getLogger("uvicorn.error")
     # Try to get the actual port from uvicorn server

@@ -1,6 +1,6 @@
 """Pretix-specific models."""
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.base import BaseAttendee, BaseIsAnAttendee
 
@@ -45,3 +45,19 @@ class PretixIsAnAttendee(PretixAttendee, BaseIsAnAttendee):
     """Pretix validation response model."""
 
     pass
+
+
+class TShirtVariantCount(BaseModel):
+    """Count of a specific T-shirt variant."""
+
+    variant_name: str = Field(json_schema_extra={"example": "M", "description": "T-shirt size variant name"})
+    count: int = Field(json_schema_extra={"example": 42, "description": "Number of this variant purchased"})
+
+
+class AddonStatistics(BaseModel):
+    """Add-on product statistics for on-site attendees."""
+
+    onsite_tickets_sold: int = Field(json_schema_extra={"example": 200, "description": "Total on-site tickets sold in category"})
+    tshirt_purchased: int = Field(json_schema_extra={"example": 150, "description": "On-site tickets with T-shirt add-on"})
+    tshirt_not_purchased: int = Field(json_schema_extra={"example": 50, "description": "On-site tickets without T-shirt add-on"})
+    tshirt_variants: list[TShirtVariantCount] = Field(json_schema_extra={"description": "Breakdown of purchased T-shirt variants"})

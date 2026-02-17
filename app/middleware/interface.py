@@ -33,6 +33,8 @@ class Interface:
         self._valid_order_name_combo: dict = {}
         self.initial_data_loaded: bool = False
         self.categories: dict = {}  # For Pretix categories
+        self.addon_positions: list[dict] = []  # Add-on order positions (e.g., T-shirts)
+        self.item_variations: dict[int, str] = {}  # Variation ID → name mapping
         if self.in_dummy_mode:
             self.set_dummy_data()
 

@@ -93,3 +93,8 @@ pretix_mapping:
 
   add_speaker:  # add speaker role to any other ticket (e.g. day tickets)
     - "XYZFG-1"  # Dean Doe
+
+# Add-on statistics configuration
+addon_statistics:
+  onsite_category_id: 0  # Pretix category ID for on-site tickets
+  tshirt_item_id: 0  # Pretix item ID for Conference T-Shirt add-on
