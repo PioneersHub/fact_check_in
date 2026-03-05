@@ -10,7 +10,8 @@ from app.routers.common import refresh_all
 from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
 
-from .models import PretixAttendee, PretixIsAnAttendee
+from .addon_stats import get_addon_statistics, load_addon_statistics
+from .models import AddonStatistics, PretixAttendee, PretixIsAnAttendee
 
 router = APIRouter(prefix="/tickets", tags=["Pretix Validation"])
 
@@ -96,6 +97,23 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
     res["is_attendee"] = False
     res["hint"] = f"No attendee named '{attendee.name}' found on order {attendee.order_id}"
     return res
+
+
+@router.get("/addon_statistics/", response_model=AddonStatistics, tags=["Pretix Statistics"])
+async def addon_statistics():
+    """Return add-on product statistics from cached data.
+
+    Provides metrics about on-site ticket sales and Conference T-Shirt add-on purchases.
+    Data is loaded on startup and can be refreshed via /tickets/refresh_addon_statistics/.
+    """
+    return get_addon_statistics()
+
+
+@router.get("/refresh_addon_statistics/", response_model=AddonStatistics, tags=["Pretix Statistics"])
+async def refresh_addon_statistics():
+    """Refresh add-on statistics cache from Pretix API and return updated data."""
+    load_addon_statistics()
+    return get_addon_statistics()
 
 
 def detailed_positive_result(item) -> dict[str, bool]:
