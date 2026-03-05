@@ -112,10 +112,10 @@ def get_addon_statistics() -> AddonStatistics:
 
     Returns metrics about on-site ticket sales and T-shirt add-on purchases.
     """
-    onsite_category_id = CONFIG.addon_statistics.onsite_category_id
+    onsite_category_ids = set(CONFIG.addon_statistics.onsite_category_ids)
 
     # Count on-site tickets from cached sales data
-    onsite_item_ids = {item_id for item_id, release in interface.release_id_map.items() if release.get("category_id") == onsite_category_id}
+    onsite_item_ids = {item_id for item_id, release in interface.release_id_map.items() if release.get("category_id") in onsite_category_ids}
     onsite_tickets = [sale for sale in interface.all_sales.values() if sale.get("item") in onsite_item_ids]
     onsite_tickets_sold = len(onsite_tickets)
 
