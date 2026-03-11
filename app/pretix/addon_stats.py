@@ -65,9 +65,14 @@ def _fetch_addon_positions(item_id: int) -> list[dict]:
     """Fetch all order positions for a specific add-on item.
 
     Returns minimal position data needed for statistics.
+    Fetches paid (p) and pending (n) orders separately and combines them,
+    excluding cancelled orders.
     """
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
-    results = _fetch_all_pages(url, {"item": item_id, "order__status": "p"})
+    results = (
+        _fetch_all_pages(url, {"item": item_id, "order__status": "p"})
+        + _fetch_all_pages(url, {"item": item_id, "order__status": "n"})
+    )
 
     positions = []
     for pos in results:
