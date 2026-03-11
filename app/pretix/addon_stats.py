@@ -67,7 +67,7 @@ def _fetch_addon_positions(item_id: int) -> list[dict]:
     Returns minimal position data needed for statistics.
     """
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
-    results = _fetch_all_pages(url, {"item": item_id})
+    results = _fetch_all_pages(url, {"item": item_id, "order__status": "p"})
 
     positions = []
     for pos in results:
