@@ -143,7 +143,7 @@ def get_all_categories():
     Categories set the baseline for on-site and remote access
     """
     if in_dummy_mode:
-        return {}
+        return {}  # type: ignore[unreachable]
 
     categories = {}
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/categories/"
@@ -215,11 +215,11 @@ def get_all_items():
             break
 
     # Make sure ticket names are unique
-    duplicates = {item: cnt for item, cnt in Counter([x["title"].upper() for x in collect]).items() if cnt > 1}
+    duplicates = {item: cnt for item, cnt in Counter([str(x["title"]).upper() for x in collect]).items() if cnt > 1}
     if duplicates:
         raise AssertionError(f"ticket names must be unique for mapping: {duplicates}")
 
-    interface.all_releases = {x["title"].upper(): x for x in collect}
+    interface.all_releases = {str(x["title"]).upper(): x for x in collect}
 
 
 def determine_activities_from_item(item: dict) -> list[str]:
@@ -235,9 +235,17 @@ def determine_activities_from_item(item: dict) -> list[str]:
     # Store attributes in the item for later use (e.g., in validation endpoint)
     item["_attributes"] = attributes
 
-    activities = ["on_site", "online_access"]
+    activities = []
     # Add day-specific activities if it's a day pass
     name = item.get("name", {}).get("en", "").lower()
+
+    # Determine on-site vs remote from item name
+    if "online" in name or "remote" in name:
+        activities.append("remote_sale")
+        activities.append("online_access")
+    else:
+        activities.append("on_site")
+        activities.append("online_access")
     weekdays = {
         "mon": "monday",
         "tue": "tuesday",
@@ -463,7 +471,3 @@ def search_by_order(order_code: str):
 # Map Pretix functions to Tito function names for compatibility
 get_all_tickets = get_all_order_positions
 get_all_ticket_offers = get_all_items
-
-
-if __name__ == "__main__":
-    pass

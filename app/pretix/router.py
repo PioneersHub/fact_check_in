@@ -1,5 +1,7 @@
 """Pretix-specific routes."""
 
+from typing import TYPE_CHECKING
+
 from fastapi import APIRouter, HTTPException, Response
 from starlette import status
 
@@ -9,6 +11,9 @@ from app.models.base import Email, Truthy
 from app.routers.common import refresh_all
 from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
+
+if TYPE_CHECKING:
+    from app.pretix.backend import PretixBackend
 
 from .addon_stats import get_addon_statistics, load_addon_statistics
 from .models import AddonStatistics, PretixAttendee, PretixIsAnAttendee
@@ -24,10 +29,12 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
     req = email.model_dump()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
-    backend = get_ticketing_backend()
+    backend: PretixBackend = get_ticketing_backend()  # type: ignore[assignment]
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}
-    # there is no search option via the API for attendees' emails in Pretix
+    # Email not found in cache - force a refresh and try again.
+    # Pretix does have an email search endpoint but refreshing all data
+    # is simpler and keeps the cached data current.
     refresh_all()
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}
@@ -53,7 +60,7 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
             return res
     except Exception as e:
         print(e)
-    valid_order = attendee.order_id.upper() in interface.valid_order_ids
+    valid_order = bool(attendee.order_id) and attendee.order_id.upper() in interface.valid_order_ids  # type: ignore[union-attr]
 
     if not valid_order:
         response.status_code = status.HTTP_404_NOT_FOUND
