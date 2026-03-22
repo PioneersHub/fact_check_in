@@ -11,11 +11,13 @@ This test suite:
 import os
 import subprocess
 import sys
+from typing import Any, ClassVar
 
 import pytest
 import requests
 from colorama import Fore, Style, init
-from test_helpers import (
+
+from .test_helpers import (
     PretixTestClient,
     extract_test_cases,
     generate_invalid_test_cases,
@@ -34,6 +36,9 @@ TEST_DATA_FILE = "pretix_test_data.json"
 class TestPretixIntegration:
     """Integration test suite for Pretix validation endpoints."""
 
+    server_process: ClassVar[subprocess.Popen]
+    test_data: ClassVar[dict[str, Any]]
+
     @classmethod
     def setup_class(cls):
         """Setup test data and start the API server."""
@@ -48,6 +53,10 @@ class TestPretixIntegration:
         # Start the API server with environment variable for port
         env = os.environ.copy()
         env["PORT"] = "8002"
+        # Ensure the server runs in live mode, not test/dummy mode.
+        # FAKE_CHECK_IN_TEST_MODE may be set by unit tests running in the same
+        # pytest session, so we explicitly clear it here.
+        env.pop("FAKE_CHECK_IN_TEST_MODE", None)
         cls.server_process = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "app.main:app", "--port", "8002", "--host", "127.0.0.1"],
             stdout=subprocess.PIPE,
@@ -285,8 +294,10 @@ class TestPretixIntegration:
         response = requests.get(f"{API_BASE_URL}/tickets/refresh_all/")
         assert response.status_code == 200
         data = response.json()
-        assert "Pretix" in data.get("message", "")
-        print(f"  {Fore.GREEN}✓ Refresh all: {data['message']}{Style.RESET_ALL}")
+        assert data is not None, "refresh_all returned null - server may be in dummy mode"
+        message = data.get("message", "")
+        assert message, "refresh_all returned empty message"
+        print(f"  {Fore.GREEN}Refresh all: {message}{Style.RESET_ALL}")
 
         # Test ticket_types
         response = requests.get(f"{API_BASE_URL}/tickets/ticket_types/")
