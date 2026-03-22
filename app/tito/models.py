@@ -8,8 +8,12 @@ from app.models.base import BaseAttendee, BaseIsAnAttendee
 class TitoAttendee(BaseAttendee):
     """Tito attendee validation model."""
 
-    ticket_id: str = Field(None, json_schema_extra={"example": "XRTP-3", "description": "Ticket ID is <four char alphanumeric>-<integer>."})
-    name: str = Field(None, json_schema_extra={"example": "Sam Smith", "description": "Person full name as used for registration."})
+    ticket_id: str | None = Field(
+        default=None, json_schema_extra={"example": "XRTP-3", "description": "Ticket ID is <four char alphanumeric>-<integer>."}
+    )
+    name: str | None = Field(
+        default=None, json_schema_extra={"example": "Sam Smith", "description": "Person full name as used for registration."}
+    )
 
     @field_validator("ticket_id")
     @classmethod
