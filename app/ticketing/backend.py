@@ -4,9 +4,8 @@ Ticketing backend abstraction layer.
 This module provides a unified interface for different ticketing systems (Tito, Pretix).
 """
 
-import os
-
 from app import log
+from app.config import CONFIG
 
 
 class TicketingBackend:
@@ -35,9 +34,9 @@ class TicketingBackend:
 
 def get_backend_name() -> str:
     """Get the configured backend name."""
-    backend_name = os.environ.get("TICKETING_BACKEND")
+    backend_name = CONFIG.get("TICKETING_BACKEND")
     if not backend_name:
-        raise RuntimeError("TICKETING_BACKEND environment variable not set")
+        raise RuntimeError("TICKETING_BACKEND not set")
     return backend_name.lower()
 
 
