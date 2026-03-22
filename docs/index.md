@@ -102,8 +102,7 @@ The category can very easily be changed in the Pretix backend. Other people migh
 ### 1. Install Dependencies
 
 ```bash
-# Requires Python 3.12+
-uv pip install -e .
+uv sync
 ```
 
 ### 2. Configure Ticketing System
@@ -221,7 +220,7 @@ ticketing platforms:
 
 ```bash
 # Install with dev dependencies
-uv pip install -e .
+uv sync
 
 # Set up pre-commit hooks
 pre-commit install --hook-type pre-commit --hook-type pre-push
