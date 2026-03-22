@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     refresh_all()
     # Run Pretix validation and load add-on statistics if using Pretix backend
     try:
-        from app.pretix.validation import validate_pretix_mappings  # noqa: PLC0415
+        from app.pretix.validation import validate_pretix_mappings
 
         validate_pretix_mappings()
     except Exception as e:
@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
         logger.error(f"Failed to validate Pretix mappings: {e}")
 
     try:
-        from app.pretix.addon_stats import load_addon_statistics  # noqa: PLC0415
+        from app.pretix.addon_stats import load_addon_statistics
 
         load_addon_statistics()
     except Exception as e:

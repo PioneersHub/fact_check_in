@@ -48,12 +48,12 @@ def get_backend() -> TicketingBackend:
     try:
         if backend_name == "tito":
             log.info("Using Tito ticketing backend")
-            from app.tito.backend import TitoBackend  # noqa: PLC0415
+            from app.tito.backend import TitoBackend
 
             return TitoBackend()
         if backend_name == "pretix":
             log.info("Using Pretix ticketing backend")
-            from app.pretix.backend import PretixBackend  # noqa: PLC0415
+            from app.pretix.backend import PretixBackend
 
             return PretixBackend()
         raise ValueError(f"Unknown ticketing backend: {backend_name}")

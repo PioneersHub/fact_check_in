@@ -66,8 +66,9 @@ select = [
     "UP",  # pyupgrade
 ]
 ignore = [
-    "E501", # may cause conflicts with ruff formatter
+    "E501",    # may cause conflicts with ruff formatter
     "W191",
+    "PLC0415",
 ]
 [tool.ruff.format]
 quote-style = "double"
