@@ -29,3 +29,9 @@ repos:
       - id: uv-lock
       - id: uv-export
         args: [--frozen, --no-hashes, --output-file, requirements.txt]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+      - id: pyupgrade
+        args: [--py314-plus]
