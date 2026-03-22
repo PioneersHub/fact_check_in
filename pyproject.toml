@@ -40,6 +40,9 @@ build-backend = "uv_build"
 module-name = "app"
 module-root = ""
 
+[tool.uv]
+exclude-newer = "1 day"
+
 [tool.ruff]
 line-length = 140
 target-version = "py314"
