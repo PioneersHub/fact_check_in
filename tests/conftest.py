@@ -27,7 +27,7 @@ class LiveServerSession(requests.Session):
 @pytest.fixture(scope="session")
 def app_client():
     # Environment variable is set in the Release-Pipeline or in ci\execute_tests.bat.
-    USE_LIVE_SERVICE = bool(os.environ.get("Test_UseLiveService", False))  # noqa: N806, SIM112
+    USE_LIVE_SERVICE = os.environ.get("Test_UseLiveService", "False").strip().lower() in ("true", "1")  # noqa: N806, SIM112
     if USE_LIVE_SERVICE:
         # During deployment the port is configured in the pipeline (Variable 'Application.Port.Active')
         # and not directly from the config.

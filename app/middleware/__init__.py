@@ -1,10 +1,12 @@
-from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette_context import context, plugins
-from starlette_context.middleware import ContextMiddleware
+from starlette_context import context
 from structlog.contextvars import bind_contextvars, clear_contextvars
+
+# from starlette.middleware import Middleware
+# from starlette_context import plugins
+# from starlette_context.middleware import ContextMiddleware
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):

@@ -14,7 +14,9 @@ class Attendee(BaseModel):
     def valid_ticket_id(cls, v):
         try:
             v = v.strip().upper()
-            if not 6 <= len(v) <= 7:
+            min_ticket_id_length = 6
+            max_ticket_id_length = 7
+            if not min_ticket_id_length <= len(v) <= max_ticket_id_length:
                 raise ValueError("Invalid ticket ID, must be: ^[A-Z]{4}-\\d+$ e. g. DROP-3.")
             return v
         except ValueError:
