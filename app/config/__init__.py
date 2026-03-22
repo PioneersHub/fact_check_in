@@ -1,16 +1,23 @@
 import os
 import socket
 from pathlib import Path
+from typing import cast
 
 from dotenv import dotenv_values, load_dotenv
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 
 project_root = Path(__file__).resolve().parents[2]
 
-BASE_CONFIG = OmegaConf.load(Path(__file__).parent.resolve() / "base.yml")
-LOCAL_CONFIG = OmegaConf.load(Path(__file__).parents[2].resolve() / "event_config.yml")
+# The base config is always loaded
+BASE_CONFIG = cast(DictConfig, OmegaConf.load(Path(__file__).parent.resolve() / "base.yml"))
 
-CONFIG = OmegaConf.merge(BASE_CONFIG, LOCAL_CONFIG)
+# The local config is optional and can override the base config
+LOCAL_CONFIG_PATH = Path(__file__).parents[2].resolve() / "event_config.yml"
+if LOCAL_CONFIG_PATH.exists():
+    LOCAL_CONFIG: DictConfig = cast(DictConfig, OmegaConf.load(LOCAL_CONFIG_PATH))
+    CONFIG = cast(DictConfig, OmegaConf.merge(BASE_CONFIG, LOCAL_CONFIG))
+else:
+    CONFIG = BASE_CONFIG
 
 if not CONFIG.APP.get("HOST"):
     CONFIG.APP.HOST = socket.gethostname()
