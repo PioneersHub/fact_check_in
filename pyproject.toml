@@ -30,6 +30,7 @@ dev = [
     "hypothesis>=6.126.0",
     "pytest>=8.3.4",
     "pytest-asyncio>=0.25.3",
+    "ruff>=0.15.7",
 ]
 
 [build-system]
