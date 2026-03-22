@@ -106,7 +106,7 @@ def get_all_ticket_offers():
         filtered_data = [{k: mangler(k, v) for k, v in x.items() if k in {"id", "title", "activities"}} for x in res_j["releases"]]
         collect.extend(filtered_data)
         payload["page"] = res_j["meta"]["next_page"]
-    interface.all_releases = {x["title"].upper(): x for x in collect}
+    interface.all_releases = {str(x["title"]).upper(): x for x in collect}
 
 
 def search_reference(reference):

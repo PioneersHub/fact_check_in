@@ -42,16 +42,27 @@ async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  #
     res = attendee.model_dump()
     backend = TitoBackend()
 
+    # ticket_id and name are validated by TitoAttendee field validators, but they
+    # have Optional types for schema flexibility; guard against missing values here.
+    if not attendee.ticket_id or not attendee.name:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        res["is_attendee"] = False
+        res["hint"] = "ticket_id and name are required"
+        return res
+
+    ticket_id: str = attendee.ticket_id
+    name: str = attendee.name
+
     # Try to find ticket in cache first
     try:
-        ticket = interface.all_sales[attendee.ticket_id.upper()]
-        log.debug(f"ticket found in cache: {attendee.ticket_id}")
+        ticket = interface.all_sales[ticket_id.upper()]
+        log.debug(f"ticket found in cache: {ticket_id}")
     except KeyError:
-        log.debug(f"ticket not found in cache: {attendee.ticket_id}")
-        log.debug(f"trying live search: {attendee.ticket_id}")
+        log.debug(f"ticket not found in cache: {ticket_id}")
+        log.debug(f"trying live search: {ticket_id}")
         try:
-            ticket = backend.search_reference(attendee.ticket_id)[0]
-            log.debug(f"ticket found via API: {attendee.ticket_id}")
+            ticket = backend.search_reference(ticket_id)[0]  # type: ignore[index]
+            log.debug(f"ticket found via API: {ticket_id}")
         except IndexError, TypeError:
             log.debug(f"attendees loaded: {len(interface.all_sales)}")
             response.status_code = status.HTTP_404_NOT_FOUND
@@ -77,7 +88,7 @@ async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  #
     # Fuzzy name matching
     match_result = fuzzy_match_name(
         ticket.get("name", ""),
-        attendee.name,
+        name,
         CONFIG.name_matching.exact_match_threshold,
         CONFIG.name_matching.close_match_threshold,
     )
@@ -87,10 +98,10 @@ async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  #
         res["hint"] = match_result.get("hint", "")
     elif match_result["is_close"]:
         res["is_attendee"] = False
-        res["hint"] = f"Supplied name {attendee.name} is close but not close enough."
+        res["hint"] = f"Supplied name {name} is close but not close enough."
     else:
         res["is_attendee"] = False
-        res["hint"] = f"We couldn't find {attendee.name}, check spelling."
+        res["hint"] = f"We couldn't find {name}, check spelling."
 
     # Set attendee attributes
     if res["is_attendee"]:
@@ -101,7 +112,7 @@ async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  #
             res["is_speaker"] = True
         if "organiser" in release_title_lower:
             res["is_organizer"] = True
-            if attendee.ticket_id.upper() in CONFIG.organizer_speakers:
+            if ticket_id.upper() in CONFIG.organizer_speakers:
                 res["is_speaker"] = True
         if "sponsor" in release_title_lower:
             res["is_sponsor"] = True
