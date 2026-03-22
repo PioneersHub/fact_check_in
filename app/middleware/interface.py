@@ -1,5 +1,4 @@
 import json
-import os
 import re
 
 from unidecode import unidecode
@@ -167,9 +166,9 @@ class Interface:
     def set_dummy_data(self):
         # Check which backend is being used
 
-        backend_name = os.environ.get("TICKETING_BACKEND")
+        backend_name = CONFIG.get("TICKETING_BACKEND")
         if not backend_name:
-            raise RuntimeError("TICKETING_BACKEND environment variable not set")
+            raise RuntimeError("TICKETING_BACKEND not set")
 
         if backend_name.lower() == "pretix":
             # Load Pretix-specific fake data
