@@ -21,6 +21,7 @@ def fuzzy_match_name(stored_name: str, provided_name: str, exact_threshold: floa
         - is_close: bool (above close_threshold but below exact_threshold)
         - hint: str (explanation if not exact match)
         - ratio: float (similarity ratio)
+
     """
     stored_upper = stored_name.strip().upper()
     provided_upper = provided_name.strip().upper()
@@ -34,7 +35,6 @@ def fuzzy_match_name(stored_name: str, provided_name: str, exact_threshold: floa
 
     if ratio > exact_threshold:
         return {"is_match": True, "is_close": False, "hint": "", "ratio": ratio}
-    elif ratio > close_threshold:
+    if ratio > close_threshold:
         return {"is_match": False, "is_close": True, "hint": f"Name '{provided_name}' is close but not exact enough", "ratio": ratio}
-    else:
-        return {"is_match": False, "is_close": False, "hint": f"Could not find '{provided_name}', check spelling", "ratio": ratio}
+    return {"is_match": False, "is_close": False, "hint": f"Could not find '{provided_name}', check spelling", "ratio": ratio}

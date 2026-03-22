@@ -123,7 +123,8 @@ class IntegrationTestRunner:
         for attendee in valid_attendees[:3]:
             if attendee["order_id"] and attendee["name"]:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": attendee["name"]}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": attendee["name"]},
                 )
 
                 assert response.status_code == 200, f"Status {response.status_code}: {response.text}"
@@ -143,7 +144,8 @@ class IntegrationTestRunner:
         for attendee in valid_attendees[:3]:
             if attendee["secret"] and attendee["name"]:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"ticket_id": attendee["secret"], "name": attendee["name"]}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"ticket_id": attendee["secret"], "name": attendee["name"]},
                 )
 
                 assert response.status_code == 200, f"Status {response.status_code}: {response.text}"
@@ -180,7 +182,8 @@ class IntegrationTestRunner:
 
             for wrong_name in wrong_names:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": valid_attendee["order_id"], "name": wrong_name}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": valid_attendee["order_id"], "name": wrong_name},
                 )
 
                 assert response.status_code in [404, 406], "Expected rejection for wrong name"

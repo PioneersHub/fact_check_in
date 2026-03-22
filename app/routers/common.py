@@ -17,7 +17,7 @@ cache = TTLCache(maxsize=128, ttl=300)
 def force_refresh_all():
     if in_dummy_mode:
         reset_interface(in_dummy_mode)
-        return
+        return None
     backend = get_ticketing_backend()
     backend.get_all_ticket_offers()
     backend.get_all_tickets()

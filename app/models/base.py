@@ -10,8 +10,6 @@ class Email(BaseModel):
 class BaseAttendee(BaseModel):
     """Base attendee model without validation - backends extend this."""
 
-    pass
-
 
 class BaseIsAnAttendee(BaseModel):
     """Base response model for attendee validation."""

@@ -103,7 +103,8 @@ class TestPretixIntegration:
         for attendee in valid_attendees[:3]:  # Test first 3
             if attendee["order_id"] and attendee["name"]:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": attendee["name"]}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": attendee["name"]},
                 )
 
                 # Pretix may return 404 for invalid order IDs or 200 with is_attendee=false
@@ -182,7 +183,8 @@ class TestPretixIntegration:
 
             for wrong_name in wrong_names:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": wrong_name}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": wrong_name},
                 )
 
                 assert response.status_code in [404, 406], f"Unexpected status for {wrong_name}: {response.status_code}"
@@ -209,7 +211,8 @@ class TestPretixIntegration:
 
             for name_variant in name_variations:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": name_variant}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": name_variant},
                 )
 
                 # Pretix may return 404 if order ID is not found

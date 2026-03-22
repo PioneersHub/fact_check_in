@@ -53,5 +53,6 @@ def log_attribute_mapping_decisions(item_name: str, attributes: dict[str, bool],
         item_name: Name of the item being mapped
         attributes: Attributes assigned
         source: Source of the mapping (e.g., "category_id", "category_name", "product_name")
+
     """
     log.debug(f"Mapped '{item_name}' via {source}: {attributes}")

@@ -35,7 +35,7 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
 
 
 @router.post("/validate_attendee/", response_model=PretixIsAnAttendee)
-async def validate_pretix_attendee(attendee: PretixAttendee, response: Response):  # noqa: PLR0911, PLR0912, PLR0915
+async def validate_pretix_attendee(attendee: PretixAttendee, response: Response):
     """
     Validate Pretix attendee with flexible validation options:
     - Order ID + Name
@@ -53,7 +53,6 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
             return res
     except Exception as e:
         print(e)
-        pass
     valid_order = attendee.order_id.upper() in interface.valid_order_ids
 
     if not valid_order:
@@ -118,7 +117,8 @@ async def refresh_addon_statistics():
 
 def detailed_positive_result(item) -> dict[str, bool]:
     """Set attributes via ticket and rules in CONFIG
-    For clarity: set attributes to True if matched, never to False"""
+    For clarity: set attributes to True if matched, never to False
+    """
     res = {"name": item["name"], "order_id": item["order"], "is_attendee": True}
 
     # add ticket features via categories.by_id

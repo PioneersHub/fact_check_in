@@ -40,5 +40,3 @@ class TitoAttendee(BaseAttendee):
 
 class TitoIsAnAttendee(TitoAttendee, BaseIsAnAttendee):
     """Tito validation response model."""
-
-    pass

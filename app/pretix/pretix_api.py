@@ -62,7 +62,7 @@ def response_is_not_ok(response):
         log.info("error", e)
         content = jsonable_encoder({response.status_code: str(e)})
     finally:
-        raise NotOk(status_code=response.status_code, content=content)  # noqa: B012
+        raise NotOk(status_code=response.status_code, content=content)
 
 
 def get_all_order_positions():
@@ -227,7 +227,6 @@ def determine_activities_from_item(item: dict) -> list[str]:
 
     This maps Pretix items to the activity-based system used by Tito.
     """
-
     # Get the mapper
     mapper = PretixAttributeMapper()
     # Get attributes using the mapping engine

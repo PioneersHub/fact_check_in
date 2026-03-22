@@ -42,6 +42,7 @@ class PretixAttributeMapper:
 
         Returns:
             Dictionary of attribute names to boolean values
+
         """
         attributes = {}
 
@@ -67,6 +68,7 @@ class PretixAttributeMapper:
 
         Returns:
             Validation report with coverage statistics
+
         """
         # Track which attributes are mapped to which items
         attribute_coverage = {attr: [] for attr in self.all_attributes}
@@ -75,7 +77,8 @@ class PretixAttributeMapper:
         for item in items:
             # Handle both transformed items and raw items
             item_name = item.get(
-                "title", item.get("name", {}).get("en", "Unknown") if isinstance(item.get("name"), dict) else item.get("name", "Unknown")
+                "title",
+                item.get("name", {}).get("en", "Unknown") if isinstance(item.get("name"), dict) else item.get("name", "Unknown"),
             )
             category_id = item.get("category_id", item.get("category"))
             category = categories.get(category_id) if category_id else None

@@ -54,7 +54,7 @@ def response_is_not_ok(response):
         log.info("error", e)
         content = jsonable_encoder({response.status_code: str(e)})
     finally:
-        raise NotOk(status_code=response.status_code, content=content)  # noqa: B012
+        raise NotOk(status_code=response.status_code, content=content)
 
 
 def get_all_tickets():

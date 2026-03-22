@@ -51,13 +51,12 @@ def get_backend() -> TicketingBackend:
             from app.tito.backend import TitoBackend  # noqa: PLC0415
 
             return TitoBackend()
-        elif backend_name == "pretix":
+        if backend_name == "pretix":
             log.info("Using Pretix ticketing backend")
             from app.pretix.backend import PretixBackend  # noqa: PLC0415
 
             return PretixBackend()
-        else:
-            raise ValueError(f"Unknown ticketing backend: {backend_name}")
+        raise ValueError(f"Unknown ticketing backend: {backend_name}")
     except ImportError as e:
         raise ImportError(f"Backend '{backend_name}' not found. Module may have been removed.") from e
 

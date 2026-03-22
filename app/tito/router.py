@@ -52,7 +52,7 @@ async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  #
         try:
             ticket = backend.search_reference(attendee.ticket_id)[0]
             log.debug(f"ticket found via API: {attendee.ticket_id}")
-        except (IndexError, TypeError):
+        except IndexError, TypeError:
             log.debug(f"attendees loaded: {len(interface.all_sales)}")
             response.status_code = status.HTTP_404_NOT_FOUND
             res["is_attendee"] = False
@@ -76,7 +76,10 @@ async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  #
 
     # Fuzzy name matching
     match_result = fuzzy_match_name(
-        ticket.get("name", ""), attendee.name, CONFIG.name_matching.exact_match_threshold, CONFIG.name_matching.close_match_threshold
+        ticket.get("name", ""),
+        attendee.name,
+        CONFIG.name_matching.exact_match_threshold,
+        CONFIG.name_matching.close_match_threshold,
     )
 
     if match_result["is_match"]:

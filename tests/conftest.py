@@ -40,7 +40,7 @@ def app_client():
         tc = LiveServerSession(url_base)
     else:
         tc = TestClient(main.app, raise_server_exceptions=True)
-    yield tc
+    return tc
 
 
 @pytest.fixture(autouse=True, scope="function")

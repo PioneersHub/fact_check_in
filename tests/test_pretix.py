@@ -31,7 +31,6 @@ class TestPretixIntegration:
 
     def test_determine_activities_from_item(self):
         """Test activity determination from item names."""
-
         # Test online/remote items
         item = {"name": {"en": "Business Ticket (Online)"}}
         activities = pretix_api.determine_activities_from_item(item)
