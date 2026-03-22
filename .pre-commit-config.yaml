@@ -12,30 +12,30 @@ default_language_version:
 default_stages: [pre-push]
 
 repos:
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: "v0.9.7"  # Update to the latest Ruff version
-  hooks:
-    - id: ruff
-      name: Ruff Linter
-      args: ["--fix"]
-      stages: [pre-commit, pre-push]
-    - id: ruff-format
-      name: Ruff Formatter
-      stages: [pre-commit, pre-push]
-# Use local hooks to tools installed via the environment-dev.yml.
-# This should allow to ake the installed tool without pre-commit, e.g., integrated in the IDE or manually.
-- repo: local
-  hooks:
-    - id: uv-pytoml-check
-      name: UV Pytoml Check
-      entry: uv pip check
-      language: system
-      types: [python]
-      pass_filenames: false
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.9.7" # Update to the latest Ruff version
+    hooks:
+      - id: ruff
+        name: Ruff Linter
+        args: ["--fix"]
+        stages: [pre-commit, pre-push]
+      - id: ruff-format
+        name: Ruff Formatter
+        stages: [pre-commit, pre-push]
+  # Use local hooks to tools installed via the environment-dev.yml.
+  # This should allow to ake the installed tool without pre-commit, e.g., integrated in the IDE or manually.
+  - repo: local
+    hooks:
+      - id: uv-pytoml-check
+        name: UV Pytoml Check
+        entry: uv pip check
+        language: system
+        types: [python]
+        pass_filenames: false
 
-    - id: uv-requirements-sync
-      name: UV Sync Dependencies
-      entry: uv pip compile pyproject.toml -o requirements.txt
-      language: system
-      types: [python]
-      pass_filenames: false
+      - id: uv-requirements-sync
+        name: UV Sync Dependencies
+        entry: uv pip compile pyproject.toml -o requirements.txt
+        language: system
+        types: [python]
+        pass_filenames: false
