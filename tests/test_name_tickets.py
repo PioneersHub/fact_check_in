@@ -36,8 +36,11 @@ with open(test_dir / "test_data" / "fake_all_sales_fail.json") as f:
 @pytest.fixture
 def client():
     # Import app here AFTER environment is set
+    from app.config import CONFIG
     from app.main import app
 
+    # Explicitly configure tito backend for these tests and load tito dummy data
+    CONFIG["TICKETING_BACKEND"] = "tito"
     # make sure to run against test data and not the live API
     reset_interface(dummy_mode=True)
     return TestClient(app)

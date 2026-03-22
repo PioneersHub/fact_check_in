@@ -56,6 +56,7 @@ class TestPretixIntegration:
         assert "on_site" in activities
         assert "online_access" in activities
 
+    @patch("app.pretix.pretix_api.in_dummy_mode", False)
     @patch("requests.get")
     def test_search_reference_format(self, mock_get):
         """Test reference format parsing."""
@@ -181,7 +182,10 @@ class TestPretixIntegration:
     def test_interface_loads_pretix_fake_data(self):
         """Test that Interface loads Pretix-specific fake data when backend is Pretix."""
         from app import interface, reset_interface
+        from app.config import CONFIG
 
+        # Explicitly set the backend in CONFIG (os.environ alone is not enough after .env is loaded)
+        CONFIG["TICKETING_BACKEND"] = "pretix"
         # Reset interface with dummy mode
         reset_interface(dummy_mode=True)
 
