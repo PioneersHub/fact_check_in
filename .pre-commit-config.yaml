@@ -7,7 +7,7 @@
 # Hooks can and should be customized for personal and project-specific settings.
 # Checkin to the repository should be aligned with the other service maintainers.
 default_language_version:
-  python: python3.12
+  python: python3.14
 
 default_stages: [pre-push]
 

@@ -102,7 +102,6 @@ Other people might do that to:
 ### 1. Install Dependencies
 
 ```bash
-# Requires Python 3.12+
 uv pip install -e .
 ```
 
