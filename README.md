@@ -223,7 +223,7 @@ ticketing platforms:
 uv sync
 
 # Set up pre-commit hooks
-pre-commit install --hook-type pre-commit --hook-type pre-push
+prek install --hook-type pre-commit --hook-type pre-push
 
 # Run tests
 pytest
