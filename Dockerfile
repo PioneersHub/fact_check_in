@@ -18,8 +18,7 @@ COPY event_config.yml /code/event_config.yml
 COPY tests /code/tests
 
 # Use UV to install dependencies
-RUN /usr/local/bin/uv venv && \
-    /usr/local/bin/uv pip install -e .
+RUN /usr/local/bin/uv sync
 
 # Run FastAPI with Uvicorn using UV - check which path works
 CMD ["/usr/local/bin/uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9898"]
