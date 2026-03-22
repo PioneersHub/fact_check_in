@@ -5,9 +5,6 @@ import pytest
 import requests
 from fastapi.testclient import TestClient
 
-from app import main
-from app.config import CONFIG
-
 
 class LiveServerSession(requests.Session):
     """
@@ -26,6 +23,9 @@ class LiveServerSession(requests.Session):
 
 @pytest.fixture(scope="session")
 def app_client():
+    from app import main
+    from app.config import CONFIG
+
     # Environment variable is set in the Release-Pipeline or in ci\execute_tests.bat.
     USE_LIVE_SERVICE = os.environ.get("Test_UseLiveService", "False").strip().lower() in ("true", "1")  # noqa: N806, SIM112
     if USE_LIVE_SERVICE:
@@ -47,10 +47,12 @@ def app_client():
 def reset_backend_cache():
     """Reset the backend cache before each test to ensure proper isolation."""
     from app import reset_interface
+    from app.config import CONFIG
     from app.ticketing import backend as backend_module
 
-    # Store original environment
+    # Store original state
     original_backend = os.environ.get("TICKETING_BACKEND")
+    original_config_backend = CONFIG.get("TICKETING_BACKEND")
 
     # Clear the cached backend before test
     backend_module._backend = None
@@ -63,8 +65,11 @@ def reset_backend_cache():
     # Clear again after test
     backend_module._backend = None
 
-    # Restore original environment
+    # Restore original environment and CONFIG
     if original_backend is not None:
         os.environ["TICKETING_BACKEND"] = original_backend
     elif "TICKETING_BACKEND" in os.environ:
         del os.environ["TICKETING_BACKEND"]
+
+    if original_config_backend is not None:
+        CONFIG["TICKETING_BACKEND"] = original_config_backend
