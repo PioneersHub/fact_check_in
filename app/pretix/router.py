@@ -8,7 +8,6 @@ from starlette import status
 from app import interface, log
 from app.config import CONFIG
 from app.models.base import Email, Truthy
-from app.routers.common import refresh_all
 from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
 
@@ -33,6 +32,8 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
     # Email not found in cache - force a refresh and try again.
     # Pretix does have an email search endpoint but refreshing all data
     # is simpler and keeps the cached data current.
+    from app.routers.common import refresh_all  # avoid circular import at module level
+
     refresh_all()
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}

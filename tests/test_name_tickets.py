@@ -35,12 +35,14 @@ with (test_dir / "test_data" / "fake_all_sales_fail.json").open() as f:
 
 @pytest.fixture
 def client():
-    # Import app here AFTER environment is set
+    # Set backend BEFORE importing app.main (which triggers router loading)
     from app.config import CONFIG
+
+    os.environ["TICKETING_BACKEND"] = "tito"
+    CONFIG["TICKETING_BACKEND"] = "tito"
+
     from app.main import app
 
-    # Explicitly configure tito backend for these tests and load tito dummy data
-    CONFIG["TICKETING_BACKEND"] = "tito"
     # make sure to run against test data and not the live API
     reset_interface(dummy_mode=True)
     return TestClient(app)

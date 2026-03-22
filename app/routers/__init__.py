@@ -2,9 +2,7 @@
 
 This module loads:
 1. Common routers that are always included
-2. Both backend-specific routers (Tito and Pretix) so all endpoints are available
-   regardless of which backend is active at runtime. This allows tests and runtime
-   to switch backends without restarting.
+2. Backend-specific router based on the configured backend (Tito or Pretix)
 """
 
 import importlib
@@ -12,6 +10,7 @@ import traceback
 from pathlib import Path
 
 from app import log
+from app.ticketing.backend import get_backend_name, get_ticketing_backend
 
 # List to hold all routers that will be loaded into the main app
 routers = []
@@ -40,25 +39,23 @@ for path_to_module in base_path.glob("*.py"):
         log.error(f"error importing router from {path_to_module.stem}: {e}")
 
 
-class BackendRouterModule:
-    def __init__(self, router):
-        self.router = router
+# Second, load backend-specific router
+try:
+    backend_name = get_backend_name()
+    log.info(f"Loading router for {backend_name} backend")
 
+    backend = get_ticketing_backend()
+    backend_router = backend.get_router()
 
-# Second, always load BOTH backend-specific routers so all endpoints are available
-for _backend_name, _backend_module_path, _backend_class in [
-    ("tito", "app.tito.backend", "TitoBackend"),
-    ("pretix", "app.pretix.backend", "PretixBackend"),
-]:
-    try:
-        log.info(f"Loading router for {_backend_name} backend")
-        _mod = importlib.import_module(_backend_module_path)
-        _backend = getattr(_mod, _backend_class)()
-        _backend_router = _backend.get_router()
-        routers.append(BackendRouterModule(_backend_router))
-        log.info(f"Successfully loaded {_backend_name} router")
-    except Exception as e:  # noqa: BLE001
-        log.error(f"Failed to load {_backend_name} router: {e}")
-        traceback.print_exc()
+    class BackendRouterModule:
+        def __init__(self, router):
+            self.router = router
+
+    routers.append(BackendRouterModule(backend_router))
+    log.info(f"Successfully loaded {backend_name} router")
+
+except Exception as e:  # noqa: BLE001
+    log.error(f"Failed to load backend-specific router: {e}")
+    traceback.print_exc()
 
 log.info(f"Total routers loaded: {len(routers)}")

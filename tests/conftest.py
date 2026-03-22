@@ -21,7 +21,7 @@ class LiveServerSession(requests.Session):
 
 
 @pytest.fixture(scope="session")
-def app_client():
+def app_client(_set_tito_for_unit_tests):  # noqa: ARG001
     from app import main
     from app.config import CONFIG
 
@@ -40,6 +40,23 @@ def app_client():
     else:
         tc = TestClient(main.app, raise_server_exceptions=True)
     return tc
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _set_tito_for_unit_tests():
+    """Force tito backend before any test triggers app.main import.
+
+    app/config/__init__.py calls reload_env() with load_dotenv(override=True),
+    which reads TICKETING_BACKEND from .env (pretix) and overrides any env var
+    set before the import. This session fixture re-asserts tito AFTER config is
+    loaded and BEFORE the router module first runs (router runs on first
+    `from app.main import app`).
+    """
+    from app.config import CONFIG
+
+    os.environ["TICKETING_BACKEND"] = "tito"
+    CONFIG["TICKETING_BACKEND"] = "tito"
+    yield
 
 
 @pytest.fixture(autouse=True)
