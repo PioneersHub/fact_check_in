@@ -28,7 +28,7 @@ def _fetch_all_pages(url: str, params: dict) -> list[dict]:
 
     while True:
         log.info(f"fetching page:{params['page']} from {url}")
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=30)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
 
@@ -81,7 +81,7 @@ def _fetch_addon_positions(item_id: int) -> list[dict]:
                 "item": pos["item"],
                 "variation": pos.get("variation"),
                 "addon_to": pos.get("addon_to"),
-            }
+            },
         )
 
     return positions

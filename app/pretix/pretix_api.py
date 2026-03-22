@@ -42,14 +42,12 @@ def minimize_data(data: list[dict]) -> list[dict]:
         "_pretix_data",  # Original Pretix data
     }
     log.debug("minimizing data footprint")
-    filtered = [{k: v for k, v in x.items() if k in opt_in_attributes} for x in data]
-    return filtered
+    return [{k: v for k, v in x.items() if k in opt_in_attributes} for x in data]
 
 
 def filter_valid_items(data: list[dict], valid_item_ids: set) -> list[dict]:
     """Filter order positions by valid item IDs."""
-    filtered = [x for x in data if x.get("item") in valid_item_ids]
-    return filtered
+    return [x for x in data if x.get("item") in valid_item_ids]
 
 
 def response_is_not_ok(response):
@@ -58,7 +56,7 @@ def response_is_not_ok(response):
     try:
         log.info("error", response.status_code)
         content = jsonable_encoder({response.status_code: response.json()})
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         log.info("error", e)
         content = jsonable_encoder({response.status_code: str(e)})
     finally:
@@ -66,8 +64,9 @@ def response_is_not_ok(response):
 
 
 def get_all_order_positions():
-    """Get all order positions (equivalent to tickets in Tito).
-    This gets all orders and iterates through the order positions
+    """Get all order positions.
+
+    Equivalent to tickets in Tito. Gets all orders and iterates through the order positions.
     """
     if in_dummy_mode:
         return
@@ -79,7 +78,7 @@ def get_all_order_positions():
 
     while True:
         log.info(f"getting page:{params['page']}")
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=30)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
 
@@ -124,7 +123,7 @@ def get_all_order_positions():
                     }
                     positions.append(transformed)
                 except AttributeError as e:
-                    print(f"error: {e}")
+                    log.warning("error processing position", error=str(e))
 
         data = minimize_data(positions)
         collect.extend(data)
@@ -139,8 +138,9 @@ def get_all_order_positions():
 
 def get_all_categories():
     """Get all categories from Pretix.
-    Product Categories are used for grouping tickets in Pretix
-    Categories set the baseline for on-site and remote access
+
+    Product categories are used for grouping tickets in Pretix and set the baseline
+    for on-site and remote access.
     """
     if in_dummy_mode:
         return {}  # type: ignore[unreachable]
@@ -151,7 +151,7 @@ def get_all_categories():
 
     while True:
         log.info(f"getting categories page:{params['page']}")
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=30)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
 
@@ -187,7 +187,7 @@ def get_all_items():
 
     while True:
         log.info(f"getting page:{params['page']}")
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=30)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
 
@@ -270,8 +270,7 @@ def search_reference(reference):
     """Search for a specific order position by reference."""
     log.debug(f"searching for reference: {reference}")
     if in_dummy_mode:
-        res = interface.all_sales.get(reference)
-        return res
+        return interface.all_sales.get(reference)
 
     # Split reference back into order and position
     try:
@@ -287,7 +286,7 @@ def search_reference(reference):
         "order__code": order_code,
     }
 
-    res = requests.get(url, headers=headers, params=params)
+    res = requests.get(url, headers=headers, params=params, timeout=30)
     if res.status_code != HTTPStatus.OK:
         log.debug(f"the request reference: {reference} returned status code: {res.status_code}")
         response_is_not_ok(res)
@@ -305,7 +304,7 @@ def search_reference(reference):
                     "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
                     "release_id": pos["item"],
                     "state": "complete" if pos.get("order__status") == "p" else "pending",
-                }
+                },
             ]
 
     log.debug(f"Position {position_id} not found in order {order_code}")
@@ -326,7 +325,7 @@ def search(search_for: str):
 
     # Try email search first
     params = {"attendee_email__icontains": search_for}
-    res = requests.get(url, headers=headers, params=params)
+    res = requests.get(url, headers=headers, params=params, timeout=30)
 
     if res.status_code != HTTPStatus.OK:
         log.debug(f"the request {search_for} returned status code: {res.status_code}")
@@ -347,13 +346,13 @@ def search(search_for: str):
                     "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
                     "release_id": pos["item"],
                     "state": "complete" if pos.get("order__status") == "p" else "pending",
-                }
+                },
             )
 
     # If no results, try name search
     if not results:
         params = {"attendee_name__icontains": search_for}
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=30)
 
         if res.status_code == HTTPStatus.OK:
             res_j = res.json()
@@ -368,7 +367,7 @@ def search(search_for: str):
                             "name": pos.get("attendee_name", "") or pos.get("attendee_name_cached", ""),
                             "release_id": pos["item"],
                             "state": "complete" if pos.get("order__status") == "p" else "pending",
-                        }
+                        },
                     )
 
     log.debug(f"success: the request {search_for} returned {len(results)} tickets.")
@@ -388,10 +387,7 @@ def search_by_secret(secret: str):
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
     params = {"secret": secret}
 
-    res = requests.get(url, headers=headers, params=params)
-    if res.status_code != HTTPStatus.OK:
-        log.debug(f"search by secret returned status code: {res.status_code}")
-        return None
+    res = requests.get(url, headers=headers, params=params, timeout=30)
 
     res_j = res.json()
     results = res_j.get("results", [])
@@ -434,10 +430,7 @@ def search_by_order(order_code: str):
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
     params = {"order": order_code}
 
-    res = requests.get(url, headers=headers, params=params)
-    if res.status_code != HTTPStatus.OK:
-        log.debug(f"search by order returned status code: {res.status_code}")
-        return []
+    res = requests.get(url, headers=headers, params=params, timeout=30)
 
     res_j = res.json()
     results = []
@@ -462,7 +455,7 @@ def search_by_order(order_code: str):
                     "item": pos["item"],
                     "variation": pos.get("variation"),
                 },
-            }
+            },
         )
 
     return results

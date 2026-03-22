@@ -52,6 +52,6 @@ elif CONFIG["TICKETING_BACKEND"] == "pretix":
     TOKEN = os.getenv("PRETIX_TOKEN")
 
 if not TOKEN:
-    print("no token found in environment, trying config")
+    print("no token found in environment, trying config")  # noqa: T201
 
-__all__ = ["CONFIG", "TOKEN", "event_slug", "account_slug", "project_root"]
+__all__ = ["CONFIG", "TOKEN", "account_slug", "event_slug", "project_root"]

@@ -1,5 +1,4 @@
-"""
-Dynamic router loading based on configured backend.
+"""Dynamic router loading based on configured backend.
 
 This module loads:
 1. Common routers that are always included
@@ -36,7 +35,7 @@ for path_to_module in base_path.glob("*.py"):
             log.debug(f"added common router from {path_to_module.stem}")
     except ImportError as e:
         log.error(f"ImportError: failed to import router from {path_to_module.stem}: {e}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         traceback.print_exc()
         log.error(f"error importing router from {path_to_module.stem}: {e}")
 
@@ -58,7 +57,7 @@ for _backend_name, _backend_module_path, _backend_class in [
         _backend_router = _backend.get_router()
         routers.append(BackendRouterModule(_backend_router))
         log.info(f"Successfully loaded {_backend_name} router")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         log.error(f"Failed to load {_backend_name} router: {e}")
         traceback.print_exc()
 

@@ -23,9 +23,7 @@ router = APIRouter(prefix="/tickets", tags=["Pretix Validation"])
 
 @router.post("/validate_email/", response_model=Truthy)
 async def search_email(email: Email, response: Response):  # noqa: ARG001
-    """
-    Search for a participant by email in preloaded orders.
-    """
+    """Search for a participant by email in preloaded orders."""
     req = email.model_dump()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
@@ -43,11 +41,11 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
 
 @router.post("/validate_attendee/", response_model=PretixIsAnAttendee)
 async def validate_pretix_attendee(attendee: PretixAttendee, response: Response):
-    """
-    Validate Pretix attendee with flexible validation options:
-    - Order ID + Name
-    - Ticket ID (secret) + Name
-    - Order ID + Name + Ticket ID (most secure)
+    """Validate a Pretix attendee.
+
+    Supports flexible validation options:
+    - Order ID + Name, Ticket ID (secret) + Name,
+    - Order ID + Name + Ticket ID (most secure).
     """
     res: dict = attendee.model_dump()
     valid_order = False
@@ -56,10 +54,9 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
         item = interface.valid_order_name_combo.get((attendee.order_id, attendee.name.strip().upper()))
         if item:
             # direct hit, can be processed directly
-            res = detailed_positive_result(item)
-            return res
-    except Exception as e:
-        print(e)
+            return detailed_positive_result(item)
+    except Exception as e:  # noqa: BLE001
+        log.warning("error looking up attendee", error=str(e))
     valid_order = bool(attendee.order_id) and attendee.order_id.upper() in interface.valid_order_ids  # type: ignore[union-attr]
 
     if not valid_order:
@@ -123,8 +120,9 @@ async def refresh_addon_statistics():
 
 
 def detailed_positive_result(item) -> dict[str, bool]:
-    """Set attributes via ticket and rules in CONFIG
-    For clarity: set attributes to True if matched, never to False
+    """Build a detailed positive result dict from a matched ticket item.
+
+    Sets attributes to True if matched, never to False.
     """
     res = {"name": item["name"], "order_id": item["order"], "is_attendee": True}
 

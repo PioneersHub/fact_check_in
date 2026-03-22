@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standalone integration test runner for Pretix API.
+"""Standalone integration test runner for Pretix API.
 
 This script can be run directly without pytest to perform integration tests.
 Usage: python run_integration_tests.py

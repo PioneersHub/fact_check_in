@@ -6,8 +6,7 @@ from app import interface
 
 
 def fuzzy_match_name(stored_name: str, provided_name: str, exact_threshold: float, close_threshold: float) -> dict:
-    """
-    Fuzzy name matching with configurable thresholds.
+    """Fuzzy name matching with configurable thresholds.
 
     Args:
         stored_name: Name from the ticketing system

@@ -1,5 +1,4 @@
-"""
-Ticketing backend abstraction layer.
+"""Ticketing backend abstraction layer.
 
 This module provides a unified interface for different ticketing systems (Tito, Pretix).
 """
@@ -69,4 +68,6 @@ def get_ticketing_backend() -> TicketingBackend:
     global _backend  # noqa: PLW0603
     if _backend is None:
         _backend = get_backend()
+    if _backend is None:  # pragma: no cover
+        raise RuntimeError("Backend could not be initialized")
     return _backend

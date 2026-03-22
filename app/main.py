@@ -24,17 +24,17 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
         from app.pretix.validation import validate_pretix_mappings
 
         validate_pretix_mappings()
-    except Exception as e:
+    except Exception:  # broad catch intentional during startup
         logger = logging.getLogger("uvicorn.error")
-        logger.error(f"Failed to validate Pretix mappings: {e}")
+        logger.exception("Failed to validate Pretix mappings")
 
     try:
         from app.pretix.addon_stats import load_addon_statistics
 
         load_addon_statistics()
-    except Exception as e:
+    except Exception:  # broad catch intentional during startup
         logger = logging.getLogger("uvicorn.error")
-        logger.error(f"Failed to load add-on statistics: {e}")
+        logger.exception("Failed to load add-on statistics")
 
     logger = logging.getLogger("uvicorn.error")
     # Try to get the actual port from uvicorn server
@@ -83,11 +83,8 @@ async def validation_exception_handler(request: Request, exc: ValidationError): 
 @app.get("/")
 @app.get("/healthcheck/alive")
 async def healthcheck():
-    """
-    Simple endpoint to check if the service is alive
-    """
-    content = {"alive": True}
-    return content
+    """Check if the service is alive."""
+    return {"alive": True}
 
 
 if __name__ == "__main__":
@@ -106,14 +103,14 @@ if __name__ == "__main__":
     # Custom startup message
     # Convert 0.0.0.0 to localhost for display
     display_host = "localhost" if host == "0.0.0.0" else host
-    print(f"\n{'=' * 60}")
-    print(f"Starting {CONFIG.PROJECT_NAME}")
-    print(f"{'=' * 60}")
-    print(f"Server:     http://{display_host}:{port}")
-    print(f"API Docs:   http://{display_host}:{port}/docs")
-    print(f"ReDoc:      http://{display_host}:{port}/redoc")
-    print(f"OpenAPI:    http://{display_host}:{port}/openapi.json")
-    print(f"{'=' * 60}\n")
+    print(f"\n{'=' * 60}")  # noqa: T201
+    print(f"Starting {CONFIG.PROJECT_NAME}")  # noqa: T201
+    print(f"{'=' * 60}")  # noqa: T201
+    print(f"Server:     http://{display_host}:{port}")  # noqa: T201
+    print(f"API Docs:   http://{display_host}:{port}/docs")  # noqa: T201
+    print(f"ReDoc:      http://{display_host}:{port}/redoc")  # noqa: T201
+    print(f"OpenAPI:    http://{display_host}:{port}/openapi.json")  # noqa: T201
+    print(f"{'=' * 60}\n")  # noqa: T201
 
     uvicorn.run(
         app,

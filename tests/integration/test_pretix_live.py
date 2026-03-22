@@ -1,5 +1,4 @@
-"""
-Integration tests for Pretix API endpoints using live data.
+"""Integration tests for Pretix API endpoints using live data.
 
 This test suite:
 1. Fetches real data from the Pretix API
@@ -130,7 +129,7 @@ class TestPretixIntegration:
                 data = response.json()
                 if not data["is_attendee"]:
                     print(
-                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}"
+                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}",
                     )
                     continue
                 assert data["is_attendee"] is True
@@ -157,7 +156,7 @@ class TestPretixIntegration:
                 data = response.json()
                 if not data["is_attendee"]:
                     print(
-                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['secret'][:8]}... + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}"
+                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['secret'][:8]}... + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}",
                     )
                     continue
                 assert data["is_attendee"] is True
@@ -239,7 +238,7 @@ class TestPretixIntegration:
                 data = response.json()
                 if not data["is_attendee"]:
                     print(
-                        f"  {Fore.YELLOW}⚠ Name variant '{name_variant}' not matched (fuzzy matching may not be perfect){Style.RESET_ALL}"
+                        f"  {Fore.YELLOW}⚠ Name variant '{name_variant}' not matched (fuzzy matching may not be perfect){Style.RESET_ALL}",
                     )
                 else:
                     print(f"  {Fore.GREEN}✓ Accepted variant: '{name_variant}'{Style.RESET_ALL}")

@@ -75,7 +75,7 @@ class Interface:
 
     @classmethod
     def exclude_this_ticket_type(cls, ticket_name: str):
-        """Filter by ticket name substrings"""
+        """Filter by ticket name substrings."""
         for pattern in CONFIG.exclude_ticket_patterns:
             if pattern.lower() in ticket_name.lower():
                 return True
@@ -152,12 +152,12 @@ class Interface:
         self._valid_order_ids = {x["order"]: x for x in self.all_sales.values() if x.get("order")}
 
     def valid_ticket_types(self, data):
-        """List of qualified ticket types (releases)"""
+        """Return list of qualified ticket types (releases)."""
         return [x for x in data if not self.exclude_this_ticket_type(x["title"])]
 
     @classmethod
     def normalization(cls, txt):
-        """Remove all diacritic marks, normalize everything to ascii, and make all upper case"""
+        """Remove all diacritic marks, normalize to ASCII, and make upper case."""
         txt = re.sub(r"\s{2,}", " ", txt).strip()
         return unidecode(txt).upper()
 

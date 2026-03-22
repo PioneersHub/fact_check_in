@@ -27,9 +27,7 @@ def force_refresh_all():
 
 @cached(cache=TTLCache(maxsize=1024, ttl=300))
 def refresh_all():
-    """
-    Service method to force a reload of all ticket data from the ticketing system
-    """
+    """Force a reload of all ticket data from the ticketing system."""
     return force_refresh_all()
 
 

@@ -7,8 +7,7 @@ from fastapi.testclient import TestClient
 
 
 class LiveServerSession(requests.Session):
-    """
-    Allow execution of tests against a separately deployed client, e.g. for smoke tests during deployment.
+    """Allow execution of tests against a separately deployed client, e.g. for smoke tests during deployment.
     Taken from https://github.com/psf/requests/issues/2554#issuecomment-109341010.
     """
 
@@ -43,7 +42,7 @@ def app_client():
     return tc
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(autouse=True)
 def reset_backend_cache():
     """Reset the backend cache before each test to ensure proper isolation."""
     from app import reset_interface

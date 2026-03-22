@@ -59,4 +59,4 @@ def reset_interface(dummy_mode=True):
     interface = Interface(in_dummy_mode=dummy_mode)
 
 
-__all__ = ["log", "interface", "in_dummy_mode", "reset_interface"]
+__all__ = ["in_dummy_mode", "interface", "log", "reset_interface"]

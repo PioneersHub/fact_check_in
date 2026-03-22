@@ -17,9 +17,7 @@ router = APIRouter(prefix="/tickets", tags=["Tito Validation"])
 
 @router.post("/validate_email/", response_model=Truthy)
 async def search_email(email: Email, response: Response):
-    """
-    Live-search for a participant by email.
-    """
+    """Live-search for a participant by email."""
     req = email.model_dump()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
@@ -36,9 +34,7 @@ async def search_email(email: Email, response: Response):
 
 @router.post("/validate_name/", response_model=TitoIsAnAttendee)
 async def validate_tito_attendee(attendee: TitoAttendee, response: Response):  # noqa: PLR0912, PLR0915
-    """
-    Validate a Tito attendee by ticket id and name with fuzzy matching.
-    """
+    """Validate a Tito attendee by ticket id and name with fuzzy matching."""
     res = attendee.model_dump()
     backend = TitoBackend()
 

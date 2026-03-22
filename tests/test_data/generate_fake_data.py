@@ -144,7 +144,7 @@ for i in range(-5, 0):  # Last 5 elements
             "name": "",
             "state": "unassigned",  # Fixed typo: "undassigned" → "unassigned"
             "assigned": False,
-        }
+        },
     )
 fake_all_sales_fail = {str(x["reference"]).upper(): x for x in fake_all_sales[-5:]}
 fake_all_sales = {str(x["reference"]).upper(): x for x in fake_all_sales[:-5]}

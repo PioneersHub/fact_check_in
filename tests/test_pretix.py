@@ -72,8 +72,8 @@ class TestPretixIntegration:
                     "attendee_email": "test@example.com",
                     "attendee_name": "Test User",
                     "order__status": "p",
-                }
-            ]
+                },
+            ],
         }
         mock_get.return_value = mock_response
 
@@ -125,9 +125,9 @@ class TestPretixIntegration:
 
         # Load Pretix fake data files
         project_root = Path(__file__).parent.parent
-        with open(project_root / "tests/test_data/fake_all_sales_pretix.json") as f:
+        with (project_root / "tests/test_data/fake_all_sales_pretix.json").open() as f:
             sales = json.load(f)
-        with open(project_root / "tests/test_data/fake_all_releases_pretix.json") as f:
+        with (project_root / "tests/test_data/fake_all_releases_pretix.json").open() as f:
             releases = json.load(f)
 
         # Test sales structure
