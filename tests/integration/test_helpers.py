@@ -25,10 +25,10 @@ class PretixTestClient:
 
         self.headers = {"Authorization": f"Token {self.token}", "Content-Type": "application/json"}
 
-    def get_order_positions(self, limit: int = 10) -> list[dict]:
+    def get_order_positions(self, limit: int = 10, order_status: str = "p") -> list[dict]:
         """Fetch real order positions from Pretix."""
         url = f"{self.base_url}/organizers/{self.organizer}/events/{self.event}/orderpositions/"
-        params = {"limit": limit, "ordering": "-datetime"}
+        params = {"limit": limit, "ordering": "-datetime", "order__status": order_status}
 
         response = requests.get(url, headers=self.headers, params=params)
         response.raise_for_status()
@@ -64,7 +64,8 @@ def load_test_data(filename: str) -> dict:
 
 def extract_test_cases(positions: list[dict]) -> dict:
     """Extract test cases from real Pretix data."""
-    test_cases = {"valid_attendees": [], "order_ids": set(), "secrets": [], "emails": [], "names": []}
+    test_cases: dict[str, list] = {"valid_attendees": [], "order_ids": [], "secrets": [], "emails": [], "names": []}
+    order_ids_seen: set[str] = set()  # used to deduplicate order_ids
 
     for pos in positions:
         if pos.get("attendee_name") and pos.get("order"):
@@ -91,13 +92,13 @@ def extract_test_cases(positions: list[dict]) -> dict:
             }
 
             test_cases["valid_attendees"].append(attendee)
-            test_cases["order_ids"].add(order_code)
+            order_ids_seen.add(order_code)
             test_cases["secrets"].append(pos.get("secret", ""))
             test_cases["emails"].append(pos.get("attendee_email", ""))
             test_cases["names"].append(pos.get("attendee_name", ""))
 
-    # Convert set to list
-    test_cases["order_ids"] = list(test_cases["order_ids"])
+    # Convert deduplicated set to list
+    test_cases["order_ids"] = list(order_ids_seen)
 
     # Filter out empty values
     test_cases["secrets"] = [s for s in test_cases["secrets"] if s]
