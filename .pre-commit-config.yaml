@@ -13,7 +13,7 @@ default_stages: [pre-push]
 
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.9.7" # Update to the latest Ruff version
+    rev: "v0.15.7"
     hooks:
       - id: ruff
         name: Ruff Linter
