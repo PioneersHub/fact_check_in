@@ -37,6 +37,12 @@ class TestPretixIntegration:
     @classmethod
     def setup_class(cls):
         """Setup test data and start the API server."""
+        missing = [v for v in ("PRETIX_TOKEN", "PRETIX_ORGANIZER_SLUG", "PRETIX_EVENT_SLUG") if not os.environ.get(v)]
+        if missing:
+            pytest.skip(f"Pretix credentials not set: {', '.join(missing)}")
+        if os.environ.get("TICKETING_BACKEND", "").lower() not in ("pretix", ""):
+            pytest.skip(f"TICKETING_BACKEND={os.environ['TICKETING_BACKEND']!r} is not pretix")
+
         print(f"\n{Fore.CYAN}=== Setting up Pretix Integration Tests ==={Style.RESET_ALL}")
 
         # Start the API server with environment variable for port
