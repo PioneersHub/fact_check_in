@@ -64,6 +64,11 @@ indent-style = "space"
 docstring-code-format = true
 
 [tool.pytest.ini_options]
+addopts = [
+    "-ra",
+    "--import-mode=importlib",
+    "--tb=short",
+]
 markers = [
     "smoke_test: marks tests as smoke tests",
 ]
