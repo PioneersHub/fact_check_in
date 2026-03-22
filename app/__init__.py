@@ -53,8 +53,9 @@ interface = Interface(in_dummy_mode=in_dummy_mode)
 
 def reset_interface(dummy_mode=True):
     global interface  # noqa: PLW0603
-    # Reset the singleton instance
-    Interface._instance = None
+    # Re-initialize the singleton in-place so router module references remain valid.
+    # Do NOT clear Interface._instance - calling Interface() on the existing singleton
+    # will call __init__ again, resetting its data while keeping the same object.
     interface = Interface(in_dummy_mode=dummy_mode)
 
 
