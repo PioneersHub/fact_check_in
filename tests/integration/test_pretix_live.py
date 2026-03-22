@@ -253,11 +253,6 @@ class TestPretixIntegration:
         for email in valid_emails:
             response = requests.post(f"{API_BASE_URL}/tickets/validate_email/", json={"email": email})
 
-            # Pretix may return 404 if email not found
-            # if response.status_code == 404:
-            #     print(f"  {Fore.YELLOW}⚠ Email {email} not found in current Pretix data{Style.RESET_ALL}")
-            #     continue
-
             assert response.status_code == 200, f"Failed for {email}: {response.text}"
             data = response.json()
             if not data.get("valid", False):
@@ -265,26 +260,17 @@ class TestPretixIntegration:
             else:
                 print(f"  {Fore.GREEN}✓ Valid email: {email}{Style.RESET_ALL}")
 
-        # Test invalid emails
-        invalid_emails = self.test_data["invalid"]["invalid_emails"]
-        for email in invalid_emails:
+        # Emails with invalid format: Pydantic EmailStr rejects them with 422
+        for email in self.test_data["invalid"]["invalid_format_emails"]:
             response = requests.post(f"{API_BASE_URL}/tickets/validate_email/", json={"email": email})
+            assert response.status_code == 422, f"Expected validation error for {email}: got {response.status_code}"
+            print(f"  {Fore.RED}✓ Rejected (invalid format): {email}{Style.RESET_ALL}")
 
-            # Invalid format should give 422, non-existent should give 404
-            if (
-                "@" not in email
-                or "." not in email
-                or email.startswith("@")
-                or len(email.split("@")) != 2
-                or not (len(email.split("@")) == 2 and len(email.split("@")[-1].split(".")) < 2)
-            ):
-                assert response.status_code == 422, f"Expected validation error for {email}"
-                print(f"  {Fore.RED}✓ Rejected (invalid format): {email}{Style.RESET_ALL}")
-            else:
-                assert response.status_code == 404, f"Expected 404 for {email}: {response.status_code}"
-                data = response.json()
-                assert data["valid"] is False
-                print(f"  {Fore.RED}✓ Rejected (not found): {email}{Style.RESET_ALL}")
+        # Emails with valid format but not registered: server returns 404
+        for email in self.test_data["invalid"]["not_found_emails"]:
+            response = requests.post(f"{API_BASE_URL}/tickets/validate_email/", json={"email": email})
+            assert response.status_code == 404, f"Expected 404 for {email}: got {response.status_code}"
+            print(f"  {Fore.RED}✓ Rejected (not found): {email}{Style.RESET_ALL}")
 
     def test_common_endpoints(self):
         """Test common endpoints."""

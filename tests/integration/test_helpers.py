@@ -125,7 +125,10 @@ def generate_invalid_test_cases(valid_cases: dict) -> dict:
             "x" * 33,  # Too long
             "abc123!@#$%^&*()abc123!@#$%^&*()",  # Invalid characters
         ],
-        "invalid_emails": ["notanemail", "missing@domain", "@nodomain.com", "spaces in@email.com", "definitely.not.registered@example.com"],
+        # Emails that fail format validation (Pydantic should reject with 422)
+        "invalid_format_emails": ["notanemail", "missing@domain", "@nodomain.com", "spaces in@email.com"],
+        # Valid format emails that simply are not registered (expect 404)
+        "not_found_emails": ["definitely.not.registered@example.com"],
         "mismatched_names": [],
     }
 
