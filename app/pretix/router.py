@@ -6,7 +6,7 @@ from starlette import status
 from app import interface, log
 from app.config import CONFIG
 from app.models.base import Email, Truthy
-from app.routers.common import refresh_all
+from app.routers.common import force_refresh_all, refresh_all
 from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
 
@@ -111,7 +111,8 @@ async def addon_statistics():
 
 @router.get("/refresh_addon_statistics/", response_model=AddonStatistics, tags=["Pretix Statistics"])
 async def refresh_addon_statistics():
-    """Refresh add-on statistics cache from Pretix API and return updated data."""
+    """Refresh all ticket data + add-on statistics from Pretix API and return updated data."""
+    force_refresh_all()
     load_addon_statistics()
     return get_addon_statistics()
 
