@@ -87,10 +87,9 @@ def get_all_order_positions():
         positions = []
         for order in res_j["results"]:
             # noinspection SpellCheckingInspection
-            # Simplified state, e: expired and n: pending are deemed valid for now.
-            state = {
-                "c": "canceled",
-            }.get(order["status"], "complete")
+            # Only paid (p) and pending (n) are valid — expired (e), cancelled (c),
+            # refunded (r) are treated as canceled and excluded.
+            state = "complete" if order["status"] in ("p", "n") else "canceled"
             for pos in order["positions"]:
                 try:
                     pos_state = "canceled" if pos["canceled"] else state
