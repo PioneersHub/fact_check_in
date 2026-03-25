@@ -1,14 +1,18 @@
 """Pretix-specific routes."""
 
+from typing import TYPE_CHECKING
+
 from fastapi import APIRouter, HTTPException, Response
 from starlette import status
 
 from app import interface, log
 from app.config import CONFIG
 from app.models.base import Email, Truthy
-from app.routers.common import refresh_all
 from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
+
+if TYPE_CHECKING:
+    from app.pretix.backend import PretixBackend
 
 from .addon_stats import get_addon_statistics, load_addon_statistics
 from .models import AddonStatistics, PretixAttendee, PretixIsAnAttendee
@@ -18,16 +22,18 @@ router = APIRouter(prefix="/tickets", tags=["Pretix Validation"])
 
 @router.post("/validate_email/", response_model=Truthy)
 async def search_email(email: Email, response: Response):  # noqa: ARG001
-    """
-    Search for a participant by email in preloaded orders.
-    """
+    """Search for a participant by email in preloaded orders."""
     req = email.model_dump()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
-    backend = get_ticketing_backend()
+    backend: PretixBackend = get_ticketing_backend()  # type: ignore[assignment]
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}
-    # there is no search option via the API for attendees' emails in Pretix
+    # Email not found in cache - force a refresh and try again.
+    # Pretix does have an email search endpoint but refreshing all data
+    # is simpler and keeps the cached data current.
+    from app.routers.common import refresh_all  # avoid circular import at module level
+
     refresh_all()
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}
@@ -35,12 +41,12 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
 
 
 @router.post("/validate_attendee/", response_model=PretixIsAnAttendee)
-async def validate_pretix_attendee(attendee: PretixAttendee, response: Response):  # noqa: PLR0911, PLR0912, PLR0915
-    """
-    Validate Pretix attendee with flexible validation options:
-    - Order ID + Name
-    - Ticket ID (secret) + Name
-    - Order ID + Name + Ticket ID (most secure)
+async def validate_pretix_attendee(attendee: PretixAttendee, response: Response):
+    """Validate a Pretix attendee.
+
+    Supports flexible validation options:
+    - Order ID + Name, Ticket ID (secret) + Name,
+    - Order ID + Name + Ticket ID (most secure).
     """
     res: dict = attendee.model_dump()
     valid_order = False
@@ -49,12 +55,10 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
         item = interface.valid_order_name_combo.get((attendee.order_id, attendee.name.strip().upper()))
         if item:
             # direct hit, can be processed directly
-            res = detailed_positive_result(item)
-            return res
-    except Exception as e:
-        print(e)
-        pass
-    valid_order = attendee.order_id.upper() in interface.valid_order_ids
+            return detailed_positive_result(item)
+    except Exception as e:  # noqa: BLE001
+        log.warning("error looking up attendee", error=str(e))
+    valid_order = bool(attendee.order_id) and attendee.order_id.upper() in interface.valid_order_ids  # type: ignore[union-attr]
 
     if not valid_order:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -117,8 +121,10 @@ async def refresh_addon_statistics():
 
 
 def detailed_positive_result(item) -> dict[str, bool]:
-    """Set attributes via ticket and rules in CONFIG
-    For clarity: set attributes to True if matched, never to False"""
+    """Build a detailed positive result dict from a matched ticket item.
+
+    Sets attributes to True if matched, never to False.
+    """
     res = {"name": item["name"], "order_id": item["order"], "is_attendee": True}
 
     # add ticket features via categories.by_id

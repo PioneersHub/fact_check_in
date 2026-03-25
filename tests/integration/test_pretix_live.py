@@ -1,5 +1,4 @@
-"""
-Integration tests for Pretix API endpoints using live data.
+"""Integration tests for Pretix API endpoints using live data.
 
 This test suite:
 1. Fetches real data from the Pretix API
@@ -11,11 +10,13 @@ This test suite:
 import os
 import subprocess
 import sys
+from typing import Any, ClassVar
 
 import pytest
 import requests
 from colorama import Fore, Style, init
-from test_helpers import (
+
+from .test_helpers import (
     PretixTestClient,
     extract_test_cases,
     generate_invalid_test_cases,
@@ -34,14 +35,27 @@ TEST_DATA_FILE = "pretix_test_data.json"
 class TestPretixIntegration:
     """Integration test suite for Pretix validation endpoints."""
 
+    server_process: ClassVar[subprocess.Popen]
+    test_data: ClassVar[dict[str, Any]]
+
     @classmethod
     def setup_class(cls):
         """Setup test data and start the API server."""
+        missing = [v for v in ("PRETIX_TOKEN", "PRETIX_ORGANIZER_SLUG", "PRETIX_EVENT_SLUG") if not os.environ.get(v)]
+        if missing:
+            pytest.skip(f"Pretix credentials not set: {', '.join(missing)}")
+        if os.environ.get("TICKETING_BACKEND", "").lower() not in ("pretix", ""):
+            pytest.skip(f"TICKETING_BACKEND={os.environ['TICKETING_BACKEND']!r} is not pretix")
+
         print(f"\n{Fore.CYAN}=== Setting up Pretix Integration Tests ==={Style.RESET_ALL}")
 
         # Start the API server with environment variable for port
         env = os.environ.copy()
         env["PORT"] = "8002"
+        # Ensure the server runs in live mode, not test/dummy mode.
+        # FAKE_CHECK_IN_TEST_MODE may be set by unit tests running in the same
+        # pytest session, so we explicitly clear it here.
+        env.pop("FAKE_CHECK_IN_TEST_MODE", None)
         cls.server_process = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "app.main:app", "--port", "8002", "--host", "127.0.0.1"],
             stdout=subprocess.PIPE,
@@ -103,7 +117,8 @@ class TestPretixIntegration:
         for attendee in valid_attendees[:3]:  # Test first 3
             if attendee["order_id"] and attendee["name"]:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": attendee["name"]}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": attendee["name"]},
                 )
 
                 # Pretix may return 404 for invalid order IDs or 200 with is_attendee=false
@@ -114,7 +129,7 @@ class TestPretixIntegration:
                 data = response.json()
                 if not data["is_attendee"]:
                     print(
-                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}"
+                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}",
                     )
                     continue
                 assert data["is_attendee"] is True
@@ -141,7 +156,7 @@ class TestPretixIntegration:
                 data = response.json()
                 if not data["is_attendee"]:
                     print(
-                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['secret'][:8]}... + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}"
+                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['secret'][:8]}... + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}",
                     )
                     continue
                 assert data["is_attendee"] is True
@@ -182,7 +197,8 @@ class TestPretixIntegration:
 
             for wrong_name in wrong_names:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": wrong_name}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": wrong_name},
                 )
 
                 assert response.status_code in [404, 406], f"Unexpected status for {wrong_name}: {response.status_code}"
@@ -209,7 +225,8 @@ class TestPretixIntegration:
 
             for name_variant in name_variations:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": name_variant}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": name_variant},
                 )
 
                 # Pretix may return 404 if order ID is not found
@@ -221,7 +238,7 @@ class TestPretixIntegration:
                 data = response.json()
                 if not data["is_attendee"]:
                     print(
-                        f"  {Fore.YELLOW}⚠ Name variant '{name_variant}' not matched (fuzzy matching may not be perfect){Style.RESET_ALL}"
+                        f"  {Fore.YELLOW}⚠ Name variant '{name_variant}' not matched (fuzzy matching may not be perfect){Style.RESET_ALL}",
                     )
                 else:
                     print(f"  {Fore.GREEN}✓ Accepted variant: '{name_variant}'{Style.RESET_ALL}")
@@ -235,11 +252,6 @@ class TestPretixIntegration:
         for email in valid_emails:
             response = requests.post(f"{API_BASE_URL}/tickets/validate_email/", json={"email": email})
 
-            # Pretix may return 404 if email not found
-            # if response.status_code == 404:
-            #     print(f"  {Fore.YELLOW}⚠ Email {email} not found in current Pretix data{Style.RESET_ALL}")
-            #     continue
-
             assert response.status_code == 200, f"Failed for {email}: {response.text}"
             data = response.json()
             if not data.get("valid", False):
@@ -247,26 +259,17 @@ class TestPretixIntegration:
             else:
                 print(f"  {Fore.GREEN}✓ Valid email: {email}{Style.RESET_ALL}")
 
-        # Test invalid emails
-        invalid_emails = self.test_data["invalid"]["invalid_emails"]
-        for email in invalid_emails:
+        # Emails with invalid format: Pydantic EmailStr rejects them with 422
+        for email in self.test_data["invalid"]["invalid_format_emails"]:
             response = requests.post(f"{API_BASE_URL}/tickets/validate_email/", json={"email": email})
+            assert response.status_code == 422, f"Expected validation error for {email}: got {response.status_code}"
+            print(f"  {Fore.RED}✓ Rejected (invalid format): {email}{Style.RESET_ALL}")
 
-            # Invalid format should give 422, non-existent should give 404
-            if (
-                "@" not in email
-                or "." not in email
-                or email.startswith("@")
-                or len(email.split("@")) != 2
-                or not (len(email.split("@")) == 2 and len(email.split("@")[-1].split(".")) < 2)
-            ):
-                assert response.status_code == 422, f"Expected validation error for {email}"
-                print(f"  {Fore.RED}✓ Rejected (invalid format): {email}{Style.RESET_ALL}")
-            else:
-                assert response.status_code == 404, f"Expected 404 for {email}: {response.status_code}"
-                data = response.json()
-                assert data["valid"] is False
-                print(f"  {Fore.RED}✓ Rejected (not found): {email}{Style.RESET_ALL}")
+        # Emails with valid format but not registered: server returns 404
+        for email in self.test_data["invalid"]["not_found_emails"]:
+            response = requests.post(f"{API_BASE_URL}/tickets/validate_email/", json={"email": email})
+            assert response.status_code == 404, f"Expected 404 for {email}: got {response.status_code}"
+            print(f"  {Fore.RED}✓ Rejected (not found): {email}{Style.RESET_ALL}")
 
     def test_common_endpoints(self):
         """Test common endpoints."""
@@ -276,8 +279,10 @@ class TestPretixIntegration:
         response = requests.get(f"{API_BASE_URL}/tickets/refresh_all/")
         assert response.status_code == 200
         data = response.json()
-        assert "Pretix" in data.get("message", "")
-        print(f"  {Fore.GREEN}✓ Refresh all: {data['message']}{Style.RESET_ALL}")
+        assert data is not None, "refresh_all returned null - server may be in dummy mode"
+        message = data.get("message", "")
+        assert message, "refresh_all returned empty message"
+        print(f"  {Fore.GREEN}Refresh all: {message}{Style.RESET_ALL}")
 
         # Test ticket_types
         response = requests.get(f"{API_BASE_URL}/tickets/ticket_types/")

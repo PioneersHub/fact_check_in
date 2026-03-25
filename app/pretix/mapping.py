@@ -42,18 +42,19 @@ class PretixAttributeMapper:
 
         Returns:
             Dictionary of attribute names to boolean values
+
         """
         attributes = {}
 
         # 1. Category-based mappings
         # set the baseline for on-site and remote access
-        category_id = item["category"]
+        category_id = item.get("category")
         if category_id and category_id in self.category_by_id:
             attributes.update(self.category_by_id[category_id])
             log.debug(f"Applied category ID mapping for {category_id}: {self.category_by_id[category_id]}")
 
         # 1. Check for ticket_id mapping
-        if item["id"] in self.category_by_ticket_id:
+        if item.get("id") in self.category_by_ticket_id:
             attributes.update(self.category_by_ticket_id[item["id"]])
 
         return attributes
@@ -67,21 +68,21 @@ class PretixAttributeMapper:
 
         Returns:
             Validation report with coverage statistics
+
         """
         # Track which attributes are mapped to which items
-        attribute_coverage = {attr: [] for attr in self.all_attributes}
+        attribute_coverage: dict[str, list[str]] = {attr: [] for attr in self.all_attributes}
         unmapped_items = []
 
         for item in items:
             # Handle both transformed items and raw items
             item_name = item.get(
-                "title", item.get("name", {}).get("en", "Unknown") if isinstance(item.get("name"), dict) else item.get("name", "Unknown")
+                "title",
+                item.get("name", {}).get("en", "Unknown") if isinstance(item.get("name"), dict) else item.get("name", "Unknown"),
             )
-            category_id = item.get("category_id", item.get("category"))
-            category = categories.get(category_id) if category_id else None
-
-            # Get attributes for this item - use stored attributes if available
-            attributes = item["_attributes"] if "_attributes" in item else self.get_attributes_from_item(item, category)
+            # Get attributes for this item - use stored attributes if available.
+            # The get_attributes_from_item method re-derives category from item.get("category").
+            attributes = item["_attributes"] if "_attributes" in item else self.get_attributes_from_item(item)
 
             # Track coverage
             has_any_attribute = False

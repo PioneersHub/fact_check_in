@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Debug script to test email search behavior directly.
-"""
+"""Debug script to test email search behavior directly."""
 
 import os
 import sys

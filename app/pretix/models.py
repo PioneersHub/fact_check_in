@@ -9,7 +9,12 @@ class PretixAttendee(BaseAttendee):
     """Pretix attendee validation model with flexible validation options."""
 
     order_id: str | None = Field(
-        None, json_schema_extra={"example": "MH9CG", "description": "5-character order code (A-Z, 0-9, no O or 1)"}
+        None,
+        json_schema_extra={"example": "MH9CG", "description": "5-character order code (A-Z, 0-9, no O or 1)"},
+    )
+    ticket_id: str | None = Field(
+        None,
+        json_schema_extra={"example": "m526nf8vseamchcw2jn26zxc6cfxg8gp", "description": "32-character secret ticket identifier"},
     )
     name: str = Field(..., json_schema_extra={"example": "Sam Smith", "description": "Attendee name (required)"})
 
@@ -43,8 +48,6 @@ class PretixAttendee(BaseAttendee):
 
 class PretixIsAnAttendee(PretixAttendee, BaseIsAnAttendee):
     """Pretix validation response model."""
-
-    pass
 
 
 class TShirtVariantCount(BaseModel):

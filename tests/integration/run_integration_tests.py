@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standalone integration test runner for Pretix API.
+"""Standalone integration test runner for Pretix API.
 
 This script can be run directly without pytest to perform integration tests.
 Usage: python run_integration_tests.py
@@ -13,6 +12,7 @@ import subprocess
 import sys
 import traceback
 from datetime import datetime
+from typing import Any, TypedDict
 
 import requests
 from colorama import Fore, Style, init
@@ -36,13 +36,29 @@ API_BASE_URL = "http://localhost:8002"
 TEST_DATA_FILE = "pretix_test_data.json"
 
 
+class _TestResults(TypedDict):
+    passed: int
+    failed: int
+    skipped: int
+    errors: list[dict[str, Any]]
+    start_time: str
+    end_time: str
+
+
 class IntegrationTestRunner:
     """Run integration tests and generate report."""
 
     def __init__(self):
-        self.results = {"passed": 0, "failed": 0, "skipped": 0, "errors": [], "start_time": datetime.now().isoformat()}
+        self.results: _TestResults = {
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": [],
+            "start_time": datetime.now().isoformat(),
+            "end_time": "",
+        }
         self.server_process = None
-        self.test_data = None
+        self.test_data: dict[str, Any] | None = None
 
     def setup(self):
         """Setup test environment."""
@@ -123,7 +139,8 @@ class IntegrationTestRunner:
         for attendee in valid_attendees[:3]:
             if attendee["order_id"] and attendee["name"]:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": attendee["order_id"], "name": attendee["name"]}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": attendee["order_id"], "name": attendee["name"]},
                 )
 
                 assert response.status_code == 200, f"Status {response.status_code}: {response.text}"
@@ -143,7 +160,8 @@ class IntegrationTestRunner:
         for attendee in valid_attendees[:3]:
             if attendee["secret"] and attendee["name"]:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"ticket_id": attendee["secret"], "name": attendee["name"]}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"ticket_id": attendee["secret"], "name": attendee["name"]},
                 )
 
                 assert response.status_code == 200, f"Status {response.status_code}: {response.text}"
@@ -180,7 +198,8 @@ class IntegrationTestRunner:
 
             for wrong_name in wrong_names:
                 response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/", json={"order_id": valid_attendee["order_id"], "name": wrong_name}
+                    f"{API_BASE_URL}/tickets/validate_attendee/",
+                    json={"order_id": valid_attendee["order_id"], "name": wrong_name},
                 )
 
                 assert response.status_code in [404, 406], "Expected rejection for wrong name"

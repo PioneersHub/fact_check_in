@@ -1,12 +1,10 @@
-"""
-Ticketing backend abstraction layer.
+"""Ticketing backend abstraction layer.
 
 This module provides a unified interface for different ticketing systems (Tito, Pretix).
 """
 
-import os
-
 from app import log
+from app.config import CONFIG
 
 
 class TicketingBackend:
@@ -35,9 +33,9 @@ class TicketingBackend:
 
 def get_backend_name() -> str:
     """Get the configured backend name."""
-    backend_name = os.environ.get("TICKETING_BACKEND")
+    backend_name = CONFIG.get("TICKETING_BACKEND")
     if not backend_name:
-        raise RuntimeError("TICKETING_BACKEND environment variable not set")
+        raise RuntimeError("TICKETING_BACKEND not set")
     return backend_name.lower()
 
 
@@ -48,16 +46,15 @@ def get_backend() -> TicketingBackend:
     try:
         if backend_name == "tito":
             log.info("Using Tito ticketing backend")
-            from app.tito.backend import TitoBackend  # noqa: PLC0415
+            from app.tito.backend import TitoBackend
 
             return TitoBackend()
-        elif backend_name == "pretix":
+        if backend_name == "pretix":
             log.info("Using Pretix ticketing backend")
-            from app.pretix.backend import PretixBackend  # noqa: PLC0415
+            from app.pretix.backend import PretixBackend
 
             return PretixBackend()
-        else:
-            raise ValueError(f"Unknown ticketing backend: {backend_name}")
+        raise ValueError(f"Unknown ticketing backend: {backend_name}")
     except ImportError as e:
         raise ImportError(f"Backend '{backend_name}' not found. Module may have been removed.") from e
 
@@ -71,4 +68,6 @@ def get_ticketing_backend() -> TicketingBackend:
     global _backend  # noqa: PLW0603
     if _backend is None:
         _backend = get_backend()
+    if _backend is None:  # pragma: no cover
+        raise RuntimeError("Backend could not be initialized")
     return _backend

@@ -3,39 +3,35 @@
 
 # Hooks
 #   Please note the hooks below are intended to be installed as a pre-push hook, e.g. specifying the --hook-type option:
-#     pre-commit install --hook-type pre-push
+#     prek install --hook-type pre-push
 # Hooks can and should be customized for personal and project-specific settings.
-# Checkin to the repository should be aligned with the other service maintainers.
+# Checking in to the repository should be aligned with the other service maintainers.
 default_language_version:
-  python: python3.12
+  python: python3.14
 
 default_stages: [pre-push]
 
 repos:
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: "v0.9.7"  # Update to the latest Ruff version
-  hooks:
-    - id: ruff
-      name: Ruff Linter
-      args: ["--fix"]
-      stages: [pre-commit, pre-push]
-    - id: ruff-format
-      name: Ruff Formatter
-      stages: [pre-commit, pre-push]
-# Use local hooks to tools installed via the environment-dev.yml.
-# This should allow to ake the installed tool without pre-commit, e.g., integrated in the IDE or manually.
-- repo: local
-  hooks:
-    - id: uv-pytoml-check
-      name: UV Pytoml Check
-      entry: uv pip check
-      language: system
-      types: [python]
-      pass_filenames: false
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.15.7"
+    hooks:
+      - id: ruff
+        name: Ruff Linter
+        args: ["--fix"]
+        stages: [pre-commit, pre-push]
+      - id: ruff-format
+        name: Ruff Formatter
+        stages: [pre-commit, pre-push]
 
-    - id: uv-requirements-sync
-      name: UV Sync Dependencies
-      entry: uv pip compile pyproject.toml -o requirements.txt
-      language: system
-      types: [python]
-      pass_filenames: false
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.10.12
+    hooks:
+      - id: uv-lock
+      - id: uv-export
+        args: [--frozen, --no-hashes, --output-file, requirements.txt]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+      - id: pyupgrade
+        args: [--py314-plus]

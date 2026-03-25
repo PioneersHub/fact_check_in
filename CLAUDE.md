@@ -58,7 +58,7 @@ pytest -m smoke_test
 # They will automatically run ruff check and format
 
 # To install/update pre-commit hooks:
-pre-commit install --hook-type pre-commit --hook-type pre-push
+prek install --hook-type pre-commit --hook-type pre-push
 
 # Run linting manually
 ruff check . --fix
@@ -67,7 +67,7 @@ ruff check . --fix
 ruff format .
 
 # Run all pre-commit hooks manually
-pre-commit run --all-files
+prek run --all-files
 ```
 
 ### Version Management

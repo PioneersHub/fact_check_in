@@ -10,8 +10,6 @@ class Email(BaseModel):
 class BaseAttendee(BaseModel):
     """Base attendee model without validation - backends extend this."""
 
-    pass
-
 
 class BaseIsAnAttendee(BaseModel):
     """Base response model for attendee validation."""
@@ -40,7 +38,7 @@ class TicketType(BaseModel):
         json_schema_extra={
             "example": 12345,
             "description": "Id of ticket.",
-        }
+        },
     )
     title: str = Field(json_schema_extra={"example": "Business Late Bird (online)", "description": "Description of ticket type."})
     activities: list[str] = Field(json_schema_extra={"example": ["talks", "workshops"], "description": "List of activities included."})

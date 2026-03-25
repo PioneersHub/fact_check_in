@@ -28,7 +28,7 @@ def _fetch_all_pages(url: str, params: dict) -> list[dict]:
 
     while True:
         log.info(f"fetching page:{params['page']} from {url}")
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=30)
         if res.status_code != HTTPStatus.OK:
             response_is_not_ok(res)
 
@@ -81,7 +81,7 @@ def _fetch_addon_positions(item_id: int) -> list[dict]:
                 "item": pos["item"],
                 "variation": pos.get("variation"),
                 "addon_to": pos.get("addon_to"),
-            }
+            },
         )
 
     return positions
@@ -115,7 +115,9 @@ def get_addon_statistics() -> AddonStatistics:
     onsite_category_ids = set(CONFIG.addon_statistics.onsite_category_ids)
 
     # Count on-site tickets from cached sales data
-    onsite_item_ids = {item_id for item_id, release in interface.release_id_map.items() if release.get("category_id") in onsite_category_ids}
+    onsite_item_ids = {
+        item_id for item_id, release in interface.release_id_map.items() if release.get("category_id") in onsite_category_ids
+    }
     onsite_tickets = [sale for sale in interface.all_sales.values() if sale.get("item") in onsite_item_ids]
     onsite_tickets_sold = len(onsite_tickets)
 
