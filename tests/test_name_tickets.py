@@ -24,10 +24,10 @@ logging.getLogger("faker").setLevel(logging.WARNING)
 
 # Load the fake data using absolute paths based on this file's location
 test_dir = Path(__file__).parent
-with open(test_dir / "test_data" / "fake_all_sales.json") as f:
+with (test_dir / "test_data" / "fake_all_sales.json").open() as f:
     fake_data = json.load(f)
 
-with open(test_dir / "test_data" / "fake_all_sales_fail.json") as f:
+with (test_dir / "test_data" / "fake_all_sales_fail.json").open() as f:
     fake_data_fail = json.load(f)
 
 # Router is already included via main.py dynamic loading
@@ -35,7 +35,12 @@ with open(test_dir / "test_data" / "fake_all_sales_fail.json") as f:
 
 @pytest.fixture
 def client():
-    # Import app here AFTER environment is set
+    # Set backend BEFORE importing app.main (which triggers router loading)
+    from app.config import CONFIG
+
+    os.environ["TICKETING_BACKEND"] = "tito"
+    CONFIG["TICKETING_BACKEND"] = "tito"
+
     from app.main import app
 
     # make sure to run against test data and not the live API
@@ -43,7 +48,7 @@ def client():
     return TestClient(app)
 
 
-@pytest.mark.parametrize("reference,ticket", fake_data.items())
+@pytest.mark.parametrize(("reference", "ticket"), fake_data.items())
 def test_validate_name(client, reference, ticket):
     attendee = {"ticket_id": reference, "name": ticket["name"]}
     response = client.post("/tickets/validate_name/", json=attendee)
@@ -52,7 +57,7 @@ def test_validate_name(client, reference, ticket):
     assert data["is_attendee"] == (ticket["state"] != "unassigned")
 
 
-@pytest.mark.parametrize("reference,ticket", fake_data_fail.items())
+@pytest.mark.parametrize(("reference", "ticket"), fake_data_fail.items())
 def test_validate_name_fail(client, reference, ticket):
     attendee = {"ticket_id": reference, "name": ticket["name"]}
     response = client.post("/tickets/validate_name/", json=attendee)

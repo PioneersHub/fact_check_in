@@ -5,13 +5,9 @@ import pytest
 import requests
 from fastapi.testclient import TestClient
 
-from app import main
-from app.config import CONFIG
-
 
 class LiveServerSession(requests.Session):
-    """
-    Allow execution of tests against a separately deployed client, e.g. for smoke tests during deployment.
+    """Allow execution of tests against a separately deployed client, e.g. for smoke tests during deployment.
     Taken from https://github.com/psf/requests/issues/2554#issuecomment-109341010.
     """
 
@@ -25,9 +21,12 @@ class LiveServerSession(requests.Session):
 
 
 @pytest.fixture(scope="session")
-def app_client():
+def app_client(_set_tito_for_unit_tests):  # noqa: ARG001
+    from app import main
+    from app.config import CONFIG
+
     # Environment variable is set in the Release-Pipeline or in ci\execute_tests.bat.
-    USE_LIVE_SERVICE = bool(os.environ.get("Test_UseLiveService", False))  # noqa: N806, SIM112
+    USE_LIVE_SERVICE = os.environ.get("Test_UseLiveService", "False").strip().lower() in ("true", "1")  # noqa: N806, SIM112
     if USE_LIVE_SERVICE:
         # During deployment the port is configured in the pipeline (Variable 'Application.Port.Active')
         # and not directly from the config.
@@ -40,17 +39,36 @@ def app_client():
         tc = LiveServerSession(url_base)
     else:
         tc = TestClient(main.app, raise_server_exceptions=True)
-    yield tc
+    return tc
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(scope="session", autouse=True)
+def _set_tito_for_unit_tests():
+    """Force tito backend before any test triggers app.main import.
+
+    app/config/__init__.py calls reload_env() with load_dotenv(override=True),
+    which reads TICKETING_BACKEND from .env (pretix) and overrides any env var
+    set before the import. This session fixture re-asserts tito AFTER config is
+    loaded and BEFORE the router module first runs (router runs on first
+    `from app.main import app`).
+    """
+    from app.config import CONFIG
+
+    os.environ["TICKETING_BACKEND"] = "tito"
+    CONFIG["TICKETING_BACKEND"] = "tito"
+    yield
+
+
+@pytest.fixture(autouse=True)
 def reset_backend_cache():
     """Reset the backend cache before each test to ensure proper isolation."""
     from app import reset_interface
+    from app.config import CONFIG
     from app.ticketing import backend as backend_module
 
-    # Store original environment
+    # Store original state
     original_backend = os.environ.get("TICKETING_BACKEND")
+    original_config_backend = CONFIG.get("TICKETING_BACKEND")
 
     # Clear the cached backend before test
     backend_module._backend = None
@@ -63,8 +81,11 @@ def reset_backend_cache():
     # Clear again after test
     backend_module._backend = None
 
-    # Restore original environment
+    # Restore original environment and CONFIG
     if original_backend is not None:
         os.environ["TICKETING_BACKEND"] = original_backend
     elif "TICKETING_BACKEND" in os.environ:
         del os.environ["TICKETING_BACKEND"]
+
+    if original_config_backend is not None:
+        CONFIG["TICKETING_BACKEND"] = original_config_backend

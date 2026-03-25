@@ -6,15 +6,23 @@ class Email(BaseModel):
 
 
 class Attendee(BaseModel):
-    ticket_id: str = Field(None, json_schema_extra={"example": "XRTP-3", "description": "Ticket ID is <four char alphanumeric>-<integer>."})
-    name: str = Field(None, json_schema_extra={"example": "Sam Smith", "description": "Person full name as used for registration."})
+    ticket_id: str | None = Field(
+        default=None,
+        json_schema_extra={"example": "XRTP-3", "description": "Ticket ID is <four char alphanumeric>-<integer>."},
+    )
+    name: str | None = Field(
+        default=None,
+        json_schema_extra={"example": "Sam Smith", "description": "Person full name as used for registration."},
+    )
 
     @field_validator("ticket_id")
     @classmethod
     def valid_ticket_id(cls, v):
         try:
             v = v.strip().upper()
-            if not 6 <= len(v) <= 7:
+            min_ticket_id_length = 6
+            max_ticket_id_length = 7
+            if not min_ticket_id_length <= len(v) <= max_ticket_id_length:
                 raise ValueError("Invalid ticket ID, must be: ^[A-Z]{4}-\\d+$ e. g. DROP-3.")
             return v
         except ValueError:
@@ -60,7 +68,7 @@ class TicketType(BaseModel):
         json_schema_extra={
             "example": 12345,
             "description": "Id of ticket.",
-        }
+        },
     )
     title: str = Field(json_schema_extra={"example": "Business Late Bird (online)", "description": "Description of ticket type."})
     activities: list[str] = Field(json_schema_extra={"example": ["talks", "workshops"], "description": "List of activities included."})

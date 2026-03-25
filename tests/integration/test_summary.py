@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Generate a summary of integration test results and test data.
-"""
+"""Generate a summary of integration test results and test data."""
 
 import json
 import os

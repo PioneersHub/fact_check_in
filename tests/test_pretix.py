@@ -31,7 +31,6 @@ class TestPretixIntegration:
 
     def test_determine_activities_from_item(self):
         """Test activity determination from item names."""
-
         # Test online/remote items
         item = {"name": {"en": "Business Ticket (Online)"}}
         activities = pretix_api.determine_activities_from_item(item)
@@ -57,6 +56,7 @@ class TestPretixIntegration:
         assert "on_site" in activities
         assert "online_access" in activities
 
+    @patch("app.pretix.pretix_api.in_dummy_mode", False)
     @patch("requests.get")
     def test_search_reference_format(self, mock_get):
         """Test reference format parsing."""
@@ -72,8 +72,8 @@ class TestPretixIntegration:
                     "attendee_email": "test@example.com",
                     "attendee_name": "Test User",
                     "order__status": "p",
-                }
-            ]
+                },
+            ],
         }
         mock_get.return_value = mock_response
 
@@ -125,9 +125,9 @@ class TestPretixIntegration:
 
         # Load Pretix fake data files
         project_root = Path(__file__).parent.parent
-        with open(project_root / "tests/test_data/fake_all_sales_pretix.json") as f:
+        with (project_root / "tests/test_data/fake_all_sales_pretix.json").open() as f:
             sales = json.load(f)
-        with open(project_root / "tests/test_data/fake_all_releases_pretix.json") as f:
+        with (project_root / "tests/test_data/fake_all_releases_pretix.json").open() as f:
             releases = json.load(f)
 
         # Test sales structure
@@ -182,7 +182,10 @@ class TestPretixIntegration:
     def test_interface_loads_pretix_fake_data(self):
         """Test that Interface loads Pretix-specific fake data when backend is Pretix."""
         from app import interface, reset_interface
+        from app.config import CONFIG
 
+        # Explicitly set the backend in CONFIG (os.environ alone is not enough after .env is loaded)
+        CONFIG["TICKETING_BACKEND"] = "pretix"
         # Reset interface with dummy mode
         reset_interface(dummy_mode=True)
 

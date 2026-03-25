@@ -1,5 +1,4 @@
-"""
-Integration test specific configuration.
+"""Integration test specific configuration.
 This overrides the parent conftest.py to disable dummy mode for integration tests.
 """
 
@@ -10,8 +9,7 @@ import pytest
 
 @pytest.fixture(autouse=True, scope="function")
 def reset_backend_cache():
-    """
-    Override the parent conftest's reset_backend_cache to NOT use dummy mode.
+    """Override the parent conftest's reset_backend_cache to NOT use dummy mode.
     Integration tests need to test against real backends.
     """
     from app.ticketing import backend as backend_module

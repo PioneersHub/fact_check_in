@@ -74,7 +74,7 @@ categories_success = {
     },
 }
 
-categories_fail = {
+categories_fail: dict[str, dict[str, int | list[str]]] = {
     "1 PIECE OF LUGGAGE ON MONDAY": {"id": 1495774, "activities": []},
     "1 PIECE OF LUGGAGE ON WEDNESDAY": {"id": 1495775, "activities": []},
     "CHILDCARE MONDAY": {"id": 1491499, "activities": ["childcare"]},
@@ -144,13 +144,13 @@ for i in range(-5, 0):  # Last 5 elements
             "name": "",
             "state": "unassigned",  # Fixed typo: "undassigned" → "unassigned"
             "assigned": False,
-        }
+        },
     )
-fake_all_sales_fail = {x["reference"].upper(): x for x in fake_all_sales[-5:]}
-fake_all_sales = {x["reference"].upper(): x for x in fake_all_sales[:-5]}
+fake_all_sales_fail = {str(x["reference"]).upper(): x for x in fake_all_sales[-5:]}
+fake_all_sales = {str(x["reference"]).upper(): x for x in fake_all_sales[:-5]}
 
 more_fails = [generate_fake_all_sales(successful_items=False) for i in range(10)]
-more_fails = {x["reference"].upper(): x for x in more_fails}
+more_fails = {str(x["reference"]).upper(): x for x in more_fails}
 fake_all_sales_fail.update(more_fails)
 
 

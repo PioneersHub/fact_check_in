@@ -1,6 +1,7 @@
 # Fact Check-in
 
-REST API to validate conference attendees using multiple ticketing systems through a modular backend architecture.
+REST API to validate conference attendees using multiple ticketing systems through a modular backend
+architecture.
 
 ## Supported Ticketing Systems
 
@@ -28,21 +29,22 @@ It's important to follow a base structure when setting up the tickets in pretix 
 
 Roles can bes assigned via:
 
-#### 1. Ticket Categories  
+#### 1. Ticket Categories
 
 > "Product categories" in Pretix
 
-The category defines on-site and remote access baseline (e.g. attributes: is_remote, is_onsite, online_access)
+The category defines on-site and remote access baseline (e.g. attributes: is_remote, is_onsite,
+online_access)
 
 #### 2. Tickets (incl. Variations)
 
->"Products" in Pretix
+> "Products" in Pretix
 
 This will update the attributes set in 1.
 
 A usual use case is to add is_speaker for speaker tickets for example.
 
-#### 3. Order ID 
+#### 3. Order ID
 
 > 'ABCDE-1', "Orders" in Pretix, note one order can have multiple items 'ABCDE-1, 'ABCDE-2',…
 
@@ -66,16 +68,15 @@ Access rights are assigned in the following order:
 2. Ticket ID
 3. Order ID
 
-Any step might change attributes. The best practice is to only add access, i,e. setting attributes to True. A mix of adding and removing
-access will be confusing.
-
+Any step might change attributes. The best practice is to only add access, i,e. setting attributes
+to True. A mix of adding and removing access will be confusing.
 
 #### **Pitfalls**
 
 ##### Use case: Social Event
 
-You grant all ticket holders access to remote attendance `online_access: True`.
-But there are also social event tickets available for a +1, social event tickets does not include `online_access`
+You grant all ticket holders access to remote attendance `online_access: True`. But there are also
+social event tickets available for a +1, social event tickets does not include `online_access`
 
 - put event tickets in own category, e.,g. Social Event
 
@@ -93,8 +94,7 @@ pretix_mapping:
 
 ##### ⚠️: Change of Category
 
-The category can very easily be changed in the Pretix backend.
-Other people might do that to:
+The category can very easily be changed in the Pretix backend. Other people might do that to:
 
 - get a nicer look on the stats
 - improve the ticket shop order.
@@ -102,8 +102,7 @@ Other people might do that to:
 ### 1. Install Dependencies
 
 ```bash
-# Requires Python 3.12+
-uv pip install -e .
+uv sync
 ```
 
 ### 2. Configure Ticketing System
@@ -151,7 +150,7 @@ pretix_mapping:
 
   # Special multi-role assignments
   speaker_and_sponsor:
-    - "C3UAP-1"  # Ticket code
+    - "C3UAP-1" # Ticket code
 ```
 
 ### 4. Run the Application
@@ -190,19 +189,20 @@ docker-compose up
 - **Modular Backend Architecture**: Easily switch between ticketing systems or add new ones
 - **Dynamic Configuration**: Backend selection via environment variables or config files
 - **Smart Validation**:
-    - Validate attendees by ticket code + name (with fuzzy matching)
-    - Validate attendees by email
-    - Configurable name matching thresholds
+  - Validate attendees by ticket code + name (with fuzzy matching)
+  - Validate attendees by email
+  - Configurable name matching thresholds
 - **Flexible Attribute Mapping**:
-    - Tito: Native activity support
-    - Pretix: Category and product name-based mapping
+  - Tito: Native activity support
+  - Pretix: Category and product name-based mapping
 - **Special Attendee Types**: Automatic detection of speakers, sponsors, volunteers, organizers
 - **Access Level Detection**: Distinguish between on-site, remote, and online attendees
 - **Day Pass Support**: Handle day-specific access (Monday, Tuesday, etc.)
 
 ## Backend Architecture
 
-The application uses a modular backend system that allows seamless switching between different ticketing platforms:
+The application uses a modular backend system that allows seamless switching between different
+ticketing platforms:
 
 - **Abstract Interface**: `TicketingBackend` base class defines the contract
 - **Dynamic Loading**: Backends are loaded at runtime based on configuration
@@ -220,10 +220,10 @@ The application uses a modular backend system that allows seamless switching bet
 
 ```bash
 # Install with dev dependencies
-uv pip install -e .
+uv sync
 
 # Set up pre-commit hooks
-pre-commit install --hook-type pre-commit --hook-type pre-push
+prek install --hook-type pre-commit --hook-type pre-push
 
 # Run tests
 pytest
@@ -235,17 +235,18 @@ ruff format .
 
 ## Agentic API
 
-This project was partially updated with Claude CLI. Instructions for Claude are in [CLAUDE.md](CLAUDE.md)
+This project was partially updated with Claude CLI. Instructions for Claude are in
+[CLAUDE.md](CLAUDE.md)
 
 ## Documentation
 
 - [Developer Guide](DEVELOPER.md) - Development setup and guidelines
 - [API Documentation](http://localhost:8080/docs) - Interactive API docs (when running)
 
-
 # Other
 
-There are issues of the library that created the social cards on macOS, the cairo svg library is required: `brew install cairo`.  
+There are issues of the library that created the social cards on macOS, the cairo svg library is
+required: `brew install cairo`.  
 Even if installed cairo might not be found. Fixes:
 
 - `export DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib`

@@ -17,7 +17,7 @@ cache = TTLCache(maxsize=128, ttl=300)
 def force_refresh_all():
     if in_dummy_mode:
         reset_interface(in_dummy_mode)
-        return
+        return {"message": "Refreshed from dummy (test) data."}
     backend = get_ticketing_backend()
     backend.get_all_ticket_offers()
     backend.get_all_tickets()
@@ -27,9 +27,7 @@ def force_refresh_all():
 
 @cached(cache=TTLCache(maxsize=1024, ttl=300))
 def refresh_all():
-    """
-    Service method to force a reload of all ticket data from the ticketing system
-    """
+    """Force a reload of all ticket data from the ticketing system."""
     return force_refresh_all()
 
 
