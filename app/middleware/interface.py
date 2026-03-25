@@ -22,7 +22,7 @@ class Interface:
             self.initialized = True
         self._in_dummy_mode = in_dummy_mode
         self._all_sales: dict = {}
-        self.all_releases: dict = {}
+        self._all_releases: dict = {}
         self._release_id_map: dict = {}
         self._activity_release_id_map: dict = {}
         self._valid_ticket_ids: dict = {}
@@ -45,6 +45,18 @@ class Interface:
     @in_dummy_mode.setter
     def in_dummy_mode(self, value):
         self._in_dummy_mode = value
+
+    @property
+    def all_releases(self):
+        return self._all_releases
+
+    @all_releases.setter
+    def all_releases(self, value):
+        self._all_releases = value
+        # Invalidate all caches derived from releases
+        self._release_id_map = {}
+        self._valid_ticket_ids = {}
+        self._activity_release_id_map = {}
 
     @property
     def release_id_map(self):
