@@ -1,6 +1,8 @@
 services:
   fact_check_in:
     build: .
+    image: ${IMAGE_NAME:-fact_check_in}:${IMAGE_TAG:-latest}
+    container_name: ${CONTAINER_NAME:-fact_check_in}
     ports:
       - "9898:9898"
     env_file:
