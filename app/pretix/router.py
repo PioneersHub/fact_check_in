@@ -137,17 +137,17 @@ def detailed_positive_result(item) -> dict[str, bool]:
     res.update(_attributes)
     # add ticket ticker_id + pos:
     #  - organizer_and_speaker
-    if item["reference"] in CONFIG.pretix_mapping.organizer_and_speaker:
+    if CONFIG.pretix_mapping.organizer_and_speaker and item["reference"] in CONFIG.pretix_mapping.organizer_and_speaker:
         res.update({"is_speaker": True, "is_organizer": True})
     #  - organizer_and_sponsor
-    if item["reference"] in CONFIG.pretix_mapping.organizer_and_sponsor:
+    if CONFIG.pretix_mapping.organizer_and_sponsor and item["reference"] in CONFIG.pretix_mapping.organizer_and_sponsor:
         res.update({"is_sponsor": True, "is_organizer": True})
     #  - speaker_and_sponsor
-    if item["reference"] in CONFIG.pretix_mapping.speaker_and_sponsor:
+    if CONFIG.pretix_mapping.speaker_and_sponsor and item["reference"] in CONFIG.pretix_mapping.speaker_and_sponsor:
         res.update({"is_speaker": True, "is_sponsor": True})
     #  - speaker_add_keynote
-    if item["reference"] in CONFIG.pretix_mapping.speaker_add_keynote:
+    if CONFIG.pretix_mapping.speaker_add_keynote and item["reference"] in CONFIG.pretix_mapping.speaker_add_keynote:
         res.update({"is_speaker": True, "is_keynote": True})
-    if item["reference"] in CONFIG.pretix_mapping.add_speaker:
+    if CONFIG.pretix_mapping.add_speaker and item["reference"] in CONFIG.pretix_mapping.add_speaker:
         res.update({"is_speaker": True})
     return res
