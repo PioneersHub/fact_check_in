@@ -43,12 +43,10 @@ async def search_email(email: Email, response: Response):  # noqa: ARG001
 
 @router.post("/validate_attendee/", response_model=PretixIsAnAttendee)
 async def validate_pretix_attendee(attendee: PretixAttendee, response: Response):
-    """Validate a Pretix attendee.
+    """Validate a Pretix attendee by order ID and name.
 
-    Supports flexible validation options:
-    - Name + Order ID,
-    - Name + Ticket ID,
-    - Name + Order ID + Ticket ID (most secure).
+    Uses a combination of exact and fuzzy matching to find the best match for the provided name on
+    the specified order.
     """
     res: dict = attendee.model_dump()
     valid_order = False
@@ -128,7 +126,7 @@ def detailed_positive_result(item) -> dict[str, bool]:
 
     Sets attributes to True if matched, never to False.
     """
-    res = {"name": item["name"], "order_id": item["order"], "is_attendee": True}
+    res = {"name": item["name"], "order_id": item["order"], "is_attendee": True, "ticket_id": item["reference"]}
 
     # add ticket features via categories.by_id
     _attributes = interface.release_id_map[item["item"]]["_attributes"]

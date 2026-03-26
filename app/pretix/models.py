@@ -14,7 +14,7 @@ class PretixAttendee(BaseAttendee):
     )
     ticket_id: str | None = Field(
         None,
-        json_schema_extra={"example": "m526nf8vseamchcw2jn26zxc6cfxg8gp", "description": "32-character secret ticket identifier"},
+        json_schema_extra={"example": "MH9CG-2", "description": "Order code with position ID (ORDER-POSITION format)"},
     )
     name: str = Field(..., json_schema_extra={"example": "Sam Smith", "description": "Attendee name (required)"})
 
