@@ -11,6 +11,15 @@ none
 none
 ### Changes:
 none
+
+## [3.0.0] - 2026-03-25
+
+### Major Changes
+- **Python upgrade**: Upgraded to Python 3.14 with support for new language features and improved performance
+- **Refactored Codebase**: Significant refactoring for better maintainability and extensibility
+- **Enhanced Testing**: Fixed all existing tests and added new test cases for edge scenarios
+- **Bug Fixes**: Resolved all known issues
+
 ## [2.0.0] - 2025-08-27
 
 ### Major Changes
