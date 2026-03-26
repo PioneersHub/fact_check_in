@@ -1,6 +1,9 @@
 import os
 from urllib.parse import urljoin
 
+# Must be set before any test module triggers app imports at collection time
+os.environ["FAKE_CHECK_IN_TEST_MODE"] = "1"
+
 import pytest
 import requests
 from fastapi.testclient import TestClient
@@ -42,7 +45,7 @@ def app_client(_set_tito_for_unit_tests):  # noqa: ARG001
     return tc
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def _set_tito_for_unit_tests():
     """Force tito backend before any test triggers app.main import.
 
@@ -54,9 +57,10 @@ def _set_tito_for_unit_tests():
     """
     from app.config import CONFIG
 
-    os.environ["TICKETING_BACKEND"] = "tito"
-    CONFIG["TICKETING_BACKEND"] = "tito"
-    yield
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("TICKETING_BACKEND", "tito")
+        CONFIG["TICKETING_BACKEND"] = "tito"
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -66,8 +70,7 @@ def reset_backend_cache():
     from app.config import CONFIG
     from app.ticketing import backend as backend_module
 
-    # Store original state
-    original_backend = os.environ.get("TICKETING_BACKEND")
+    # Save original CONFIG value
     original_config_backend = CONFIG.get("TICKETING_BACKEND")
 
     # Clear the cached backend before test
@@ -81,11 +84,6 @@ def reset_backend_cache():
     # Clear again after test
     backend_module._backend = None
 
-    # Restore original environment and CONFIG
-    if original_backend is not None:
-        os.environ["TICKETING_BACKEND"] = original_backend
-    elif "TICKETING_BACKEND" in os.environ:
-        del os.environ["TICKETING_BACKEND"]
-
+    # Restore CONFIG
     if original_config_backend is not None:
         CONFIG["TICKETING_BACKEND"] = original_config_backend
