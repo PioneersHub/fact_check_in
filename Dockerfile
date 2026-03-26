@@ -12,7 +12,6 @@ RUN /usr/local/bin/uv --version
 COPY pyproject.toml /code/
 COPY README.md /code/
 COPY app /code/app
-COPY event_config.yml /code/event_config.yml
 # Copy test data for FAKE_CHECK_IN_TEST_MODE
 COPY tests /code/tests
 
