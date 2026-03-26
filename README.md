@@ -170,11 +170,15 @@ export TITO_TOKEN="your_token"
 export ACCOUNT_SLUG="your_account"
 export EVENT_SLUG="your_event"
 
-# Build and run
-docker-compose up --build
+# Build Docker image
+# Make sure to set `DOCKER_DEFAULT_PLATFORM` to match the server architecture (e.g. linux/amd64) if building on a different platform.
+# You can also configure the image name and tag with `IMAGE_NAME` and `IMAGE_TAG` environment variables.
+# Example: `DOCKER_DEFAULT_PLATFORM=linux/amd64 IMAGE_NAME=validation.api IMAGE_TAG=latest docker compose build`
+docker compose build
 
-# Or run pre-built image
-docker-compose up
+# Start the container
+# You can also configure the container name with `CONTAINER_NAME` environment variable.
+docker compose up  # Use -d flag to run in detached mode
 ```
 
 **Note**: Startup takes ~30 seconds while loading ticket data.
