@@ -69,9 +69,8 @@ def _fetch_addon_positions(item_id: int) -> list[dict]:
     excluding cancelled orders.
     """
     url = f"{PRETIX_BASE_URL}/organizers/{ORGANIZER_SLUG}/events/{EVENT_SLUG}/orderpositions/"
-    results = (
-        _fetch_all_pages(url, {"item": item_id, "order__status": "p"})
-        + _fetch_all_pages(url, {"item": item_id, "order__status": "n"})
+    results = _fetch_all_pages(url, {"item": item_id, "order__status": "p"}) + _fetch_all_pages(
+        url, {"item": item_id, "order__status": "n"}
     )
 
     positions = []
