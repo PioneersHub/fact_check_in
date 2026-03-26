@@ -46,8 +46,9 @@ async def validate_pretix_attendee(attendee: PretixAttendee, response: Response)
     """Validate a Pretix attendee.
 
     Supports flexible validation options:
-    - Order ID + Name, Ticket ID (secret) + Name,
-    - Order ID + Name + Ticket ID (most secure).
+    - Name + Order ID,
+    - Name + Ticket ID,
+    - Name + Order ID + Ticket ID (most secure).
     """
     res: dict = attendee.model_dump()
     valid_order = False
