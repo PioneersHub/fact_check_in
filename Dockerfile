@@ -2,9 +2,8 @@ FROM python:3.14
 
 WORKDIR /code
 
-# Install UV properly and move it to a system-wide path
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    mv ~/.local/bin/uv /usr/local/bin/uv
+# Install UV into a system-wide path
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Verify UV installation
 RUN /usr/local/bin/uv --version
