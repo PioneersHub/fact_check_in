@@ -88,10 +88,8 @@ class TestPretixIntegration:
         result = pretix_api.search_reference("INVALID")
         assert result is None or len(result) == 0
 
-    def test_backend_selection(self):
+    def test_backend_selection(self, monkeypatch):
         """Test that the correct backend is selected based on config."""
-        import os
-
         from app.config import CONFIG
         from app.ticketing import backend as backend_module
 
@@ -99,7 +97,7 @@ class TestPretixIntegration:
         backend_module._backend = None
 
         # Test Tito backend
-        os.environ["TICKETING_BACKEND"] = "tito"
+        monkeypatch.setenv("TICKETING_BACKEND", "tito")
         CONFIG.TICKETING_BACKEND = "tito"
         backend = backend_module.get_backend()
         assert backend.__class__.__name__ == "TitoBackend"
@@ -108,15 +106,13 @@ class TestPretixIntegration:
         backend_module._backend = None
 
         # Test Pretix backend
-        os.environ["TICKETING_BACKEND"] = "pretix"
+        monkeypatch.setenv("TICKETING_BACKEND", "pretix")
         CONFIG.TICKETING_BACKEND = "pretix"
         backend = backend_module.get_backend()
         assert backend.__class__.__name__ == "PretixBackend"
 
-        # Reset to original
+        # Clear after test
         backend_module._backend = None
-        if "TICKETING_BACKEND" in os.environ:
-            del os.environ["TICKETING_BACKEND"]
 
     def test_pretix_fake_data_structure(self):
         """Test that Pretix fake data has the correct structure."""

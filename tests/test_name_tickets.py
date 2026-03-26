@@ -1,11 +1,7 @@
 # test_tickets.py
 import json
 import logging
-import os
 from pathlib import Path
-
-os.environ["FAKE_CHECK_IN_TEST_MODE"] = "1"
-os.environ["TICKETING_BACKEND"] = "tito"  # These tests are for Tito backend
 
 import pytest
 from fastapi.testclient import TestClient
@@ -34,11 +30,11 @@ with (test_dir / "test_data" / "fake_all_sales_fail.json").open() as f:
 
 
 @pytest.fixture
-def client():
+def client(monkeypatch) -> TestClient:
     # Set backend BEFORE importing app.main (which triggers router loading)
     from app.config import CONFIG
 
-    os.environ["TICKETING_BACKEND"] = "tito"
+    monkeypatch.setenv("TICKETING_BACKEND", "tito")
     CONFIG["TICKETING_BACKEND"] = "tito"
 
     from app.main import app
