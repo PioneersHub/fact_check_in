@@ -8,7 +8,7 @@ from starlette import status
 from app import interface, log
 from app.config import CONFIG
 from app.models.base import Email, Truthy
-from app.routers.common import force_refresh_all, refresh_all
+from app.routers.common import force_refresh_all
 from app.ticketing.backend import get_ticketing_backend
 from app.ticketing.utils import fuzzy_match_name
 
