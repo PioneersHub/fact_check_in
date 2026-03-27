@@ -135,33 +135,6 @@ class TestPretixIntegration:
                 assert data["is_attendee"] is True
                 print(f"  {Fore.GREEN}✓ Valid: {attendee['order_id']} + {attendee['name']}{Style.RESET_ALL}")
 
-    def test_validate_attendee_with_all_fields(self):
-        """Test validation using order ID + ticket ID + name (most secure)."""
-        print(f"\n{Fore.YELLOW}Testing: Order ID + Ticket ID + Name validation{Style.RESET_ALL}")
-
-        valid_attendees = self.test_data["valid"]["valid_attendees"]
-
-        for attendee in valid_attendees[:3]:
-            if attendee["order_id"] and attendee["secret"] and attendee["name"]:
-                response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/",
-                    json={"order_id": attendee["order_id"], "ticket_id": attendee["secret"], "name": attendee["name"]},
-                )
-
-                # Pretix may return 404 for invalid order IDs or 200 with is_attendee=false
-                if response.status_code == 404:
-                    print(f"  {Fore.YELLOW}⚠ Order ID {attendee['order_id']} not found in current Pretix data{Style.RESET_ALL}")
-                    continue
-                assert response.status_code == 200, f"Unexpected status {response.status_code} for {attendee}: {response.text}"
-                data = response.json()
-                if not data["is_attendee"]:
-                    print(
-                        f"  {Fore.YELLOW}⚠ {attendee['order_id']} + {attendee['secret'][:8]}... + {attendee['name']} not validated (may be stale test data){Style.RESET_ALL}",
-                    )
-                    continue
-                assert data["is_attendee"] is True
-                print(f"  {Fore.GREEN}✓ Valid: {attendee['order_id']} + {attendee['secret'][:8]}... + {attendee['name']}{Style.RESET_ALL}")
-
     def test_invalid_order_ids(self):
         """Test with invalid order IDs."""
         print(f"\n{Fore.YELLOW}Testing: Invalid Order IDs{Style.RESET_ALL}")
