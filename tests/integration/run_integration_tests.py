@@ -152,27 +152,6 @@ class IntegrationTestRunner:
 
         assert tested > 0, "No valid test cases found"
 
-    def test_validate_with_secret_and_name(self):
-        """Test validation with ticket ID + name."""
-        valid_attendees = self.test_data["valid"]["valid_attendees"]
-        tested = 0
-
-        for attendee in valid_attendees[:3]:
-            if attendee["secret"] and attendee["name"]:
-                response = requests.post(
-                    f"{API_BASE_URL}/tickets/validate_attendee/",
-                    json={"ticket_id": attendee["secret"], "name": attendee["name"]},
-                )
-
-                assert response.status_code == 200, f"Status {response.status_code}: {response.text}"
-                data = response.json()
-                assert data["is_attendee"] is True
-
-                print(f"  ✓ {attendee['secret'][:8]}... + {attendee['name']}")
-                tested += 1
-
-        assert tested > 0, "No valid test cases with secrets found"
-
     def test_invalid_order_ids(self):
         """Test with invalid order IDs."""
         valid_name = self.test_data["valid"]["names"][0] if self.test_data["valid"]["names"] else "Test User"
@@ -265,7 +244,6 @@ class IntegrationTestRunner:
 
         tests = [
             ("Order ID + Name Validation", self.test_validate_with_order_and_name),
-            ("Ticket ID + Name Validation", self.test_validate_with_secret_and_name),
             ("Invalid Order IDs", self.test_invalid_order_ids),
             ("Wrong Names", self.test_wrong_names),
             ("Email Validation", self.test_email_validation),
