@@ -1,6 +1,8 @@
 """Pretix-specific models."""
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+import re
+
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from app.models.base import BaseAttendee, BaseIsAnAttendee
 
@@ -10,13 +12,19 @@ class PretixAttendee(BaseAttendee):
 
     order_id: str | None = Field(
         None,
-        json_schema_extra={"example": "MH9CG", "description": "5-character order code (A-Z, 0-9, no O or 1)"},
+        description="5-character order code (A-Z, 0-9, no O or 1)",
+        json_schema_extra={"example": "MH9CG"},
     )
     ticket_id: str | None = Field(
         None,
-        json_schema_extra={"example": "MH9CG-2", "description": "Order code with position ID (ORDER-POSITION format)"},
+        description="Order code with position ID (ORDER-POSITION format)",
+        json_schema_extra={"example": "MH9CG-2"},
     )
-    name: str = Field(..., json_schema_extra={"example": "Sam Smith", "description": "Attendee name (required)"})
+    name: str = Field(
+        ...,
+        description="Attendee name (required)",
+        json_schema_extra={"example": "Sam Smith"},
+    )
 
     @field_validator("order_id")
     @classmethod
