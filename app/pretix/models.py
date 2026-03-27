@@ -40,7 +40,7 @@ class PretixAttendee(BaseAttendee):
 
     @field_validator("name")
     @classmethod
-    def valid_name(cls, v):
+    def validate_name(cls, v):
         v = v.strip()
         if not v:
             raise ValueError("Name is required")
