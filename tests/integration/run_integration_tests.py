@@ -213,8 +213,7 @@ class IntegrationTestRunner:
 
         assert response.status_code == 404, f"Expected 404 for invalid email, got {response.status_code}. Response: {response.text}"
         data = response.json()
-        assert data["valid"] is False, f"Expected valid=False, got {data}"
-
+        assert data.get("detail", "") == "Email not found", f"Expected detail='Email not found', got {data}"
         print(f"  ✓ Rejected: {invalid_email}")
 
     def test_common_endpoints(self):
