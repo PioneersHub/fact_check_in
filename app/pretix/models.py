@@ -67,6 +67,12 @@ class PretixAttendee(BaseAttendee):
 class PretixIsAnAttendee(PretixAttendee, BaseIsAnAttendee):
     """Pretix validation response model."""
 
+    email: EmailStr | None = Field(
+        None,
+        description="Attendee email address",
+        json_schema_extra={"example": "guido@example.com"},
+    )
+
 
 class TShirtVariantCount(BaseModel):
     """Count of a specific T-shirt variant."""

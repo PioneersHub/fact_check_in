@@ -126,7 +126,7 @@ def detailed_positive_result(item) -> dict[str, bool]:
 
     Sets attributes to True if matched, never to False.
     """
-    res = {"name": item["name"], "order_id": item["order"], "is_attendee": True, "ticket_id": item["reference"]}
+    res = {"name": item["name"], "order_id": item["order"], "is_attendee": True, "ticket_id": item["reference"], "email": item["email"]}
 
     # add ticket features via categories.by_id
     _attributes = interface.release_id_map[item["item"]]["_attributes"]
