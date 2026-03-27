@@ -38,6 +38,16 @@ class PretixAttendee(BaseAttendee):
             raise ValueError("Order ID must be alphanumeric")
         return v
 
+    @field_validator("ticket_id")
+    @classmethod
+    def validate_ticket_id(cls, v):
+        if v is None:
+            return v
+        v = v.strip().upper()
+        if not re.fullmatch(r"[A-Z0-9]{5}-\d+", v):
+            raise ValueError("ticket_id must be in ORDER-POSITION format (e.g. MH9CG-2)")
+        return v
+
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
