@@ -12,6 +12,7 @@ dependencies = [
     "mkdocs-material[imaging]>=9.7.6",
     "omegaconf>=2.3.0",
     "pydantic[email]>=2.12.5",
+    "PyJWT[crypto]>=2.10.0",
     "python-dotenv>=1.2.2",
     "requests>=2.33.1",
     "rich>=14.3.3",

@@ -129,6 +129,24 @@ PRETIX_EVENT_SLUG="your_event_slug"
 TICKETING_BACKEND=pretix
 ```
 
+### 2b. Configure Authentication (Optional)
+
+The API supports OAuth2/OIDC authentication via Keycloak (or any OIDC-compliant provider). All
+`/tickets/` endpoints require a valid JWT Bearer token when authentication is enabled. Healthcheck
+endpoints remain public.
+
+Add to your `.env` file:
+
+```bash
+OIDC_ISSUER_URL="https://keycloak.example.com/realms/your-realm"
+OIDC_AUDIENCE="your-keycloak-client-id"
+# Optional: override signing algorithm (default: RS256)
+# OIDC_ALGORITHMS="RS256"
+```
+
+When `OIDC_ISSUER_URL` is not set, authentication is disabled and all endpoints are open. This is
+the default for local development.
+
 ### 3. Configure Event Mapping (Pretix only)
 
 Edit `event_config.yml` to map your event's ticket categories and special roles:
@@ -162,23 +180,57 @@ pretix_mapping:
 uvicorn app.main:app --port 9898 --host "0.0.0.0"
 ```
 
-**Option B: Docker**
+**Option B: Docker (Development)**
+
+Running `docker compose up` loads `compose.override.yaml` automatically, which starts a local
+Keycloak instance alongside the API for OAuth2 development.
 
 ```bash
-# Set environment variables in .env file or export them
-export TITO_TOKEN="your_token"
-export ACCOUNT_SLUG="your_account"
-export EVENT_SLUG="your_event"
+# Starts fact_check_in + Keycloak (dev mode with hot-reload)
+docker compose up
+```
 
-# Build Docker image
-# Make sure to set `DOCKER_DEFAULT_PLATFORM` to match the server architecture (e.g. linux/amd64) if building on a different platform.
-# You can also configure the image name and tag with `IMAGE_NAME` and `IMAGE_TAG` environment variables.
+Keycloak quick setup for machine-to-machine access:
+
+1. Open `http://localhost:8080` and login with `admin / admin`.
+2. Create realm `fact-check-in`.
+3. Create API client (the token audience):
+   - Client ID: `fact-check-in-api`
+   - Protocol: `OpenID Connect`
+   - Client authentication: `Off`
+4. Create a caller client for each service that will call the API. Example:
+   - Client ID: `fact-check-in-caller`
+   - Protocol: `OpenID Connect`
+   - Client authentication: `On`
+   - Enable `Service account roles`
+   - Copy client secret from `Credentials`
+5. Add audience mapper so caller tokens include API audience:
+   - Create client scope `fact-check-in-api-access`
+   - Add mapper type `Audience` with included audience `fact-check-in-api`
+   - Assign that client scope to `fact-check-in-caller`
+
+Set API env vars in `.env`:
+
+```bash
+# Docker: http://keycloak:8080 | Prod: https://auth.yourdomain.com | Local tools: add 127.0.0.1 keycloak to /etc/hosts
+OIDC_ISSUER_URL=http://keycloak:8080/realms/fact-check-in
+OIDC_AUDIENCE="fact-check-in-api"
+```
+
+**Option C: Docker (Production)**
+
+In production, Keycloak should already be running (dedicated host or managed service). Use only
+`compose.yaml` to skip the dev override, and point your host nginx to port 9898.
+
+```bash
+# Build the image
+# Set DOCKER_DEFAULT_PLATFORM to match server arch if building cross-platform.
+# Configure image name/tag with IMAGE_NAME and IMAGE_TAG env vars.
 # Example: `DOCKER_DEFAULT_PLATFORM=linux/amd64 IMAGE_NAME=validation.api IMAGE_TAG=latest docker compose build`
 docker compose build
 
-# Start the container
-# You can also configure the container name with `CONTAINER_NAME` environment variable.
-docker compose up  # Use -d flag to run in detached mode
+# Start without the dev Keycloak override
+docker compose -f compose.yaml up -d
 ```
 
 **Note**: Startup takes ~30 seconds while loading ticket data.
@@ -190,6 +242,8 @@ docker compose up  # Use -d flag to run in detached mode
 
 ## Features
 
+- **OAuth2 Authentication**: JWT validation via Keycloak or any OIDC provider, with OIDC
+  auto-discovery, JWKS caching, and typed token claims
 - **Modular Backend Architecture**: Easily switch between ticketing systems or add new ones
 - **Dynamic Configuration**: Backend selection via environment variables or config files
 - **Smart Validation**:
@@ -215,10 +269,15 @@ ticketing platforms:
 
 ## API Endpoints
 
+All `/tickets/` endpoints require a valid Bearer token when authentication is enabled.
+
 - `POST /tickets/validate_name/` - Validate by ticket ID and name
 - `POST /tickets/validate_email/` - Validate by email
+- `POST /tickets/validate_attendee/` - Validate by order ID and name (Pretix)
+- `GET /tickets/ticket_types/` - List available ticket types
+- `GET /tickets/ticket_count/` - Count of tickets in cache
 - `GET /tickets/refresh_all/` - Force reload ticket data
-- `GET /healthcheck/alive` - Health check
+- `GET /healthcheck/alive` - Health check (public, no auth required)
 
 ## Development
 

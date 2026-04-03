@@ -19,6 +19,10 @@ uv pip install -e .
 
 # Create .env file with required credentials:
 
+# For all backends - OAuth2 / Keycloak authentication (required in production):
+# OIDC_ISSUER_URL="https://keycloak.example.com/realms/your-realm"
+# OIDC_AUDIENCE="your-keycloak-client-id"
+
 # For Tito (default):
 # TITO_TOKEN="your_secret_token"
 # ACCOUNT_SLUG="account_slug_from_tito"
@@ -40,8 +44,11 @@ uvicorn app.main:app --port 8080 --host "0.0.0.0"
 # OR with reload for development
 uvicorn app.main:app --reload
 
-# Run with Docker
-docker-compose up
+# Run with Docker (dev mode with Keycloak)
+docker compose up
+
+# Run on server (host nginx in front)
+docker compose -f compose.yaml up -d
 ```
 
 ### Testing
@@ -106,12 +113,23 @@ bump2version release --new-version 0.6.0dev1
    - Loads data from Tito API on startup (~30 seconds)
    - Supports refresh via `/tickets/refresh_all/` endpoint
 
-3. **Configuration** (`app/config/`)
+3. **Authentication** (`app/auth.py`)
+   - OAuth2 with Keycloak via JWT Bearer tokens
+   - OIDC discovery auto-resolves JWKS URI from issuer URL
+   - Validates JWT signature (via JWKS), expiration, issuer, audience, and sub
+   - Enabled when `OIDC_ISSUER_URL` env var is set; disabled when unset
+   - Applied to all `/tickets/` router endpoints via FastAPI dependency injection
+   - Healthcheck endpoints (`/`, `/healthcheck/alive`) remain public
+   - JWKS keys cached with 1-hour TTL, thread-safe
+   - Returns typed `TokenClaims` Pydantic model (or dev sentinel when disabled)
+   - Config loaded once at startup via `AuthConfig` dataclass
+
+4. **Configuration** (`app/config/`)
    - Uses OmegaConf for configuration management
    - Environment variables loaded from `.env` file
    - Test mode available via `FAKE_CHECK_IN_TEST_MODE=1`
 
-4. **Models** (`app/models/`)
+5. **Models** (`app/models/`)
    - Pydantic models for request/response validation
    - Strict type checking at runtime
 

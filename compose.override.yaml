@@ -1,0 +1,65 @@
+# compose.override.yaml - Development overrides (auto-loaded by docker compose)
+#
+# Starts Keycloak alongside the API for local OAuth2 development.
+# The API auto-reloads on code changes via volume mount.
+# This file is for development only. Do not use it in production.
+#
+# Usage:
+#   docker compose up              # starts both fact_check_in + keycloak
+#   docker compose up keycloak     # start only Keycloak
+#
+# Keycloak Admin Console:  http://localhost:8080
+#   User: admin / admin
+#
+# Minimal Keycloak setup:
+#   Realm: fact-check-in
+#   API client (audience): fact-check-in-api (client auth Off)
+#   Caller client: fact-check-in-caller (client auth On, service accounts enabled)
+#   Add audience mapper so caller tokens include aud=fact-check-in-api
+#
+# Then set OIDC_ISSUER_URL and OIDC_AUDIENCE in your .env file. Example:
+#   OIDC_ISSUER_URL=http://keycloak:8080/realms/fact-check-in
+#   OIDC_AUDIENCE=fact-check-in-api
+
+services:
+  fact_check_in:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - FAKE_CHECK_IN_TEST_MODE=${FAKE_CHECK_IN_TEST_MODE:-1}
+      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL:-}
+      - OIDC_AUDIENCE=${OIDC_AUDIENCE:-}
+    volumes:
+      - ./app:/code/app
+      - ./tests:/code/tests
+      - ./event_config.yml:/code/event_config.yml:ro
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    command:
+      - /usr/local/bin/uv
+      - run
+      - uvicorn
+      - app.main:app
+      - --host=0.0.0.0
+      - --port=9898
+      - --reload
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.7
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8080"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
