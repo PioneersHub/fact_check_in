@@ -1,21 +1,30 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Backward-incompatible changes:
+
 none
+
 ### Deprecations:
+
 none
+
 ### Changes:
+
 none
 
 ## [3.0.0] - 2026-03-25
 
 ### Major Changes
-- **Python upgrade**: Upgraded to Python 3.14 with support for new language features and improved performance
+
+- **Python upgrade**: Upgraded to Python 3.14 with support for new language features and improved
+  performance
 - **Refactored Codebase**: Significant refactoring for better maintainability and extensibility
 - **Enhanced Testing**: Fixed all existing tests and added new test cases for edge scenarios
 - **Bug Fixes**: Resolved all known issues
@@ -23,12 +32,14 @@ none
 ## [2.0.0] - 2025-08-27
 
 ### Major Changes
+
 - **Docker Support**: Added full Docker containerization with docker-compose configuration
 - **Enhanced Configuration**: Introduced `event_config.yml` for event-specific ticket mapping
 - **Improved Pretix Integration**: Added ticket ID and order-based attribute mapping
 - **Better Documentation**: Added comprehensive setup instructions for both Tito and Pretix
 
 ### Added
+
 - Docker support with environment variable configuration
 - `event_config.yml` for centralized event configuration
 - Support for multi-role assignments (speaker_and_sponsor, organizer_and_speaker, etc.)
@@ -38,24 +49,32 @@ none
 - Built-in attributes documentation
 
 ### Changed
+
 - Improved environment variable handling in Docker container
 - Enhanced Pretix category mapping with multiple configuration options
 - Better separation of application and event configuration
 - Updated documentation structure
 
 ### Fixed
+
 - Docker environment variable loading issues
 - Pretix attribute mapping edge cases
 
 ## [1.0.0] - 2025-06-19
 
 ### Major Features
-- **Modular Backend Architecture**: Complete separation of Tito and Pretix ticketing systems with pluggable backend design
-- **Dynamic Router Loading**: Backend-specific API routers are loaded at runtime based on configuration
-- **Full Pretix Integration**: Comprehensive support for Pretix API including categories, items, and order positions
-- **Enhanced Configuration**: Support for environment variable overrides and backend-specific settings
+
+- **Modular Backend Architecture**: Complete separation of Tito and Pretix ticketing systems with
+  pluggable backend design
+- **Dynamic Router Loading**: Backend-specific API routers are loaded at runtime based on
+  configuration
+- **Full Pretix Integration**: Comprehensive support for Pretix API including categories, items, and
+  order positions
+- **Enhanced Configuration**: Support for environment variable overrides and backend-specific
+  settings
 
 ### Added
+
 - Abstract `TicketingBackend` interface for implementing new ticketing systems
 - Separate backend implementations in `app/tito/` and `app/pretix/` directories
 - Dynamic backend selection via `TICKETING_BACKEND` environment variable
@@ -68,6 +87,7 @@ none
 - Structured logging with better error handling
 
 ### Changed
+
 - Moved backend-specific logic out of common modules into dedicated implementations
 - Router loading now happens dynamically based on selected backend
 - Test infrastructure updated to support backend-specific test suites
@@ -75,35 +95,43 @@ none
 - API endpoints remain consistent across backends for compatibility
 
 ### Fixed
+
 - Test isolation issues when switching between backends
 - Backend caching problems in test environments
 - Singleton pattern issues with Interface class
 - Environment variable configuration precedence
 
 ### Backward-incompatible changes
+
 - Direct imports from `app.routers.tickets` no longer work (use dynamic loading)
 - Backend configuration must be set before application startup
 - Test files must explicitly set backend for proper operation
 
 ## [0.7.0] - 2025-06-17
+
 - Add Pretix backend support
 - Move log files to dedicated logs directory
 - Add versioning guidelines
 
 ## [0.6.2] - 2025-05-15
+
 - Fix pre-commit configuration
 
 ## [0.6.1] - 2025-05-15
+
 - Fix pre-commit hooks
 
 ## [0.6.0] - 2025-05-15
+
 - Add ruff linting and formatting
 - Move name matching thresholds to configuration
 
 ## 0.5.0 - 2025-02-22
+
 - Cleanup of redundant code and documentation
 - Switch to uv, removed conda, requirements
 - Switch to mkdocs, removed sphinx
 
 ## 0.1.0 - 2023-03-29
+
 - Initial Setup
