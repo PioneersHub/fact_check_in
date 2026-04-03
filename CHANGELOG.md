@@ -27,7 +27,22 @@ none
   performance
 - **Refactored Codebase**: Significant refactoring for better maintainability and extensibility
 - **Enhanced Testing**: Fixed all existing tests and added new test cases for edge scenarios
+- **Authentication**: All /tickets/ endpoints now require valid JWT Bearer tokens when
+  authentication is enabled
 - **Bug Fixes**: Resolved all known issues
+
+### Added
+
+- **OAuth2 Authentication**: JWT validation via Keycloak or any OIDC-compliant provider
+  - Auth disabled by default when `OIDC_ISSUER_URL` is not set (dev-friendly)
+- `compose.override.yaml` for local development with Keycloak
+- `PyJWT[crypto]` dependency for RS256 JWT decoding
+
+### Changed
+
+- `docker compose up` starts Keycloak in dev mode via the override file
+- Production deployment uses `docker compose -f compose.yaml up -d` (no Keycloak)
+- `.env.example` and `.env.pretix.example` updated with OIDC variables
 
 ## [2.0.0] - 2025-08-27
 

@@ -4,11 +4,12 @@ import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, Request, status
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from app.auth import verify_token
 from app.config import CONFIG
 from app.middleware import middleware
 from app.routers import routers
@@ -53,6 +54,17 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     if os.environ.get("PORT"):
         port = os.environ.get("PORT")
 
+    from app.auth import get_auth_config
+
+    auth_config = get_auth_config()
+    if auth_config.enabled:
+        logger.info(
+            "OAuth2 authentication is ENABLED (issuer: %s)",
+            auth_config.issuer_url,
+        )
+    else:
+        logger.warning("OAuth2 authentication is DISABLED. Set OIDC_ISSUER_URL env var to enable")
+
     logger.info("\n" + "=" * 60)
     logger.info(f"🚀 {CONFIG.PROJECT_NAME} Ready!")
     logger.info("=" * 60)
@@ -67,8 +79,10 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
 app = FastAPI(title=CONFIG.PROJECT_NAME, middleware=middleware, lifespan=lifespan)
 
 # routers are dynamically collected in routers.__init__.py file
+# All router endpoints require a valid OAuth2 Bearer token when OIDC_ISSUER_URL is set.
+# Healthcheck endpoints defined directly on the app remain public.
 for router in sorted(routers, key=lambda x: x.router.tags[0]):
-    app.include_router(router.router)
+    app.include_router(router.router, dependencies=[Depends(verify_token)])
 
 
 # Report validation errors, see https://stackoverflow.com/a/62937228

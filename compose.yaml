@@ -8,7 +8,6 @@ services:
     env_file:
       - .env
     environment:
-      # These will override values from .env file
       # Shell environment variables take precedence over .env file
       - TICKETING_BACKEND
       - TITO_TOKEN
@@ -18,6 +17,8 @@ services:
       - PRETIX_BASE_URL
       - PRETIX_ORGANIZER_SLUG
       - PRETIX_EVENT_SLUG
+      - OIDC_ISSUER_URL
+      - OIDC_AUDIENCE
       - FAKE_CHECK_IN_TEST_MODE
     volumes:
       # Mount event_config.yml for live updates without rebuilding
