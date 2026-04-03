@@ -159,7 +159,7 @@ pretix_mapping:
 
 ```bash
 # IMPORTANT: Use single worker only!
-uvicorn app.main:app --port 8080 --host "0.0.0.0"
+uvicorn app.main:app --port 9898 --host "0.0.0.0"
 ```
 
 **Option B: Docker**
@@ -185,8 +185,8 @@ docker compose up  # Use -d flag to run in detached mode
 
 **API Documentation**: Once running, visit:
 
-- Interactive API docs: http://localhost:8080/docs
-- ReDoc: http://localhost:8080/redoc
+- Interactive API docs: http://localhost:9898/docs
+- ReDoc: http://localhost:9898/redoc
 
 ## Features
 
@@ -245,7 +245,7 @@ This project was partially updated with Claude CLI. Instructions for Claude are 
 ## Documentation
 
 - [Developer Guide](DEVELOPER.md) - Development setup and guidelines
-- [API Documentation](http://localhost:8080/docs) - Interactive API docs (when running)
+- [API Documentation](http://localhost:9898/docs) - Interactive API docs (when running)
 
 # Other
 
