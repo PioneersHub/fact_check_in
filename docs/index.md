@@ -10,7 +10,7 @@ architecture.
 
 ## Quick Start
 
-#### Build-In `attributes`
+#### Built-In `attributes`
 
 The following attributes are built-in and default to `False`:
 
@@ -27,7 +27,7 @@ The following attributes are built-in and default to `False`:
 
 It's important to follow a base structure when setting up the tickets in Pretix already.
 
-Roles can bes assigned via:
+Roles can be assigned via:
 
 #### 1. Ticket Categories
 
@@ -78,7 +78,7 @@ to True. A mix of adding and removing access will be confusing.
 You grant all ticket holders access to remote attendance `online_access: True`. But there are also
 social event tickets available for a +1, social event tickets does not include `online_access`
 
-- put event tickets in own category, e.,g. Social Event
+- put event tickets in own category, e.g. Social Event
 
 ```yaml
 pretix_mapping:
