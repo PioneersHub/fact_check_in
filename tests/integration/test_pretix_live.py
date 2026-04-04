@@ -56,8 +56,20 @@ class TestPretixIntegration:
         # FAKE_CHECK_IN_TEST_MODE may be set by unit tests running in the same
         # pytest session, so we explicitly clear it here.
         env.pop("FAKE_CHECK_IN_TEST_MODE", None)
+        # Disable OAuth2 for integration tests - we only test Pretix functionality.
+        # app/config/__init__.py calls reload_env() which reads .env with
+        # load_dotenv(override=True), so env vars set here get overwritten.
+        # We launch a wrapper that clears OIDC_ISSUER_URL after app.config import
+        # (which triggers reload_env) but before the OIDC config is cached.
+        server_script = (
+            "import os; "
+            "import app.config; "  # triggers reload_env()
+            "os.environ.pop('OIDC_ISSUER_URL', None); "
+            "import uvicorn; "
+            "uvicorn.run('app.main:app', port=8002, host='127.0.0.1')"
+        )
         cls.server_process = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", "8002", "--host", "127.0.0.1"],
+            [sys.executable, "-c", server_script],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

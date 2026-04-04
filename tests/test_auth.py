@@ -115,7 +115,7 @@ def auth_client(monkeypatch, jwks_response) -> Generator[TestClient]:
 
     jwks_uri = f"{ISSUER_URL}/protocol/openid-connect/certs"
     with (
-        patch("requests.get", side_effect=_mock_oidc_discovery(jwks_uri)),
+        patch("app.auth.requests.get", side_effect=_mock_oidc_discovery(jwks_uri)),
         patch.object(
             jwt.PyJWKClient,
             "fetch_data",
@@ -266,3 +266,42 @@ class TestOAuth2Disabled:
             headers={"Authorization": "Bearer some-token"},
         )
         assert response.status_code == 200  # noqa: PLR2004
+
+
+# -- Config validation tests --
+
+
+class TestAuthConfigValidation:
+    """Tests for startup validation of auth configuration."""
+
+    def test_missing_audience_raises(self, monkeypatch):
+        """Enabling auth without OIDC_AUDIENCE must fail at startup."""
+        monkeypatch.setenv("OIDC_ISSUER_URL", ISSUER_URL)
+        monkeypatch.delenv("OIDC_AUDIENCE", raising=False)
+        _clear_auth_caches()
+        with pytest.raises(ValueError, match="OIDC_AUDIENCE must be set explicitly"):
+            from app.auth import get_auth_config
+
+            get_auth_config()
+
+    def test_empty_algorithms_raises(self, monkeypatch):
+        """Empty OIDC_ALGORITHMS with auth enabled must fail at startup."""
+        monkeypatch.setenv("OIDC_ISSUER_URL", ISSUER_URL)
+        monkeypatch.setenv("OIDC_AUDIENCE", AUDIENCE)
+        monkeypatch.setenv("OIDC_ALGORITHMS", "")
+        _clear_auth_caches()
+        with pytest.raises(ValueError, match="at least one valid algorithm"):
+            from app.auth import get_auth_config
+
+            get_auth_config()
+
+    def test_trailing_comma_algorithms_filtered(self, monkeypatch):
+        """Trailing commas in OIDC_ALGORITHMS should not produce empty entries."""
+        monkeypatch.setenv("OIDC_ISSUER_URL", ISSUER_URL)
+        monkeypatch.setenv("OIDC_AUDIENCE", AUDIENCE)
+        monkeypatch.setenv("OIDC_ALGORITHMS", "RS256,")
+        _clear_auth_caches()
+        from app.auth import get_auth_config
+
+        config = get_auth_config()
+        assert config.algorithms == ["RS256"]
