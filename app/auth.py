@@ -39,7 +39,7 @@ class AuthConfig:
     """OIDC auth settings, loaded once from environment variables."""
 
     issuer_url: str = ""
-    audience: str = "account"
+    audience: str = ""
     algorithms: list[str] = field(default_factory=lambda: ["RS256"])
 
     @property
@@ -49,10 +49,20 @@ class AuthConfig:
 
 @lru_cache(maxsize=1)
 def get_auth_config() -> AuthConfig:
-    """Load auth config from env vars once and cache it forever."""
+    """Load auth config from env vars once and cache it forever.
+
+    Raises ValueError at startup when auth is enabled but required settings are missing or invalid.
+    """
     issuer = os.environ.get("OIDC_ISSUER_URL", "").rstrip("/")
-    audience = os.environ.get("OIDC_AUDIENCE", "account")
-    algorithms = [a.strip() for a in os.environ.get("OIDC_ALGORITHMS", "RS256").split(",")]
+    audience = os.environ.get("OIDC_AUDIENCE", "")
+    algorithms = [a.strip() for a in os.environ.get("OIDC_ALGORITHMS", "RS256").split(",") if a.strip()]
+
+    if issuer:
+        if not audience:
+            raise ValueError("OIDC_AUDIENCE must be set explicitly when OIDC_ISSUER_URL is configured.")
+        if not algorithms:
+            raise ValueError("OIDC_ALGORITHMS must contain at least one valid algorithm when auth is enabled.")
+
     return AuthConfig(issuer_url=issuer, audience=audience, algorithms=algorithms)
 
 
