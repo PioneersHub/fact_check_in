@@ -64,7 +64,23 @@ def _set_tito_for_unit_tests():
 
 
 @pytest.fixture(autouse=True)
-def reset_backend_cache():
+def _clear_oidc_env(monkeypatch):
+    """Ensure OIDC env vars are absent and auth config cache is reset.
+
+    Without clearing the lru_cache, a cached AuthConfig from a previous test
+    (e.g. test_auth.py's auth_client) persists and enables OAuth2 for later
+    tests that don't expect it.
+    """
+    from app.auth import get_auth_config
+
+    monkeypatch.delenv("OIDC_ISSUER_URL", raising=False)
+    monkeypatch.delenv("OIDC_AUDIENCE", raising=False)
+    monkeypatch.delenv("OIDC_ALGORITHMS", raising=False)
+    get_auth_config.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_backend_cache(monkeypatch):
     """Reset the backend cache before each test to ensure proper isolation."""
     from app import reset_interface
     from app.config import CONFIG
@@ -78,6 +94,13 @@ def reset_backend_cache():
 
     # Reset interface to ensure it uses the correct backend
     reset_interface(dummy_mode=True)
+
+    # reload_env() in app/config/__init__.py may override FAKE_CHECK_IN_TEST_MODE
+    # from .env at import time, leaving tito_api.in_dummy_mode as False (it is a
+    # module-level bool copy).  Force it to True so the Tito backend never
+    # attempts live API calls during tests.
+    monkeypatch.setattr("app.tito.tito_api.in_dummy_mode", True)
+    monkeypatch.setattr("app.in_dummy_mode", True)
 
     yield
 
