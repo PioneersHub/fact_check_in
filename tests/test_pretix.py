@@ -19,6 +19,8 @@ Reference URLs for Pretix API documentation:
 """
 
 from http import HTTPStatus
+from threading import Barrier, Thread
+from time import sleep
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -293,3 +295,55 @@ class TestValidateEmailEndpoint:
             pretix_client.post("/tickets/validate_email/", json={"email": self.KNOWN_EMAIL})
 
         mock_refresh.assert_not_called()
+
+
+class TestRefreshAllLock:
+    """Tests for the singleflight guard on refresh_all.
+
+    Without the lock, concurrent threads each see an expired TTL at the same
+    instant and each start their own expensive Pretix API refresh. The lock
+    ensures only the first thread refreshes; the rest wait and then find the
+    timestamp fresh and return without starting another refresh.
+    """
+
+    N_THREADS = 5
+
+    def test_concurrent_calls_run_force_refresh_once(self):
+        """Concurrent callers trigger force_refresh_all exactly once.
+
+        All threads start at the same instant via a Barrier. The slow inner
+        function holds the lock for 0.02 s, giving the other threads time to
+        queue up behind it. Without the singleflight guard they would all call
+        the inner function; with it, only the first one does.
+        """
+        import app.routers.common as common_module
+        from app.routers.common import refresh_all
+
+        call_count = 0
+        barrier = Barrier(self.N_THREADS)
+
+        def slow_force_refresh():
+            nonlocal call_count
+            call_count += 1
+            sleep(0.02)  # hold the lock long enough for other threads to queue up
+            return {"message": "ok"}
+
+        # Force TTL expiry so the first call triggers a refresh.
+        original_time = common_module._state.last_time
+        common_module._state.last_time = 0.0
+        try:
+            with patch("app.routers.common.force_refresh_all", side_effect=slow_force_refresh):
+
+                def task():
+                    barrier.wait()  # release all threads at the same instant
+                    refresh_all()
+
+                threads = [Thread(target=task) for _ in range(self.N_THREADS)]
+                for t in threads:
+                    t.start()
+                for t in threads:
+                    t.join()
+        finally:
+            common_module._state.last_time = original_time
+
+        assert call_count == 1
