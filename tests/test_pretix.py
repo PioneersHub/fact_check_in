@@ -18,7 +18,12 @@ Reference URLs for Pretix API documentation:
   - Format example: "ORDER123" with position ID creates reference "ORDER123-1"
 """
 
+from http import HTTPStatus
 from unittest.mock import MagicMock, patch
+
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 from app.pretix import pretix_api
 
@@ -203,3 +208,88 @@ class TestPretixIntegration:
         for release in interface.all_releases.values():
             if release.get("category_id"):
                 assert "category" in release
+
+
+class TestValidateEmailEndpoint:
+    """Tests for POST /tickets/validate_email/ on the Pretix backend.
+
+    These tests verify the non-blocking 404 behavior: unknown emails return 404
+    immediately and schedule a background refresh, rather than blocking the
+    caller for the duration of a full Pretix API refresh (~13 s).
+    """
+
+    # A known email from the fake Pretix dataset (tests/test_data/fake_all_sales_pretix.json)
+    KNOWN_EMAIL = "angel.hill@example.net"
+    UNKNOWN_EMAIL = "nobody@doesnotexist.example"
+
+    @pytest.fixture
+    def pretix_client(self):
+        """A minimal FastAPI app that only mounts the Pretix router.
+
+        Using a dedicated app (instead of the session-scoped Tito client from
+        conftest.py) keeps these tests isolated from backend-switching side
+        effects and avoids touching the global app state.
+        """
+        from app.pretix.router import router
+
+        mini_app = FastAPI()
+        mini_app.include_router(router)
+        return TestClient(mini_app, raise_server_exceptions=True)
+
+    @pytest.fixture
+    def backend_with_email(self):
+        """Mock PretixBackend whose email cache contains KNOWN_EMAIL."""
+        backend = MagicMock()
+        backend.api.interface.valid_emails = {self.KNOWN_EMAIL: {"email": self.KNOWN_EMAIL}}
+        return backend
+
+    @pytest.fixture
+    def backend_empty(self):
+        """Mock PretixBackend with an empty email cache (simulates a cache miss)."""
+        backend = MagicMock()
+        backend.api.interface.valid_emails = {}
+        return backend
+
+    def test_known_email_returns_200(self, pretix_client, backend_with_email):
+        """An email present in the cache returns 200 without scheduling a refresh."""
+        with (
+            patch("app.pretix.router.get_ticketing_backend", return_value=backend_with_email),
+            patch("app.routers.common.refresh_all") as mock_refresh,
+        ):
+            response = pretix_client.post("/tickets/validate_email/", json={"email": self.KNOWN_EMAIL})
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == {"valid": True}
+        mock_refresh.assert_not_called()
+
+    def test_unknown_email_returns_404_immediately(self, pretix_client, backend_empty):
+        """An email absent from the cache returns 404 without waiting for a refresh."""
+        with patch("app.pretix.router.get_ticketing_backend", return_value=backend_empty), patch("app.routers.common.refresh_all"):
+            response = pretix_client.post("/tickets/validate_email/", json={"email": self.UNKNOWN_EMAIL})
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json() == {"valid": False}
+
+    def test_unknown_email_triggers_background_refresh(self, pretix_client, backend_empty):
+        """A cache miss schedules exactly one background refresh for the next caller.
+
+        The TestClient runs background tasks synchronously after the response, so
+        the mock is called once by the time the assertion runs.
+        """
+        with (
+            patch("app.pretix.router.get_ticketing_backend", return_value=backend_empty),
+            patch("app.routers.common.refresh_all") as mock_refresh,
+        ):
+            pretix_client.post("/tickets/validate_email/", json={"email": self.UNKNOWN_EMAIL})
+
+        mock_refresh.assert_called_once()
+
+    def test_known_email_does_not_trigger_refresh(self, pretix_client, backend_with_email):
+        """No background refresh is scheduled when the email IS found in cache."""
+        with (
+            patch("app.pretix.router.get_ticketing_backend", return_value=backend_with_email),
+            patch("app.routers.common.refresh_all") as mock_refresh,
+        ):
+            pretix_client.post("/tickets/validate_email/", json={"email": self.KNOWN_EMAIL})
+
+        mock_refresh.assert_not_called()
