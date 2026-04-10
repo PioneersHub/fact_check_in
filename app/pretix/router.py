@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Response
 from starlette import status
 
 from app import interface, log
@@ -22,23 +22,35 @@ router = APIRouter(prefix="/tickets", tags=["Pretix Validation"])
 
 
 @router.post("/validate_email/", response_model=Truthy)
-async def search_email(email: Email, response: Response):  # noqa: ARG001
-    """Search for a participant by email in preloaded orders."""
+async def search_email(email: Email, response: Response, background_tasks: BackgroundTasks):
+    """Search for a participant by email in the preloaded orders cache.
+
+    Checks the local email cache first. If found, returns 200 immediately.
+
+    If not found, schedules a background refresh of the Pretix data and returns
+    404 right away. The cache will be up-to-date for the next request, so callers
+    can retry after a few seconds to pick up very recent registrations.
+
+    This avoids blocking for ~13 s on every cache miss (the full Pretix API
+    refresh cost), which occurred whenever the internal TTL cache expired.
+
+    Note: the status code is set via the Response object rather than raising
+    HTTPException so that FastAPI can attach the background tasks to the response
+    before sending it. Raising an exception bypasses that attachment step.
+    """
     req = email.model_dump()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
     backend: PretixBackend = get_ticketing_backend()  # type: ignore[assignment]
     if req["email"] in backend.api.interface.valid_emails:
         return {"valid": True}
-    # Email not found in cache - force a refresh and try again.
-    # Pretix does have an email search endpoint but refreshing all data
-    # is simpler and keeps the cached data current.
+    # Not in cache - schedule a background refresh so the next caller sees
+    # up-to-date data, then return 404 immediately.
     from app.routers.common import refresh_all  # avoid circular import at module level
 
-    refresh_all()
-    if req["email"] in backend.api.interface.valid_emails:
-        return {"valid": True}
-    raise HTTPException(status_code=404, detail="Email not found")
+    background_tasks.add_task(refresh_all)
+    response.status_code = status.HTTP_404_NOT_FOUND
+    return {"valid": False}
 
 
 @router.post("/validate_attendee/", response_model=PretixIsAnAttendee)
