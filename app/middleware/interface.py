@@ -101,10 +101,15 @@ class Interface:
     def all_sales(self, value: object) -> None:
         # value must be a dict, but typed as object to keep setter callable with
         # any trigger value (the actual data is read from self._all_sales).
+        # Every derived cache must be rebuilt here; otherwise a later refresh
+        # that adds new sales would leave stale lookup dicts and cause false
+        # 404s on /validate_email/ and /validate_name/ for freshly sold tickets.
         self._all_sales = value  # type: ignore[assignment]
         self.valid_order_ids = None  # type: ignore[assignment]  # trigger cache rebuild
         self.valid_order_email_combo = None  # type: ignore[assignment]  # trigger cache rebuild
         self.valid_order_name_combo = None  # type: ignore[assignment]  # trigger cache rebuild
+        self.valid_emails = None  # type: ignore[assignment]  # trigger cache rebuild
+        self.valid_names = None  # type: ignore[assignment]  # trigger cache rebuild
 
     @property
     def valid_order_email_combo(self):

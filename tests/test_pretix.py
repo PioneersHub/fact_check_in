@@ -297,6 +297,85 @@ class TestValidateEmailEndpoint:
         mock_refresh.assert_not_called()
 
 
+class TestInterfaceCacheInvalidation:
+    """Ensure derived caches are rebuilt whenever ``all_sales`` is reassigned.
+
+    The bug this guards against: ``valid_emails`` used to be populated once on
+    first access (when the initial startup refresh had loaded the orders) and
+    then never rebuilt. Any ticket sold after startup was visible in
+    ``valid_order_name_combo`` (rebuilt by the ``all_sales`` setter) but
+    absent from ``valid_emails``, so ``/validate_email/`` returned 404 for
+    fresh registrations while ``/validate_attendee/`` succeeded on the same
+    ticket. The fix extends the setter to rebuild every derived dict; these
+    tests pin that behavior.
+    """
+
+    @pytest.fixture
+    def interface_with_one_sale(self):
+        """Return the Interface singleton seeded with one sale.
+
+        We access ``valid_emails`` and ``valid_names`` here to force their
+        initial build, so the subsequent ``all_sales`` reassignment is a real
+        refresh scenario (caches non-empty from the prior load).
+        """
+        from app.middleware.interface import Interface
+
+        iface = Interface(in_dummy_mode=False)
+        iface.all_sales = {
+            "ABC12-1": {
+                "reference": "ABC12-1",
+                "order": "ABC12",
+                "email": "first@example.com",
+                "name": "First Person",
+                "release_id": 101,
+                "state": "complete",
+            },
+        }
+        # Prime the derived caches.
+        _ = iface.valid_emails
+        _ = iface.valid_names
+        _ = iface.valid_order_name_combo
+        return iface
+
+    def test_valid_emails_picks_up_new_sale_after_refresh(self, interface_with_one_sale):
+        """A sale added after the initial build shows up in ``valid_emails``."""
+        iface = interface_with_one_sale
+        assert "first@example.com" in iface.valid_emails
+
+        # Simulate a refresh that brings in a new ticket.
+        updated = dict(iface.all_sales)
+        updated["XYZ98-1"] = {
+            "reference": "XYZ98-1",
+            "order": "XYZ98",
+            "email": "second@example.com",
+            "name": "Second Person",
+            "release_id": 101,
+            "state": "complete",
+        }
+        iface.all_sales = updated
+
+        assert "second@example.com" in iface.valid_emails
+        assert "first@example.com" in iface.valid_emails
+
+    def test_valid_names_picks_up_new_sale_after_refresh(self, interface_with_one_sale):
+        """A sale added after the initial build shows up in ``valid_names``."""
+        iface = interface_with_one_sale
+        assert "FIRST PERSON" in iface.valid_names
+
+        updated = dict(iface.all_sales)
+        updated["XYZ98-1"] = {
+            "reference": "XYZ98-1",
+            "order": "XYZ98",
+            "email": "second@example.com",
+            "name": "Second Person",
+            "release_id": 101,
+            "state": "complete",
+        }
+        iface.all_sales = updated
+
+        assert "SECOND PERSON" in iface.valid_names
+
+
 class TestRefreshAllLock:
     """Tests for the singleflight guard on refresh_all.
 
