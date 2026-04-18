@@ -296,6 +296,27 @@ class TestValidateEmailEndpoint:
 
         mock_refresh.assert_not_called()
 
+    def test_mixed_case_email_is_matched(self, pretix_client, backend_with_email):
+        """Mixed-case input matches the lower-cased cache entry.
+
+        Cache keys are produced via ``casefold().strip()`` at load time.
+        Pydantic's ``EmailStr`` normalizes the domain to lower case but keeps
+        the local part case intact, so the router must normalize the input
+        before the membership check. Without this normalization, a user
+        typing "Angel.Hill@Example.NET" gets a false 404 even though their
+        ticket is in the cache.
+        """
+        mixed_case = "Angel.Hill@Example.NET"
+        with (
+            patch("app.pretix.router.get_ticketing_backend", return_value=backend_with_email),
+            patch("app.routers.common.refresh_all") as mock_refresh,
+        ):
+            response = pretix_client.post("/tickets/validate_email/", json={"email": mixed_case})
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == {"valid": True}
+        mock_refresh.assert_not_called()
+
 
 class TestInterfaceCacheInvalidation:
     """Ensure derived caches are rebuilt whenever ``all_sales`` is reassigned.

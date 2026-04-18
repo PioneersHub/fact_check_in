@@ -34,15 +34,23 @@ async def search_email(email: Email, response: Response, background_tasks: Backg
     This avoids blocking for ~13 s on every cache miss (the full Pretix API
     refresh cost), which occurred whenever the internal TTL cache expired.
 
+    The lookup is case-insensitive: the cache keys are normalized via
+    ``casefold().strip()`` at load time (see ``get_all_order_positions``), so
+    the input must be normalized the same way before the membership check.
+    Pydantic's ``EmailStr`` lowercases the domain but preserves the local part
+    case, which would otherwise cause false 404s for addresses like
+    "Jane.Doe@Example.com".
+
     Note: the status code is set via the Response object rather than raising
     HTTPException so that FastAPI can attach the background tasks to the response
     before sending it. Raising an exception bypasses that attachment step.
     """
     req = email.model_dump()
+    lookup = req["email"].casefold().strip()
     log.debug(email)
     log.debug(f"searching for email: {req['email']}")
     backend: PretixBackend = get_ticketing_backend()  # type: ignore[assignment]
-    if req["email"] in backend.api.interface.valid_emails:
+    if lookup in backend.api.interface.valid_emails:
         return {"valid": True}
     # Not in cache - schedule a background refresh so the next caller sees
     # up-to-date data, then return 404 immediately.
