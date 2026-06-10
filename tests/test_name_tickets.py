@@ -13,7 +13,7 @@ from hypothesis.strategies import emails, one_of, text
 from app import reset_interface
 
 # Set logging level to WARNING to suppress HTTP request logs
-logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpx2").setLevel(logging.WARNING)
 # Set logging level to WARNING to suppress faker logs
 logging.getLogger("faker").setLevel(logging.WARNING)
 
