@@ -5,33 +5,33 @@ description = "Validate if the attendee is registered for the conference by tick
 readme = "README.md"
 requires-python = ">=3.14,<4"
 dependencies = [
-    "cachetools>=7.1.4",
-    "fastapi>=0.136.3",
+    "cachetools>=7.1.7",
+    "fastapi>=0.141.1",
     "mkdocs>=1.6.1",
     "mkdocs-macros-plugin>=1.5.0",
-    "mkdocs-material[imaging]>=9.7.6",
-    "omegaconf>=2.3.0",
+    "mkdocs-material[imaging]>=9.7.7",
+    "omegaconf>=2.3.1",
     "pydantic[email]>=2.13.4",
     "PyJWT[crypto]>=2.13.0",
-    "python-dotenv>=1.2.2",
+    "python-dotenv>=1.2.3",
     "requests>=2.34.2",
     "rich>=15.0.0",
     "starlette-context>=0.5.1",
     "structlog>=26.1.0",
     "unidecode>=1.4.0",
-    "uvicorn>=0.49.0",
+    "uvicorn>=0.52.3",
 ]
 
 [dependency-groups]
 dev = [
     "bump2version>=1.0.1",
     "bumpversion>=0.6.0",
-    "faker>=40.21.0",
-    "httpx2>=2.3.0",
-    "hypothesis>=6.155.2",
-    "pytest>=9.0.3",
+    "faker>=40.36.0",
+    "httpx2>=2.11.0",
+    "hypothesis>=6.165.10",
+    "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
-    "ruff>=0.15.16",
+    "ruff>=0.16.3",
 ]
 
 [build-system]
