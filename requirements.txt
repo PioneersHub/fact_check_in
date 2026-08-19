@@ -227,3 +227,4 @@ webencodings==0.6.1
     # via
     #   cssselect2
     #   tinycss2
+zizmor==1.29.0
