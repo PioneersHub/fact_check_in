@@ -1,0 +1,64 @@
+# Static analysis for the GitHub Actions workflows themselves (https://docs.zizmor.sh).
+# It looks for credential persistence, cache poisoning, template injection and over-broad
+# permissions. It is the same tool the pre-commit hook runs locally, so a contributor sees a
+# finding before CI does.
+name: zizmor
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded PR scans, but never cancel the main baseline
+# (killing it would leave the Security tab's results stale).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Nothing by default; the job asks for exactly what it needs.
+permissions: {}
+
+jobs:
+  zizmor:
+    name: Audit workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # actions/checkout
+      security-events: write # upload-sarif
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+
+      # --only-group dev: zizmor needs none of the project's runtime dependencies.
+      # GH_TOKEN switches on the audits that query the GitHub API (known-vulnerable-actions,
+      # stale-action-refs). Without it those quietly do not run.
+      - name: Run zizmor
+        run: >-
+          uv run --only-group dev --locked --no-build
+          zizmor --format=sarif . > results.sarif
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload SARIF to code scanning
+        # A fork PR gets a read-only token, so the upload would fail there; the gate below still
+        # runs. The expression is also true for push and workflow_dispatch, where the field is null.
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        with:
+          sarif_file: results.sarif
+          category: zizmor
+
+      - name: Fail on findings
+        # --format=sarif always exits 0, so the audit runs a second time (sub-second) to gate the
+        # PR, after the results are safely in the Security tab.
+        run: uv run --only-group dev --locked --no-build zizmor .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
