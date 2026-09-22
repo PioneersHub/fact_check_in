@@ -137,7 +137,7 @@ pluggy==1.6.0
     # via pytest
 pycparser==3.0 ; implementation_name != 'PyPy'
     # via cffi
-pydantic==2.13.4
+pydantic==2.13.5
     # via
     #   fact-check-in
     #   fastapi
