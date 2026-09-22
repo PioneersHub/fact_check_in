@@ -5,7 +5,7 @@ annotated-doc==0.0.5
     # via fastapi
 annotated-types==0.8.0
     # via pydantic
-antlr4-python3-runtime==4.13.2
+antlr4-python3-runtime==4.9.3
     # via omegaconf
 anyio==4.15.1
     # via
@@ -38,7 +38,6 @@ click==8.5.0
     #   uvicorn
 colorama==0.4.6
     # via
-    #   click
     #   mkdocs
     #   mkdocs-material
     #   pytest
@@ -65,9 +64,9 @@ hjson==3.1.0
     # via
     #   mkdocs-macros-plugin
     #   super-collections
-httpcore2==2.14.0 ; sys_platform != 'emscripten'
+httpcore2==2.13.0 ; sys_platform != 'emscripten'
     # via httpx2
-httpx2==2.14.0
+httpx2==2.13.0
 httpx2-jsfetch==1.0 ; sys_platform == 'emscripten'
     # via httpx2
 hypothesis==6.168.0
@@ -131,7 +130,7 @@ pillow==12.3.0
     # via
     #   cairosvg
     #   mkdocs-material
-platformdirs==4.11.12
+platformdirs==4.11.11
     # via mkdocs-get-deps
 pluggy==1.6.0
     # via pytest
@@ -141,14 +140,14 @@ pydantic==2.13.5
     # via
     #   fact-check-in
     #   fastapi
-pydantic-core==2.49.0
+pydantic-core==2.46.5
     # via pydantic
 pygments==2.21.0
     # via
     #   mkdocs-material
     #   pytest
     #   rich
-pyjwt==2.13.0
+pyjwt==2.14.0
     # via fact-check-in
 pymdown-extensions==12.0.1
     # via mkdocs-material
@@ -205,6 +204,7 @@ truststore==0.10.4 ; sys_platform != 'emscripten'
     #   httpx2
 typing-extensions==4.16.0
     # via
+    #   anyio
     #   fastapi
     #   pydantic
     #   pydantic-core
