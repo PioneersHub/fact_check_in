@@ -150,7 +150,7 @@ pygments==2.21.0
     #   rich
 pyjwt==2.13.0
     # via fact-check-in
-pymdown-extensions==11.0.1
+pymdown-extensions==11.0.2
     # via mkdocs-material
 pytest==9.1.1
     # via pytest-asyncio
