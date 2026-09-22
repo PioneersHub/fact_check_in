@@ -178,7 +178,7 @@ requests==2.34.2
     #   mkdocs-material
 rich==15.0.0
     # via fact-check-in
-ruff==0.16.3
+ruff==0.16.8
 six==1.17.0
     # via python-dateutil
 sortedcontainers==2.4.0
