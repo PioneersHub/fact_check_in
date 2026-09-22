@@ -65,7 +65,7 @@ hjson==3.1.0
     # via
     #   mkdocs-macros-plugin
     #   super-collections
-httpcore2==2.13.0 ; sys_platform != 'emscripten'
+httpcore2==2.14.0 ; sys_platform != 'emscripten'
     # via httpx2
 httpx2==2.13.0
 httpx2-jsfetch==1.0 ; sys_platform == 'emscripten'
