@@ -7,7 +7,7 @@ annotated-types==0.8.0
     # via pydantic
 antlr4-python3-runtime==4.13.2
     # via omegaconf
-anyio==4.14.2
+anyio==4.15.1
     # via
     #   httpx2
     #   starlette
