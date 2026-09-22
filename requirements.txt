@@ -213,7 +213,7 @@ typing-inspection==0.4.4
     # via
     #   fastapi
     #   pydantic
-tzdata==2026.3 ; sys_platform == 'win32'
+tzdata==2026.4 ; sys_platform == 'win32'
     # via faker
 unidecode==1.4.0
     # via fact-check-in
