@@ -141,7 +141,7 @@ pydantic==2.13.5
     # via
     #   fact-check-in
     #   fastapi
-pydantic-core==2.46.4
+pydantic-core==2.49.0
     # via pydantic
 pygments==2.21.0
     # via
