@@ -131,7 +131,7 @@ pillow==12.3.0
     # via
     #   cairosvg
     #   mkdocs-material
-platformdirs==4.11.3
+platformdirs==4.11.12
     # via mkdocs-get-deps
 pluggy==1.6.0
     # via pytest
