@@ -217,7 +217,7 @@ tzdata==2026.4 ; sys_platform == 'win32'
     # via faker
 unidecode==1.4.0
     # via fact-check-in
-urllib3==2.7.0
+urllib3==2.8.0
     # via requests
 uvicorn==0.52.3
     # via fact-check-in
