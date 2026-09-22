@@ -219,7 +219,7 @@ unidecode==1.4.0
     # via fact-check-in
 urllib3==2.8.0
     # via requests
-uvicorn==0.52.3
+uvicorn==0.53.0
     # via fact-check-in
 watchdog==6.0.0
     # via mkdocs
