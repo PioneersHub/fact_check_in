@@ -18,7 +18,7 @@ backrefs==8.0
 bump2version==1.0.1
     # via bumpversion
 bumpversion==0.6.0
-cachetools==7.1.7
+cachetools==7.2.0
     # via fact-check-in
 cairocffi==1.7.1
     # via cairosvg
