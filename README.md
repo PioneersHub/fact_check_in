@@ -299,11 +299,11 @@ ruff format .
 ## Agentic API
 
 This project was partially updated with Claude CLI. Instructions for Claude are in
-[CLAUDE.md](CLAUDE.md)
+[CLAUDE.md](https://github.com/PioneersHub/fact_check_in/blob/main/CLAUDE.md)
 
 ## Documentation
 
-- [Developer Guide](DEVELOPER.md) - Development setup and guidelines
+- [Developer Guide](https://github.com/PioneersHub/fact_check_in/blob/main/DEVELOPER.md) - Development setup and guidelines
 - [API Documentation](http://localhost:9898/docs) - Interactive API docs (when running)
 
 # Other
