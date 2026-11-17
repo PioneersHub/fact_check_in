@@ -83,6 +83,7 @@ addopts = [
     "--import-mode=importlib",
     "--tb=short",
 ]
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "smoke_test: marks tests as smoke tests",
 ]
